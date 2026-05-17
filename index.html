@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HerbID Iloilo — Medicinal Herb Identification System</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css" />
+  <style>
+    /* ── HERO ── */
+    .hero {
+      min-height: calc(100vh - 64px);
+      background: var(--green-dark);
+      display: flex; align-items: center;
+      position: relative; overflow: hidden;
+      padding: 3rem 2rem;
+    }
+    .hero-bg {
+      position: absolute; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 60% 60% at 70% 50%, rgba(34,160,107,0.18) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 20% 80%, rgba(201,168,76,0.10) 0%, transparent 60%);
+    }
+    .hero-leaf {
+      position: absolute; right: -60px; top: -60px;
+      width: 520px; height: 520px; opacity: 0.045;
+      font-size: 520px; line-height: 1; z-index: 0;
+      user-select: none; pointer-events: none;
+    }
+    .hero-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 4rem; align-items: center;
+      position: relative; z-index: 1; width: 100%;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(34,160,107,0.18);
+      border: 1px solid rgba(34,160,107,0.3);
+      color: #7eebb5; font-size: 11px; font-weight: 500;
+      padding: 5px 13px; border-radius: 99px;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.2rem, 4.5vw, 3.5rem);
+      color: #fff; font-weight: 700; line-height: 1.15;
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 em { font-style: normal; color: var(--green-main); }
+    .hero-desc {
+      color: rgba(255,255,255,0.65);
+      font-size: 16px; line-height: 1.75;
+      max-width: 460px; margin-bottom: 2rem;
+    }
+    .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+    .hero-stats {
+      margin-top: 2.5rem; padding-top: 2rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      display: flex; gap: 2.5rem;
+    }
+    .hero-stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem; font-weight: 700; color: #fff;
+    }
+    .hero-stat-label { font-size: 12px; color: rgba(255,255,255,0.5); }
+
+    /* ── HERO VISUAL: 4 random cards ── */
+    .hero-visual { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .herb-preview-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px; padding: 16px 14px;
+      transition: background 0.2s, transform 0.2s;
+      text-decoration: none; display: block;
+      animation: fadeInCard 0.4s ease both;
+    }
+    .herb-preview-card:nth-child(1) { margin-top: 24px; animation-delay: 0.05s; }
+    .herb-preview-card:nth-child(2) { animation-delay: 0.1s; }
+    .herb-preview-card:nth-child(3) { margin-top: -24px; animation-delay: 0.15s; }
+    .herb-preview-card:nth-child(4) { animation-delay: 0.2s; }
+    .herb-preview-card:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+
+    @keyframes fadeInCard {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* skeleton shimmer */
+    .herb-preview-card.skeleton { pointer-events: none; background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.06); }
+    .skeleton-line { border-radius: 6px; background: rgba(255,255,255,0.08); animation: shimmerHero 1.4s infinite; }
+    @keyframes shimmerHero { 0%,100%{opacity:0.4} 50%{opacity:0.9} }
+
+    .herb-emoji { font-size: 32px; margin-bottom: 8px; }
+    .herb-preview-local { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 2px; }
+    .herb-preview-sci { font-size: 11px; color: rgba(255,255,255,0.45); font-style: italic; margin: 2px 0 8px; }
+    .herb-preview-tag {
+      display: inline-block; font-size: 10px; font-weight: 500;
+      padding: 2px 8px; border-radius: 99px;
+      background: rgba(34,160,107,0.25); color: #7eebb5;
+    }
+
+    /* ── FEATURES ── */
+    .features { padding: 5rem 0; }
+    .features-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem; margin-top: 2.5rem;
+    }
+    .feature-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1.75rem;
+    }
+    .feature-icon {
+      width: 44px; height: 44px; border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; margin-bottom: 1rem;
+    }
+    .feature-icon.green { background: var(--green-pale); color: var(--green-main); }
+    .feature-icon.gold  { background: var(--gold-light); color: var(--gold); }
+    .feature-icon.blue  { background: #dbeafe; color: #1e40af; }
+    .feature-icon.pink  { background: #fce7f3; color: #9d174d; }
+    .feature-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+    .feature-card p { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+
+    /* ── SECTION HEADER ── */
+    .section-header { text-align: center; margin-bottom: 0.5rem; }
+    .section-eyebrow {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--green-main); margin-bottom: 0.5rem;
+    }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.5rem, 3vw, 2.1rem); font-weight: 700;
+      color: var(--text-primary);
+    }
+    .section-sub { font-size: 14px; color: var(--text-muted); margin-top: 0.5rem; }
+
+    /* ── HERB STRIP: all herbs ── */
+    .herb-strip { padding: 3rem 0 4rem; background: var(--white); border-top: 1px solid var(--border); }
+    .herb-strip-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+      gap: 12px; margin-top: 2rem;
+    }
+    .strip-card {
+      border: 1px solid var(--border); border-radius: var(--radius-md);
+      overflow: hidden; text-align: center;
+      transition: box-shadow 0.2s, transform 0.2s;
+      text-decoration: none; color: inherit; display: block;
+    }
+    .strip-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
+    .strip-card-img {
+      height: 76px; background: var(--green-pale);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 34px; overflow: hidden;
+    }
+    .strip-card-img img { width: 100%; height: 100%; object-fit: cover; }
+    .strip-card-body { padding: 8px 10px 10px; }
+    .strip-card-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--green-main); color: #fff;
+      font-size: 9px; font-weight: 600; margin-bottom: 3px;
+    }
+    .strip-card-local { font-size: 12px; font-weight: 600; color: var(--green-dark); }
+    .strip-card-sci { font-size: 10px; color: var(--text-muted); font-style: italic; margin-top: 2px; }
+
+    /* strip skeleton */
+    .strip-skel { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+    .strip-skel-img { height: 76px; background: linear-gradient(90deg,#e8f0ec 25%,#f0f6f2 50%,#e8f0ec 75%); background-size: 200%; animation: shimmerStrip 1.4s infinite; }
+    .strip-skel-body { padding: 8px 10px 10px; }
+    .strip-skel-line { height: 9px; border-radius: 5px; background: #e8f0ec; animation: shimmerStrip 1.4s infinite; margin-bottom: 5px; }
+    @keyframes shimmerStrip { 0%{background-position:200%} 100%{background-position:-200%} }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .hero-inner { grid-template-columns: 1fr; gap: 2rem; }
+      .hero-visual { display: none; }
+      .hero-stats { gap: 1.5rem; }
+    }
+    @media (max-width: 640px) {
+      .hero { padding: 2rem 1rem; min-height: auto; }
+      .hero h1 { font-size: clamp(1.8rem, 6vw, 2.5rem); }
+      .hero-desc { font-size: 14px; margin-bottom: 1.5rem; }
+      .hero-ctas { flex-direction: column; }
+      .hero-ctas .btn { width: 100%; justify-content: center; }
+      .hero-stats { gap: 1.25rem; flex-wrap: wrap; }
+      .hero-stat-num { font-size: 1.5rem; }
+
+      .features { padding: 2.5rem 0; }
+      .features-grid { grid-template-columns: 1fr; gap: 10px; margin-top: 1.5rem; }
+      .feature-card { padding: 1.25rem; }
+
+      .herb-strip { padding: 2rem 0 2.5rem; }
+      .herb-strip-grid { grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap: 8px; margin-top: 1.25rem; }
+      .strip-card-img { height: 60px; font-size: 26px; }
+      .strip-skel-img { height: 60px; }
+      .strip-card-local { font-size: 11px; }
+      .strip-card-sci { font-size: 9px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="nav-brand">
+    <div class="nav-brand-icon"><i class="ti ti-leaf"></i></div>
+    <div class="nav-brand-text">
+      <strong>HerbID Iloilo</strong>
+      <span>NISU Lemery Campus</span>
+    </div>
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html" class="active">Home</a></li>
+    <li><a href="herbs.html">Herb Database</a></li>
+    <li><a href="identify.html">Identify Herb</a></li>
+    <li><a href="map.html">Map</a></li>
+    <li><a href="about.html">About</a></li>
+  </ul>
+  <button class="nav-hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Menu">
+    <i class="ti ti-menu-2"></i>
+  </button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-leaf">🌿</div>
+  <div class="hero-inner">
+
+    <!-- LEFT -->
+    <div class="hero-content">
+      <div class="hero-badge"><i class="ti ti-map-pin"></i> Lemery, Iloilo</div>
+      <h1>Discover <em>Medicinal Herbs</em> of Iloilo Province</h1>
+      <p class="hero-desc">
+        An AI-powered identification and geospatial information system for
+        medicinal herbs found in the Province of Iloilo — helping communities
+        safely identify and use traditional herbal remedies.
+      </p>
+      <div class="hero-ctas">
+        <a href="herbs.html" class="btn btn-primary">
+          <i class="ti ti-database"></i> Browse Herb Database
+        </a>
+        <a href="identify.html" class="btn btn-outline" style="color:#7eebb5;border-color:rgba(126,235,181,0.4);">
+          <i class="ti ti-camera"></i> Identify a Herb
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div>
+          <div class="hero-stat-num" id="statHerbs">—</div>
+          <div class="hero-stat-label">Herb species</div>
+        </div>
+        <div>
+          <div class="hero-stat-num">1</div>
+          <div class="hero-stat-label">Municipality mapped</div>
+        </div>
+        <div>
+          <div class="hero-stat-num">AI</div>
+          <div class="hero-stat-label">Powered ID</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: 4 random herb cards — loaded from Firebase -->
+    <div class="hero-visual" id="heroVisual">
+      <div class="herb-preview-card skeleton">
+        <div class="skeleton-line" style="width:38px;height:38px;border-radius:50%;margin-bottom:10px"></div>
+        <div class="skeleton-line" style="width:72%;height:11px;margin-bottom:7px"></div>
+        <div class="skeleton-line" style="width:90%;height:9px;margin-bottom:10px"></div>
+        <div class="skeleton-line" style="width:52%;height:17px;border-radius:99px"></div>
+      </div>
+      <div class="herb-preview-card skeleton">
+        <div class="skeleton-line" style="width:38px;height:38px;border-radius:50%;margin-bottom:10px"></div>
+        <div class="skeleton-line" style="width:60%;height:11px;margin-bottom:7px"></div>
+        <div class="skeleton-line" style="width:85%;height:9px;margin-bottom:10px"></div>
+        <div class="skeleton-line" style="width:46%;height:17px;border-radius:99px"></div>
+      </div>
+      <div class="herb-preview-card skeleton">
+        <div class="skeleton-line" style="width:38px;height:38px;border-radius:50%;margin-bottom:10px"></div>
+        <div class="skeleton-line" style="width:78%;height:11px;margin-bottom:7px"></div>
+        <div class="skeleton-line" style="width:80%;height:9px;margin-bottom:10px"></div>
+        <div class="skeleton-line" style="width:58%;height:17px;border-radius:99px"></div>
+      </div>
+      <div class="herb-preview-card skeleton">
+        <div class="skeleton-line" style="width:38px;height:38px;border-radius:50%;margin-bottom:10px"></div>
+        <div class="skeleton-line" style="width:65%;height:11px;margin-bottom:7px"></div>
+        <div class="skeleton-line" style="width:88%;height:9px;margin-bottom:10px"></div>
+        <div class="skeleton-line" style="width:50%;height:17px;border-radius:99px"></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">What this system does</div>
+      <h2 class="section-title">Everything you need to know about Iloilo's herbs</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon green"><i class="ti ti-database"></i></div>
+        <h3>Herb Database</h3>
+        <p>Browse all documented medicinal herbs with local names, scientific names, medicinal uses, and preparation methods.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon gold"><i class="ti ti-camera"></i></div>
+        <h3>AI Identification</h3>
+        <p>Upload or capture a photo of a herb and our trained CNN model will identify it and display its medicinal information instantly.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon blue"><i class="ti ti-map-2"></i></div>
+        <h3>Geospatial Map</h3>
+        <p>View interactive maps showing where each medicinal herb is most commonly found within the municipality of Lemery.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon pink"><i class="ti ti-search"></i></div>
+        <h3>Smart Search</h3>
+        <p>Search by local Ilonggo name, English name, scientific name, or by medicinal use to quickly find the herb you need.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HERB STRIP: all herbs from Firebase -->
+<section class="herb-strip">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">All herbs in the database</div>
+      <h2 class="section-title">Commonly found in Lemery, Iloilo</h2>
+      <p class="section-sub" id="stripSub">Click any herb to view full details</p>
+    </div>
+    <div class="herb-strip-grid" id="herbStrip">
+      <!-- skeletons -->
+      <div class="strip-skel"><div class="strip-skel-img"></div><div class="strip-skel-body"><div class="strip-skel-line" style="width:65%"></div><div class="strip-skel-line" style="width:85%"></div></div></div>
+      <div class="strip-skel"><div class="strip-skel-img"></div><div class="strip-skel-body"><div class="strip-skel-line" style="width:70%"></div><div class="strip-skel-line" style="width:80%"></div></div></div>
+      <div class="strip-skel"><div class="strip-skel-img"></div><div class="strip-skel-body"><div class="strip-skel-line" style="width:60%"></div><div class="strip-skel-line" style="width:90%"></div></div></div>
+      <div class="strip-skel"><div class="strip-skel-img"></div><div class="strip-skel-body"><div class="strip-skel-line" style="width:75%"></div><div class="strip-skel-line" style="width:78%"></div></div></div>
+      <div class="strip-skel"><div class="strip-skel-img"></div><div class="strip-skel-body"><div class="strip-skel-line" style="width:68%"></div><div class="strip-skel-line" style="width:82%"></div></div></div>
+      <div class="strip-skel"><div class="strip-skel-img"></div><div class="strip-skel-body"><div class="strip-skel-line" style="width:72%"></div><div class="strip-skel-line" style="width:88%"></div></div></div>
+    </div>
+    <div style="text-align:center;margin-top:2rem">
+      <a href="herbs.html" class="btn btn-outline">
+        View full database <i class="ti ti-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p>
+    <strong>HerbID Iloilo</strong> — Capstone Project · Bachelor of Science in Information Technology<br>
+    Northern Iloilo State University, Lemery Campus · 2024–2025
+  </p>
+</footer>
+
+<script type="module">
+  import { db, collection, getDocs } from './js/firebase-config.js';
+
+  // Pick N random items from an array
+  function pickRandom(arr, n) {
+    return [...arr].sort(() => Math.random() - 0.5).slice(0, n);
+  }
+
+  // Get the best display tag for a herb
+  function firstTag(h) {
+    if (h.useTags && h.useTags.length) return h.useTags[0];
+    if (h.uses    && h.uses.length)    return h.uses[0];
+    return 'Medicinal';
+  }
+
+  async function loadPage() {
+    try {
+      const snap  = await getDocs(collection(db, 'herbs'));
+      const herbs = [];
+      snap.forEach(d => herbs.push({ id: d.id, ...d.data() }));
+
+      if (!herbs.length) {
+        document.getElementById('statHerbs').textContent = '0';
+        document.getElementById('herbStrip').innerHTML =
+          `<p style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:2rem;font-size:13px">
+            No herbs in database yet. Go to <a href="setup.html" style="color:var(--green-main)">setup.html</a> to get started.
+          </p>`;
+        return;
+      }
+
+      // ── 1. Update hero stat with real count ──
+      document.getElementById('statHerbs').textContent = herbs.length;
+      document.getElementById('stripSub').textContent =
+        `${herbs.length} herb${herbs.length !== 1 ? 's' : ''} — click any to view full details`;
+
+      // ── 2. Hero visual: pick 4 random herbs every page load ──
+      const heroFour = pickRandom(herbs, Math.min(4, herbs.length));
+      document.getElementById('heroVisual').innerHTML = heroFour.map(h => `
+        <a class="herb-preview-card" href="herb-detail.html?id=${h.id}">
+          <div class="herb-emoji">${h.emoji || '🌿'}</div>
+          <div class="herb-preview-local">${h.localName}</div>
+          <div class="herb-preview-sci">${h.scientificName}</div>
+          <span class="herb-preview-tag">${firstTag(h)}</span>
+        </a>`).join('');
+
+      // ── 3. Strip: ALL herbs sorted by no field ──
+      const sorted = [...herbs].sort((a, b) => (a.no || 0) - (b.no || 0));
+      document.getElementById('herbStrip').innerHTML = sorted.map(h => `
+        <a class="strip-card" href="herb-detail.html?id=${h.id}">
+          <div class="strip-card-img">
+            ${h.imageUrl
+              ? `<img src="${h.imageUrl}" alt="${h.localName}" loading="lazy">`
+              : (h.emoji || '🌿')}
+          </div>
+          <div class="strip-card-body">
+            <div class="strip-card-num">${h.no || ''}</div>
+            <div class="strip-card-local">${h.localName}</div>
+            <div class="strip-card-sci">${h.scientificName}</div>
+          </div>
+        </a>`).join('');
+
+    } catch(e) {
+      console.warn('Firebase error:', e.message);
+      // Graceful fallback — show static cards
+      document.getElementById('statHerbs').textContent = '18';
+      document.getElementById('heroVisual').innerHTML = `
+        <a class="herb-preview-card" href="herbs.html">
+          <div class="herb-emoji">🌿</div>
+          <div class="herb-preview-local">Lagundi</div>
+          <div class="herb-preview-sci">Vitex negundo</div>
+          <span class="herb-preview-tag">Respiratory</span>
+        </a>
+        <a class="herb-preview-card" href="herbs.html">
+          <div class="herb-emoji">🌼</div>
+          <div class="herb-preview-local">Tawa-tawa</div>
+          <div class="herb-preview-sci">Euphorbia hirta</div>
+          <span class="herb-preview-tag">Fever / Dengue</span>
+        </a>
+        <a class="herb-preview-card" href="herbs.html">
+          <div class="herb-emoji">🍃</div>
+          <div class="herb-preview-local">Lapunaya</div>
+          <div class="herb-preview-sci">Coleus scutellarioides</div>
+          <span class="herb-preview-tag">Wound healing</span>
+        </a>
+        <a class="herb-preview-card" href="herbs.html">
+          <div class="herb-emoji">🌱</div>
+          <div class="herb-preview-local">Sinaw-sinaw</div>
+          <div class="herb-preview-sci">Peperomia pellucida</div>
+          <span class="herb-preview-tag">Pain relief</span>
+        </a>`;
+      document.getElementById('herbStrip').innerHTML =
+        `<p style="grid-column:1/-1;text-align:center;color:var(--text-muted);font-size:13px;padding:2rem 0">
+          Could not connect to Firebase. Check your config.
+        </p>`;
+    }
+  }
+
+  loadPage();
+</script>
+</body>
+</html>

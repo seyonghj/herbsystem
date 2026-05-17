@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Identify Herb — HerbID Iloilo</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green-dark:  #0a4a35;
+      --green-mid:   #1a7a55;
+      --green-main:  #22a06b;
+      --green-light: #d4f0e4;
+      --green-pale:  #f0faf5;
+      --border:      #dde5e0;
+      --radius-md:   12px;
+      --radius-lg:   20px;
+      --nav-h:       64px;
+    }
+
+    /* ── UPLOAD ZONE ── */
+    .upload-section { max-width: 680px; margin: 0 auto; padding: 2.5rem 1.5rem 0; }
+    .drop-zone {
+      border: 2px dashed var(--border); border-radius: var(--radius-lg);
+      background: var(--green-pale); min-height: 280px;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 12px; cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative; overflow: hidden; text-align: center; padding: 2rem;
+    }
+    .drop-zone.drag-over { border-color: var(--green-main); background: #e0f5ec; }
+    .drop-zone.has-image { border-style: solid; padding: 0; }
+    .drop-zone-icon {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: var(--green-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; color: var(--green-main); margin-bottom: 4px;
+    }
+    .drop-zone h3 { font-size: 16px; font-weight: 600; color: var(--green-dark); }
+    .drop-zone p  { font-size: 13px; color: #5a6472; }
+    .drop-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+    .preview-img {
+      width: 100%; height: 100%; object-fit: cover;
+      border-radius: calc(var(--radius-lg) - 2px); display: none; max-height: 360px;
+    }
+    .preview-overlay {
+      display: none; position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(10,74,53,0.7) 0%, transparent 50%);
+      border-radius: calc(var(--radius-lg) - 2px); align-items: flex-end; padding: 1rem 1.25rem;
+    }
+    .preview-overlay span { color: #fff; font-size: 13px; font-weight: 500; }
+    .drop-zone.has-image .preview-img,
+    .drop-zone.has-image .preview-overlay { display: flex; }
+    .drop-zone.has-image .drop-zone-content { display: none; }
+
+    /* ── BUTTONS ── */
+    .action-bar {
+      max-width: 680px; margin: 1rem auto 0; padding: 0 1.5rem;
+      display: flex; gap: 10px; flex-wrap: wrap;
+    }
+    .btn-identify {
+      flex: 1; padding: 13px 20px; background: var(--green-main); color: #fff;
+      border: none; border-radius: var(--radius-md);
+      font-size: 15px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+      cursor: pointer; transition: background 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-identify:hover:not(:disabled) { background: var(--green-mid); }
+    .btn-identify:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-camera {
+      padding: 13px 18px; background: #fff; color: var(--green-dark);
+      border: 1.5px solid var(--border); border-radius: var(--radius-md);
+      font-size: 15px; font-family: 'DM Sans', sans-serif;
+      cursor: pointer; transition: background 0.15s;
+      display: flex; align-items: center; gap: 8px; font-weight: 500;
+    }
+    .btn-camera:hover { background: var(--green-pale); }
+    .btn-clear {
+      padding: 13px 14px; background: #fff; color: #e53e3e;
+      border: 1.5px solid #fecaca; border-radius: var(--radius-md);
+      font-size: 15px; cursor: pointer; transition: background 0.15s;
+      display: none; align-items: center; gap: 6px;
+      font-family: 'DM Sans', sans-serif; font-weight: 500;
+    }
+    .btn-clear:hover { background: #fff5f5; }
+    .btn-clear.visible { display: flex; }
+
+    /* ── TIPS ── */
+    .tips {
+      max-width: 680px; margin: 1.5rem auto 0; padding: 0 1.5rem;
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 10px;
+    }
+    .tip {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 12px 14px;
+      display: flex; gap: 10px; align-items: flex-start;
+    }
+    .tip i { font-size: 18px; color: var(--green-main); flex-shrink: 0; margin-top: 1px; }
+    .tip p { font-size: 12px; color: #5a6472; line-height: 1.5; margin: 0; }
+    .tip strong { display: block; font-size: 12px; font-weight: 600; color: var(--green-dark); margin-bottom: 2px; }
+
+    /* ── LOADING ── */
+    .loading-panel { display: none; max-width: 680px; margin: 2rem auto 0; padding: 0 1.5rem; }
+    .loading-panel.active { display: block; }
+    .loading-card {
+      background: var(--green-dark); border-radius: var(--radius-lg);
+      padding: 2rem; text-align: center; color: #fff;
+    }
+    .leaf-spinner {
+      width: 56px; height: 56px; margin: 0 auto 1rem; border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.15); border-top-color: var(--green-main);
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+    .loading-card p  { font-size: 13px; color: rgba(255,255,255,0.6); }
+
+    /* ── RESULT ── */
+    .result-panel { display: none; max-width: 680px; margin: 2rem auto 3rem; padding: 0 1.5rem; }
+    .result-panel.active { display: block; }
+
+    .match-card {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 1rem;
+    }
+    .match-header {
+      background: var(--green-dark); padding: 1.25rem 1.5rem;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .match-confidence {
+      background: var(--green-main); color: #fff; font-size: 13px; font-weight: 700;
+      padding: 4px 12px; border-radius: 99px; margin-left: auto; white-space: nowrap;
+    }
+    .match-emoji { font-size: 42px; }
+    .match-names h2 {
+      font-family: 'Playfair Display', serif; font-size: 1.5rem;
+      font-weight: 700; color: #fff; line-height: 1.2;
+    }
+    .match-names p { font-size: 13px; color: rgba(255,255,255,0.6); font-style: italic; margin-top: 3px; }
+    .match-english { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 2px; font-style: normal !important; }
+    .match-body { padding: 1.25rem 1.5rem; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .info-label {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.06em; color: #8c96a0; margin-bottom: 4px;
+    }
+    .info-val { font-size: 13px; color: #1a1a1a; line-height: 1.6; }
+    .use-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+    .use-tag { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 99px; background: var(--green-light); color: var(--green-dark); }
+    .loc-row {
+      display: flex; align-items: center; gap: 6px; font-size: 13px; color: #5a6472;
+      margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);
+    }
+    .loc-row i { color: var(--green-main); font-size: 15px; }
+    .match-actions { display: flex; gap: 8px; margin-top: 1rem; }
+    .match-actions a {
+      flex: 1; padding: 10px; border-radius: var(--radius-md); text-align: center;
+      font-size: 13px; font-weight: 500; text-decoration: none; transition: all 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-detail { background: var(--green-main); color: #fff; }
+    .btn-detail:hover { background: var(--green-mid); }
+    .btn-map { background: #fff; color: var(--green-dark); border: 1px solid var(--border); }
+    .btn-map:hover { background: var(--green-pale); }
+
+    /* TOP-3 ALTERNATIVES */
+    .top3-box { background: var(--green-pale); border: 1px solid var(--green-light); border-radius: var(--radius-md); padding: 1rem 1.25rem; margin-top: 10px; }
+    .top3-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--green-mid); margin-bottom: 8px; }
+    .top3-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--green-light); font-size: 13px; }
+    .top3-row:last-child { border-bottom: none; }
+    .top3-bar-wrap { flex: 1; margin: 0 12px; height: 5px; background: var(--green-light); border-radius: 3px; overflow: hidden; }
+    .top3-bar { height: 100%; background: var(--green-main); border-radius: 3px; }
+    .top3-pct { font-size: 12px; color: var(--green-mid); font-weight: 600; min-width: 38px; text-align: right; }
+
+    /* NOT FOUND */
+    .not-found {
+      background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg);
+      padding: 2.5rem; text-align: center;
+    }
+    .not-found-icon { font-size: 48px; margin-bottom: 1rem; }
+    .not-found h3 { font-size: 17px; font-weight: 600; color: #1a1a1a; margin-bottom: 8px; }
+    .not-found p { font-size: 13px; color: #5a6472; line-height: 1.7; max-width: 400px; margin: 0 auto; }
+
+    /* CAMERA MODAL */
+    .cam-modal {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+      z-index: 500; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .cam-modal.open { display: flex; }
+    .cam-box { background: #000; border-radius: var(--radius-lg); overflow: hidden; width: 100%; max-width: 480px; position: relative; }
+    video { width: 100%; display: block; }
+    .cam-controls {
+      position: absolute; bottom: 0; left: 0; right: 0; padding: 1.25rem;
+      display: flex; justify-content: space-between; align-items: center;
+      background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    }
+    .cam-capture {
+      width: 60px; height: 60px; border-radius: 50%; background: #fff;
+      border: 4px solid rgba(255,255,255,0.4); cursor: pointer;
+      transition: transform 0.1s; display: flex; align-items: center;
+      justify-content: center; font-size: 24px; color: #1a1a1a;
+    }
+    .cam-capture:active { transform: scale(0.93); }
+    .cam-close {
+      background: rgba(255,255,255,0.15); border: none; cursor: pointer;
+      color: #fff; width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-size: 20px;
+    }
+    canvas { display: none; }
+
+    /* DISCLAIMER */
+    .disclaimer { max-width: 680px; margin: 0 auto 3rem; padding: 0 1.5rem; }
+    .disclaimer-box {
+      background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius-md);
+      padding: 10px 14px; display: flex; gap: 8px; align-items: flex-start;
+    }
+    .disclaimer-box i { color: #92400e; font-size: 15px; flex-shrink: 0; margin-top: 2px; }
+    .disclaimer-box p { font-size: 12px; color: #78350f; line-height: 1.6; margin: 0; }
+
+    @media (max-width: 580px) {
+      .tips { grid-template-columns: 1fr; }
+      .info-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="nav-brand">
+    <div class="nav-brand-icon"><i class="ti ti-leaf"></i></div>
+    <div class="nav-brand-text">
+      <strong>HerbID Iloilo</strong>
+      <span>NISU Lemery Campus</span>
+    </div>
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="herbs.html">Herb Database</a></li>
+    <li><a href="identify.html" class="active">Identify Herb</a></li>
+    <li><a href="map.html">Map</a></li>
+    <li><a href="about.html">About</a></li>
+  </ul>
+  <button class="nav-hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Menu">
+    <i class="ti ti-menu-2"></i>
+  </button>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="page-hero-badge"><i class="ti ti-camera"></i> CNN Model</div>
+  <h1>Identify a Medicinal Herb</h1>
+  <p>Upload or take a photo — our trained CNN model will identify it from the Iloilo herb database</p>
+</div>
+
+<!-- UPLOAD ZONE -->
+<div class="upload-section">
+  <div class="drop-zone" id="dropZone"
+    ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+    <input type="file" id="fileInput" accept="image/*" onchange="onFileSelect(event)" />
+    <div class="drop-zone-content" style="display:flex;flex-direction:column;align-items:center;gap:12px;pointer-events:none">
+      <div class="drop-zone-icon"><i class="ti ti-photo-up"></i></div>
+      <h3>Drop a herb photo here</h3>
+      <p>or click to browse from your device</p>
+      <span style="font-size:12px;color:#8c96a0">Supports JPG, PNG, WEBP</span>
+    </div>
+    <img class="preview-img" id="previewImg" alt="Herb preview" />
+    <div class="preview-overlay">
+      <span><i class="ti ti-photo" style="margin-right:5px"></i>Click to change photo</span>
+    </div>
+  </div>
+</div>
+
+<!-- ACTION BAR -->
+<div class="action-bar">
+  <button class="btn-identify" id="identifyBtn" onclick="identifyHerb()" disabled>
+    <i class="ti ti-plant-2"></i> Identify this herb
+  </button>
+  <button class="btn-camera" onclick="openCamera()">
+    <i class="ti ti-camera"></i> Camera
+  </button>
+  <button class="btn-clear" id="clearBtn" onclick="clearImage()">
+    <i class="ti ti-trash"></i> Clear
+  </button>
+</div>
+
+<!-- TIPS -->
+<div class="tips">
+  <div class="tip">
+    <i class="ti ti-sun"></i>
+    <div><strong>Good lighting</strong><p>Take the photo in natural daylight for best results</p></div>
+  </div>
+  <div class="tip">
+    <i class="ti ti-focus-2"></i>
+    <div><strong>Clear focus</strong><p>Make sure the leaves and stem are sharp and in focus</p></div>
+  </div>
+  <div class="tip">
+    <i class="ti ti-leaf"></i>
+    <div><strong>Show the whole plant</strong><p>Include leaves, stem, and flowers if present</p></div>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div class="loading-panel" id="loadingPanel">
+  <div class="loading-card">
+    <div class="leaf-spinner"></div>
+    <h3>Analyzing your photo…</h3>
+    <p>Running CNN model against the Iloilo herb database</p>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div class="result-panel" id="resultPanel"></div>
+
+<!-- DISCLAIMER -->
+<div class="disclaimer">
+  <div class="disclaimer-box">
+    <i class="ti ti-alert-triangle"></i>
+    <p><strong>For educational use only.</strong> This identification is based on a trained CNN model. Always consult a qualified herbalist or health professional before using any herb for medicinal purposes.</p>
+  </div>
+</div>
+
+<!-- CAMERA MODAL -->
+<div class="cam-modal" id="camModal">
+  <div class="cam-box">
+    <video id="camVideo" autoplay playsinline></video>
+    <canvas id="camCanvas"></canvas>
+    <div class="cam-controls">
+      <button class="cam-close" onclick="closeCamera()"><i class="ti ti-x"></i></button>
+      <button class="cam-capture" onclick="capturePhoto()"><i class="ti ti-camera"></i></button>
+      <div style="width:40px"></div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <p><strong>HerbID Iloilo</strong> — BSIT Capstone Project · NISU Lemery Campus · 2024–2025</p>
+</footer>
+
+<script type="module">
+  import { db, storage, collection, getDocs } from './js/firebase-config.js';
+  import {
+    ref, uploadBytes, getDownloadURL
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+  import {
+    addDoc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // ── IMPORTANT: Replace with your Render URL after deploying ──
+  const API_URL = "https://herbid-iloilo-api.onrender.com";
+
+  let currentFile    = null;
+  let herbDatabase   = [];
+  let camStream      = null;
+
+  // ── Load herbs from Firestore for detail display ──
+  async function loadHerbs() {
+    try {
+      const snap = await getDocs(collection(db, 'herbs'));
+      snap.forEach(d => herbDatabase.push({ id: d.id, ...d.data() }));
+    } catch(e) {
+      console.warn('Could not load herbs:', e.message);
+    }
+  }
+  loadHerbs();
+
+  // ── Upload image to Firebase Storage + save scan log to Firestore ──
+  async function saveToFirebase(file, result) {
+    try {
+      // 1. Upload image to Firebase Storage under scans/
+      const timestamp  = Date.now();
+      const ext        = file.name.split('.').pop() || 'jpg';
+      const filename   = `scans/${timestamp}_${Math.random().toString(36).slice(2,8)}.${ext}`;
+      const storageRef = ref(storage, filename);
+
+      const snapshot   = await uploadBytes(storageRef, file);
+      const imageUrl   = await getDownloadURL(snapshot.ref);
+
+      // 2. Save scan record to Firestore scans collection
+      await addDoc(collection(db, 'scans'), {
+        imageUrl,
+        matched:           result.matched,
+        identifiedHerb:    result.matched ? result.localName : null,
+        confidence:        result.confidence       || null,
+        confidencePercent: result.confidencePercent || null,
+        confidenceLabel:   result.confidenceLabel   || null,
+        top3:              result.top3              || [],
+        scannedAt:         serverTimestamp(),
+        filename,
+      });
+
+      console.log('✓ Scan saved to Firebase');
+      showToast('📸 Photo saved to database', 'ok');
+    } catch(e) {
+      console.warn('Could not save to Firebase:', e.message);
+      showToast('Could not save photo: ' + e.message, 'error');
+    }
+  }
+
+  // ── Toast notification ──
+  function showToast(msg, type = 'ok') {
+    let wrap = document.getElementById('toastWrap');
+    if (!wrap) {
+      wrap = document.createElement('div');
+      wrap.id = 'toastWrap';
+      wrap.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;z-index:999;display:flex;flex-direction:column;gap:8px';
+      document.body.appendChild(wrap);
+    }
+    const t = document.createElement('div');
+    t.style.cssText = `background:${type==='error'?'#7f1d1d':'#0a4a35'};color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;box-shadow:0 4px 20px rgba(0,0,0,0.2);animation:slideUp 0.25s ease`;
+    t.textContent = msg;
+    wrap.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+
+  // ── File handling ──
+  window.onFileSelect = function(e) {
+    const file = e.target.files[0];
+    if (file) loadFile(file);
+  };
+
+  function loadFile(file) {
+    currentFile = file;
+    const reader = new FileReader();
+    reader.onload = ev => showPreview(ev.target.result);
+    reader.readAsDataURL(file);
+  }
+
+  function showPreview(dataUrl) {
+    document.getElementById('previewImg').src = dataUrl;
+    document.getElementById('dropZone').classList.add('has-image');
+    document.getElementById('identifyBtn').disabled = false;
+    document.getElementById('clearBtn').classList.add('visible');
+    document.getElementById('resultPanel').classList.remove('active');
+    document.getElementById('loadingPanel').classList.remove('active');
+  }
+
+  window.clearImage = function() {
+    currentFile = null;
+    document.getElementById('previewImg').src = '';
+    document.getElementById('dropZone').classList.remove('has-image');
+    document.getElementById('identifyBtn').disabled = true;
+    document.getElementById('clearBtn').classList.remove('visible');
+    document.getElementById('fileInput').value = '';
+    document.getElementById('resultPanel').classList.remove('active');
+    document.getElementById('loadingPanel').classList.remove('active');
+  };
+
+  window.onDragOver  = e => { e.preventDefault(); document.getElementById('dropZone').classList.add('drag-over'); };
+  window.onDragLeave = () => document.getElementById('dropZone').classList.remove('drag-over');
+  window.onDrop = function(e) {
+    e.preventDefault();
+    document.getElementById('dropZone').classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) loadFile(file);
+  };
+
+  // ── IDENTIFY — calls your Flask API on Render ──
+  window.identifyHerb = async function() {
+    if (!currentFile) return;
+
+    document.getElementById('loadingPanel').classList.add('active');
+    document.getElementById('resultPanel').classList.remove('active');
+    document.getElementById('identifyBtn').disabled = true;
+
+    try {
+      const formData = new FormData();
+      formData.append('image', currentFile);
+
+      const response = await fetch(`${API_URL}/identify`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || `Server error ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      // ── Save image + result to Firebase ──
+      await saveToFirebase(currentFile, result);
+
+      showResult(result);
+
+    } catch(e) {
+      console.error('API error:', e);
+      showError(e.message);
+    }
+
+    document.getElementById('loadingPanel').classList.remove('active');
+    document.getElementById('identifyBtn').disabled = false;
+  };
+
+  // ── Render result ──
+  function showResult(result) {
+    const panel = document.getElementById('resultPanel');
+    panel.classList.add('active');
+
+    if (!result.matched) {
+      panel.innerHTML = `
+        <div class="not-found">
+          <div class="not-found-icon">🔍</div>
+          <h3>Herb not found in database</h3>
+          <p>${result.message || 'No herb in the database matched with sufficient confidence.'}</p>
+          ${renderTop3(result.top3)}
+          <button onclick="clearImage()" class="btn btn-outline" style="margin-top:1.25rem;display:inline-flex">
+            <i class="ti ti-refresh"></i> Try another photo
+          </button>
+        </div>`;
+      return;
+    }
+
+    // Match herb data from Firestore
+    const herb = herbDatabase.find(h =>
+      h.localName?.toLowerCase().includes(result.localName?.toLowerCase()) ||
+      result.localName?.toLowerCase().includes(h.localName?.toLowerCase())
+    );
+
+    const confColor = result.confidenceLabel === 'High'
+      ? '#22a06b' : result.confidenceLabel === 'Medium' ? '#c9a84c' : '#e53e3e';
+
+    panel.innerHTML = `
+      <div class="match-card">
+        <div class="match-header">
+          <div class="match-emoji">${herb?.emoji || '🌿'}</div>
+          <div class="match-names">
+            <h2>${result.localName}</h2>
+            <p class="match-english">${herb?.englishName || ''}</p>
+            <p>${herb?.scientificName || ''}</p>
+          </div>
+          <div class="match-confidence" style="background:${confColor}">
+            ${result.confidencePercent}% ${result.confidenceLabel}
+          </div>
+        </div>
+        <div class="match-body">
+          ${herb ? `
+          <div class="info-grid">
+            <div>
+              <div class="info-label">Plant family</div>
+              <div class="info-val">${herb.family || '—'}</div>
+            </div>
+            <div>
+              <div class="info-label">Parts used</div>
+              <div class="info-val">${herb.parts || '—'}</div>
+            </div>
+            <div>
+              <div class="info-label">Medicinal uses</div>
+              <div class="use-tags">${(herb.useTags||[]).map(t=>`<span class="use-tag">${t}</span>`).join('')}</div>
+            </div>
+            <div>
+              <div class="info-label">Preparation</div>
+              <div class="info-val">${herb.preparation || '—'}</div>
+            </div>
+          </div>
+          <div class="loc-row">
+            <i class="ti ti-map-pin"></i>
+            Commonly found in: <strong style="margin-left:4px">${herb.location || '—'}</strong>
+          </div>` : ''}
+
+          ${renderTop3(result.top3)}
+
+          ${herb ? `
+          <div class="match-actions">
+            <a href="herb-detail.html?id=${herb.id}" class="btn-detail">
+              <i class="ti ti-info-circle"></i> Full herb details
+            </a>
+            <a href="map.html?herb=${herb.id}" class="btn-map">
+              <i class="ti ti-map-pin"></i> View on map
+            </a>
+          </div>` : ''}
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:0.75rem">
+        <button onclick="clearImage()" style="background:none;border:none;cursor:pointer;font-size:13px;color:#5a6472;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:5px">
+          <i class="ti ti-refresh"></i> Identify another herb
+        </button>
+      </div>`;
+  }
+
+  function renderTop3(top3) {
+    if (!top3 || !top3.length) return '';
+    return `
+      <div class="top3-box" style="margin-top:12px">
+        <div class="top3-label">Top predictions</div>
+        ${top3.map((h, i) => `
+          <div class="top3-row">
+            <span style="min-width:130px;font-weight:${i===0?'600':'400'}">${h.localName}</span>
+            <div class="top3-bar-wrap"><div class="top3-bar" style="width:${h.percent}%"></div></div>
+            <span class="top3-pct">${h.percent}%</span>
+          </div>`).join('')}
+      </div>`;
+  }
+
+  function showError(msg) {
+    const panel = document.getElementById('resultPanel');
+    panel.classList.add('active');
+    panel.innerHTML = `
+      <div class="not-found">
+        <div class="not-found-icon">⚠️</div>
+        <h3>Identification failed</h3>
+        <p>${msg || 'Could not reach the identification server. Please try again.'}</p>
+        <button onclick="clearImage()" class="btn btn-outline" style="margin-top:1.25rem;display:inline-flex">
+          <i class="ti ti-refresh"></i> Try again
+        </button>
+      </div>`;
+  }
+
+  // ── CAMERA ──
+  window.openCamera = async function() {
+    try {
+      camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      document.getElementById('camVideo').srcObject = camStream;
+      document.getElementById('camModal').classList.add('open');
+    } catch(e) {
+      alert('Camera not available. Please upload a photo instead.');
+    }
+  };
+
+  window.closeCamera = function() {
+    if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
+    document.getElementById('camModal').classList.remove('open');
+  };
+
+  window.capturePhoto = function() {
+    const video  = document.getElementById('camVideo');
+    const canvas = document.getElementById('camCanvas');
+    canvas.width  = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    canvas.toBlob(blob => {
+      currentFile = new File([blob], 'capture.jpg', { type: 'image/jpeg' });
+      showPreview(URL.createObjectURL(blob));
+    }, 'image/jpeg', 0.9);
+    closeCamera();
+  };
+</script>
+</body>
+</html>

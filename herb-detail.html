@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Herb Detail — HerbID Iloilo</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css" />
+  <style>
+    .breadcrumb {
+      padding: 1rem 0; font-size: 13px;
+      display: flex; align-items: center; gap: 6px; color: var(--text-muted);
+    }
+    .breadcrumb a { color: var(--green-main); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+
+    .detail-layout {
+      display: grid; grid-template-columns: 1fr 1.6fr;
+      gap: 2.5rem; padding: 2rem 0 4rem;
+    }
+    .detail-left { position: sticky; top: calc(var(--nav-h) + 1rem); align-self: start; }
+    .herb-photo-box {
+      background: var(--green-pale); border-radius: var(--radius-lg);
+      aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+      font-size: 100px; border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .herb-photo-box img { width: 100%; height: 100%; object-fit: cover; }
+    .herb-num-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--green-main); color: #fff;
+      font-size: 12px; font-weight: 600; margin-bottom: 0.5rem;
+    }
+    .herb-title-local {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem; font-weight: 700;
+      color: var(--green-dark); line-height: 1.2;
+    }
+    .herb-title-english { font-size: 15px; color: var(--text-muted); margin: 4px 0 6px; }
+    .herb-title-sci { font-size: 15px; color: var(--text-light); font-style: italic; margin-bottom: 1rem; }
+
+    .info-section {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.25rem;
+    }
+    .info-section-title {
+      font-size: 12px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.07em; color: var(--text-muted); margin-bottom: 0.75rem;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .info-section-title i { font-size: 15px; color: var(--green-main); }
+    .info-val { font-size: 14px; color: var(--text-primary); line-height: 1.7; }
+    .info-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .info-tags span { font-size: 12px; padding: 4px 12px; border-radius: 99px; }
+
+    .loc-map-preview {
+      background: var(--green-dark); border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      display: flex; align-items: center; gap: 12px;
+      text-decoration: none; transition: opacity 0.15s;
+    }
+    .loc-map-preview:hover { opacity: 0.88; }
+    .loc-map-preview i { font-size: 24px; color: var(--green-main); }
+    .loc-map-text strong { display: block; font-size: 13px; color: #fff; }
+    .loc-map-text span { font-size: 11px; color: rgba(255,255,255,0.5); }
+
+    @media (max-width: 768px) {
+      .detail-layout { grid-template-columns: 1fr; gap: 1.5rem; }
+      .detail-left { position: static; }
+      .herb-photo-box { aspect-ratio: 16/9; font-size: 70px; }
+    }
+
+    @media (max-width: 640px) {
+      .breadcrumb { font-size: 12px; padding: 0.75rem 0; }
+      .detail-layout { padding: 1rem 0 3rem; gap: 1.25rem; }
+      .herb-photo-box { aspect-ratio: 4/3; font-size: 60px; border-radius: var(--radius-md); }
+      .herb-title-local { font-size: 1.6rem; }
+      .herb-title-english { font-size: 13px; }
+      .herb-title-sci { font-size: 13px; }
+      .info-section { padding: 1.25rem; border-radius: var(--radius-md); margin-bottom: 1rem; }
+      .info-val { font-size: 13px; }
+      .loc-map-preview { padding: 0.875rem 1rem; gap: 10px; }
+      .loc-map-preview i:first-child { font-size: 20px; }
+      .loc-map-text strong { font-size: 12px; }
+      .loc-map-text span { font-size: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-brand">
+    <div class="nav-brand-icon"><i class="ti ti-leaf"></i></div>
+    <div class="nav-brand-text">
+      <strong>HerbID Iloilo</strong>
+      <span>NISU Lemery Campus</span>
+    </div>
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="herbs.html" class="active">Herb Database</a></li>
+    <li><a href="identify.html">Identify Herb</a></li>
+    <li><a href="map.html">Map</a></li>
+    <li><a href="about.html">About</a></li>
+  </ul>
+  <button class="nav-hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Menu">
+    <i class="ti ti-menu-2"></i>
+  </button>
+</nav>
+
+<div class="container">
+  <div class="breadcrumb">
+    <a href="index.html">Home</a>
+    <i class="ti ti-chevron-right" style="font-size:13px"></i>
+    <a href="herbs.html">Herb Database</a>
+    <i class="ti ti-chevron-right" style="font-size:13px"></i>
+    <span id="bc-name">Loading…</span>
+  </div>
+
+  <div class="detail-layout" id="detailLayout" style="display:none">
+    <!-- LEFT -->
+    <div class="detail-left">
+      <div class="herb-photo-box" id="photoBox">🌿</div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="detail-right">
+      <div class="herb-num-badge" id="herbNum"></div>
+      <h1 class="herb-title-local" id="titleLocal"></h1>
+      <div class="herb-title-english" id="titleEnglish"></div>
+      <div class="herb-title-sci" id="titleSci"></div>
+
+      <div class="info-section">
+        <div class="info-section-title"><i class="ti ti-pill"></i> Medicinal uses</div>
+        <div class="info-tags" id="useTags"></div>
+      </div>
+
+      <div class="info-section">
+        <div class="info-section-title"><i class="ti ti-flask"></i> Parts used</div>
+        <div class="info-val" id="parts"></div>
+      </div>
+
+      <div class="info-section">
+        <div class="info-section-title"><i class="ti ti-kettle"></i> Preparation method</div>
+        <div class="info-val" id="preparation"></div>
+      </div>
+
+      <div class="info-section">
+        <div class="info-section-title"><i class="ti ti-dna"></i> Plant classification</div>
+        <table style="width:100%;font-size:13px;border-collapse:collapse">
+          <tr>
+            <td style="padding:5px 0;color:var(--text-muted);width:120px">Scientific name</td>
+            <td style="font-style:italic" id="sci2"></td>
+          </tr>
+          <tr>
+            <td style="padding:5px 0;color:var(--text-muted)">Plant family</td>
+            <td id="family"></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="info-section">
+        <div class="info-section-title"><i class="ti ti-map-pin"></i> Location</div>
+        <div class="info-val" id="location" style="margin-bottom:10px"></div>
+        <a class="loc-map-preview" id="mapLink" href="#">
+          <i class="ti ti-map-2"></i>
+          <div class="loc-map-text">
+            <strong>View on interactive map</strong>
+            <span>See exact locations in Lemery, Iloilo</span>
+          </div>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:rgba(255,255,255,0.4)"></i>
+        </a>
+      </div>
+
+      <a href="herbs.html" class="btn btn-outline">
+        <i class="ti ti-arrow-left"></i> Back to database
+      </a>
+    </div>
+  </div>
+
+  <div id="loadingState" style="text-align:center;padding:4rem">
+    <div class="spinner" style="margin:0 auto 1rem"></div>
+    <p style="color:var(--text-muted)">Loading herb…</p>
+  </div>
+</div>
+
+<footer class="footer">
+  <p><strong>HerbID Iloilo</strong> — BSIT Capstone Project · NISU Lemery Campus · 2024–2025</p>
+</footer>
+
+<script type="module">
+  import { db, doc, getDoc } from './js/firebase-config.js';
+
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id');
+
+  const tagClass = {
+    fever:'tag-fever', wound:'tag-wound', pain:'tag-pain',
+    digestive:'tag-digestive', respiratory:'tag-respiratory',
+    skin:'tag-skin', urinary:'tag-urinary', 'anti-inflammatory':'tag-anti-inflammatory'
+  };
+
+  async function load() {
+    if (!id) { document.getElementById('loadingState').innerHTML = '<p style="color:var(--text-muted)">No herb ID provided.</p>'; return; }
+    try {
+      const snap = await getDoc(doc(db, 'herbs', id));
+      if (!snap.exists()) {
+        document.getElementById('loadingState').innerHTML = '<p style="color:var(--text-muted)">Herb not found.</p>';
+        return;
+      }
+      const h = snap.data();
+      document.title = `${h.localName} — HerbID Iloilo`;
+      document.getElementById('bc-name').textContent = h.localName;
+      document.getElementById('herbNum').textContent = h.no || '';
+      document.getElementById('titleLocal').textContent = h.localName;
+      document.getElementById('titleEnglish').textContent = h.englishName || '';
+      document.getElementById('titleSci').textContent = h.scientificName;
+      document.getElementById('sci2').textContent = h.scientificName;
+      document.getElementById('family').textContent = h.family || '—';
+      document.getElementById('parts').textContent = h.parts || '—';
+      document.getElementById('preparation').textContent = h.preparation || '—';
+      document.getElementById('location').textContent = h.location || '—';
+      document.getElementById('mapLink').href = `map.html?herb=${id}`;
+
+      const photoBox = document.getElementById('photoBox');
+      if (h.imageUrl) {
+        photoBox.innerHTML = `<img src="${h.imageUrl}" alt="${h.localName}">`;
+      } else {
+        photoBox.textContent = h.emoji || '🌿';
+      }
+
+      document.getElementById('useTags').innerHTML =
+        (h.useTags || []).map(t => `<span class="tag tag-anti-inflammatory">${t}</span>`).join('');
+
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('detailLayout').style.display = 'grid';
+    } catch(e) {
+      document.getElementById('loadingState').innerHTML = '<p style="color:var(--text-muted)">Error loading herb data.</p>';
+    }
+  }
+  load();
+</script>
+</body>
+</html>

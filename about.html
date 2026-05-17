@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About — HerbID Iloilo</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css" />
+  <style>
+    .about-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 2rem; margin-top: 2.5rem;
+    }
+    .about-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1.75rem;
+    }
+    .about-card h3 {
+      font-size: 16px; font-weight: 600; margin-bottom: 0.75rem;
+      display: flex; align-items: center; gap: 8px; color: var(--green-dark);
+    }
+    .about-card h3 i { color: var(--green-main); font-size: 18px; }
+    .about-card p, .about-card li {
+      font-size: 14px; color: var(--text-muted); line-height: 1.75;
+    }
+    .about-card ul { padding-left: 1.25rem; }
+    .about-card li { margin-bottom: 4px; }
+    .team-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px; margin-top: 1.5rem;
+    }
+    .team-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 1.25rem; text-align: center;
+    }
+    .team-avatar {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: var(--green-pale); color: var(--green-dark);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 700; margin: 0 auto 10px;
+    }
+    .team-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .team-role { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .school-card {
+      background: var(--green-dark); border-radius: var(--radius-lg);
+      padding: 2.5rem; text-align: center; color: rgba(255,255,255,0.7);
+      margin-top: 2.5rem;
+    }
+    .school-card h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem; color: #fff; margin-bottom: 0.5rem;
+    }
+    .school-card p { font-size: 14px; }
+    .framework-box {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 1.5rem; margin-top: 1rem;
+    }
+    .framework-row {
+      display: flex; justify-content: space-between;
+      padding: 8px 0; border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .framework-row:last-child { border-bottom: none; }
+    .framework-row span:first-child { color: var(--text-muted); }
+    .framework-row span:last-child { font-weight: 500; color: var(--text-primary); }
+
+    @media (max-width: 640px) {
+      .about-grid { grid-template-columns: 1fr; gap: 10px; }
+      .about-card { padding: 1.25rem; }
+      .about-card h3 { font-size: 14px; }
+      .about-card p, .about-card li { font-size: 13px; }
+
+      .team-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 1rem; }
+      .team-card { padding: 1rem; }
+      .team-avatar { width: 44px; height: 44px; font-size: 16px; margin-bottom: 8px; }
+      .team-name { font-size: 12px; }
+      .team-role { font-size: 10px; }
+
+      .school-card { padding: 1.75rem 1.25rem; border-radius: var(--radius-md); }
+      .school-card h2 { font-size: 1.2rem; }
+      .school-card p { font-size: 13px; }
+
+      .framework-box { padding: 1rem; }
+      .framework-row { font-size: 12px; padding: 7px 0; flex-wrap: wrap; gap: 4px; }
+      .framework-row span:first-child { min-width: 110px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-brand">
+    <div class="nav-brand-icon"><i class="ti ti-leaf"></i></div>
+    <div class="nav-brand-text">
+      <strong>HerbID Iloilo</strong>
+      <span>NISU Lemery Campus</span>
+    </div>
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="herbs.html">Herb Database</a></li>
+    <li><a href="identify.html">Identify Herb</a></li>
+    <li><a href="map.html">Map</a></li>
+    <li><a href="about.html" class="active">About</a></li>
+  </ul>
+  <button class="nav-hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Menu">
+    <i class="ti ti-menu-2"></i>
+  </button>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero-badge"><i class="ti ti-info-circle"></i> About this project</div>
+  <h1>About HerbID Iloilo</h1>
+  <p>An AI-powered identification and geospatial information system for medicinal herbs in Iloilo Province</p>
+</div>
+
+<div class="container section">
+
+  <!-- ABOUT CARDS -->
+  <div class="about-grid">
+    <div class="about-card">
+      <h3><i class="ti ti-target"></i> General objective</h3>
+      <p>
+        This study covers medicinal herbs found in the Province of Iloilo. It uses AI technology to identify
+        plants from pictures and shows the herb's name, its uses, and location. The system is designed for
+        students, herbal practitioners, and local community members who want to learn about medicinal herbs.
+      </p>
+    </div>
+    <div class="about-card">
+      <h3><i class="ti ti-list-check"></i> Specific objectives</h3>
+      <ul>
+        <li>Create a database of 18 medicinal herbs in Iloilo</li>
+        <li>Train an AI model to recognize herbs from images</li>
+        <li>Design a mobile-friendly capture/upload interface</li>
+        <li>Display local, scientific names and medicinal uses</li>
+        <li>Show herb locations in Lemery, Iloilo on a map</li>
+        <li>Include a smart search feature for herb information</li>
+      </ul>
+    </div>
+    <div class="about-card">
+      <h3><i class="ti ti-ruler-2"></i> Scope</h3>
+      <p>
+        This study covers medicinal herbs in the Province of Iloilo, specifically within the municipality
+        of Lemery. It uses AI technology for plant identification from images. The system shows herb names,
+        uses, and mapped locations.
+      </p>
+    </div>
+    <div class="about-card">
+      <h3><i class="ti ti-ban"></i> Delimitations</h3>
+      <ul>
+        <li>Only herbs already in the database can be identified</li>
+        <li>Results depend on image clarity and model training quality</li>
+        <li>For identification and information only — not a substitute for medical advice</li>
+        <li>Focuses solely on Iloilo Province herbs</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- TECH STACK -->
+  <div class="about-card" style="margin-top:2rem">
+    <h3><i class="ti ti-code"></i> Technologies used</h3>
+    <div class="framework-box">
+      <div class="framework-row"><span>Frontend</span><span>HTML, CSS, JavaScript</span></div>
+      <div class="framework-row"><span>Database</span><span>Firebase Firestore</span></div>
+      <div class="framework-row"><span>Image storage</span><span>Firebase Storage</span></div>
+      <div class="framework-row"><span>Hosting</span><span>Firebase Hosting</span></div>
+      <div class="framework-row"><span>AI / ML model</span><span>Python — TensorFlow &amp; Keras (CNN)</span></div>
+      <div class="framework-row"><span>AI backend</span><span>Flask / FastAPI (REST API)</span></div>
+      <div class="framework-row"><span>Image processing</span><span>OpenCV</span></div>
+      <div class="framework-row"><span>Mapping</span><span>Leaflet.js + OpenStreetMap</span></div>
+    </div>
+  </div>
+
+  <!-- TEAM -->
+  <h2 style="font-family:'Playfair Display',serif;font-size:1.6rem;margin-top:3rem;margin-bottom:0.25rem">Project team</h2>
+  <p style="color:var(--text-muted);font-size:14px">Bachelor of Science in Information Technology — Capstone Project</p>
+  <div class="team-grid">
+    <div class="team-card">
+      <div class="team-avatar">RA</div>
+      <div class="team-name">Rene Rose Agolito</div>
+      <div class="team-role">Project Leader</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar">KA</div>
+      <div class="team-name">Kurt Matthew June E. Alborote</div>
+      <div class="team-role">Member</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar">JA</div>
+      <div class="team-name">Jermilyn F. Azuela</div>
+      <div class="team-role">Member</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar">BB</div>
+      <div class="team-name">Benjamin C. Bilbao</div>
+      <div class="team-role">Member</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar">ML</div>
+      <div class="team-name">Mae Lou Faith D. Luminate</div>
+      <div class="team-role">Member</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar">MP</div>
+      <div class="team-name">Mark Louie L. Panares</div>
+      <div class="team-role">Member</div>
+    </div>
+  </div>
+
+  <!-- ADVISERS -->
+  <h2 style="font-family:'Playfair Display',serif;font-size:1.4rem;margin-top:2.5rem;margin-bottom:0.75rem">Panel &amp; advisers</h2>
+  <div class="team-grid">
+    <div class="team-card">
+      <div class="team-avatar" style="background:var(--gold-light);color:var(--gold)">RJ</div>
+      <div class="team-name">Ralf J. Jangit, M.S.C.S</div>
+      <div class="team-role">Capstone Adviser &amp; Panel</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar" style="background:var(--gold-light);color:var(--gold)">CI</div>
+      <div class="team-name">Carlo A. Intila, D.I.T</div>
+      <div class="team-role">Chief Panel</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar" style="background:var(--gold-light);color:var(--gold)">NS</div>
+      <div class="team-name">Nestor Jr. T. Suerte, M.I.T</div>
+      <div class="team-role">Panel Member</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar" style="background:var(--gold-light);color:var(--gold)">MJ</div>
+      <div class="team-name">Melanie C. Juanola, M.A.T</div>
+      <div class="team-role">Panel Member</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar" style="background:var(--gold-light);color:var(--gold)">JS</div>
+      <div class="team-name">Jhairyn D. Sobrevega, M.I.T</div>
+      <div class="team-role">Panel Member</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar" style="background:var(--gold-light);color:var(--gold)">RA</div>
+      <div class="team-name">Rene D. Arduo, Ph.D.</div>
+      <div class="team-role">Program Chairperson, BSIT</div>
+    </div>
+  </div>
+
+  <!-- SCHOOL -->
+  <div class="school-card">
+    <h2>Northern Iloilo State University</h2>
+    <p>College of Information and Computing Studies<br>
+    NISU Lemery Campus, Poblacion South East Zone, Lemery, Iloilo<br>
+    <a href="http://www.nisu.edu.ph" style="color:var(--green-main)" target="_blank">www.nisu.edu.ph</a> ·
+    <a href="mailto:lemery.ca@nisu.edu.ph" style="color:var(--green-main)">lemery.ca@nisu.edu.ph</a></p>
+  </div>
+</div>
+
+<footer class="footer">
+  <p><strong>HerbID Iloilo</strong> — BSIT Capstone Project · NISU Lemery Campus · 2024–2025</p>
+</footer>
+</body>
+</html>
