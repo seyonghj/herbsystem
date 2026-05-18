@@ -380,34 +380,27 @@
 <script type="module">
   import { db, collection, getDocs } from './js/firebase-config.js';
 
-  // Pick N random items from an array
   function pickRandom(arr, n) {
     return [...arr].sort(() => Math.random() - 0.5).slice(0, n);
   }
 
-  // Get the best display tag for a herb
   function firstTag(h) {
     if (h.useTags && h.useTags.length) return h.useTags[0];
     if (h.uses    && h.uses.length)    return h.uses[0];
     return 'Medicinal';
   }
 
-  // Build the hero card HTML — shows image if available, falls back to emoji
+  // ── FIX: hero cards now link to herbs.html (no herb-detail needed) ──
   function heroCardHTML(h) {
     const emoji = h.emoji || '🌿';
     const thumb = h.imageUrl
       ? `<div class="herb-card-img">
-           <img
-             src="${h.imageUrl}"
-             alt="${h.localName}"
-             loading="lazy"
-             onerror="this.parentElement.outerHTML='<div class=\\'herb-card-emoji\\'>${emoji}</div>'"
-           />
+           <img src="${h.imageUrl}" alt="${h.localName}" loading="lazy" />
          </div>`
       : `<div class="herb-card-emoji">${emoji}</div>`;
 
     return `
-      <a class="herb-preview-card" href="herb-detail.html?id=${h.id}">
+      <a class="herb-preview-card" href="herbs.html">
         ${thumb}
         <div class="herb-preview-local">${h.localName}</div>
         <div class="herb-preview-sci">${h.scientificName}</div>
@@ -426,40 +419,40 @@
         document.getElementById('heroVisual').innerHTML = '';
         document.getElementById('herbStrip').innerHTML =
           `<p style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:2rem;font-size:13px">
-            No herbs in database yet. Go to <a href="setup.html" style="color:var(--green-main)">setup.html</a> to get started.
+            No herbs in database yet.
           </p>`;
         return;
       }
 
-      // ── 1. Update hero stat with real count ──
+      // 1. Update hero stat
       document.getElementById('statHerbs').textContent = herbs.length;
       document.getElementById('stripSub').textContent =
         `${herbs.length} herb${herbs.length !== 1 ? 's' : ''} — click any to view full details`;
 
-      // ── 2. Hero visual: pick 4 random herbs, show image or emoji ──
+      // 2. Hero visual: 4 random herbs
       const heroFour = pickRandom(herbs, Math.min(4, herbs.length));
       document.getElementById('heroVisual').innerHTML = heroFour.map(heroCardHTML).join('');
 
-      // ── 3. Strip: ALL herbs sorted by no field ──
+      // ── FIX: strip cards use a JS-built img element to avoid quote conflicts ──
       const sorted = [...herbs].sort((a, b) => (a.no || 0) - (b.no || 0));
-      document.getElementById('herbStrip').innerHTML = sorted.map(h => `
-        <a class="strip-card" href="herb-detail.html?id=${h.id}">
-          <div class="strip-card-img">
-            ${h.imageUrl
-              ? `<img src="${h.imageUrl}" alt="${h.localName}" loading="lazy"
-                   onerror="this.parentElement.innerHTML='${h.emoji || '🌿'}'">`
-              : (h.emoji || '🌿')}
-          </div>
-          <div class="strip-card-body">
-            <div class="strip-card-num">${h.no || ''}</div>
-            <div class="strip-card-local">${h.localName}</div>
-            <div class="strip-card-sci">${h.scientificName}</div>
-          </div>
-        </a>`).join('');
+      document.getElementById('herbStrip').innerHTML = sorted.map(h => {
+        const emoji = h.emoji || '🌿';
+        const imgHTML = h.imageUrl
+          ? `<img src="${h.imageUrl}" alt="${h.localName}" loading="lazy">`
+          : emoji;
+        return `
+          <a class="strip-card" href="herbs.html">
+            <div class="strip-card-img">${imgHTML}</div>
+            <div class="strip-card-body">
+              <div class="strip-card-num">${h.no || ''}</div>
+              <div class="strip-card-local">${h.localName}</div>
+              <div class="strip-card-sci">${h.scientificName}</div>
+            </div>
+          </a>`;
+      }).join('');
 
     } catch(e) {
-      console.warn('Firebase error:', e.message);
-      // Graceful fallback — show static cards
+      console.error('Firebase error:', e);
       document.getElementById('statHerbs').textContent = '18';
       document.getElementById('heroVisual').innerHTML = `
         <a class="herb-preview-card" href="herbs.html">
