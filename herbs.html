@@ -80,6 +80,9 @@
     }
     .herb-loc i { color: var(--green-main); font-size: 12px; }
 
+    /* tag colors for use labels */
+    .tag { font-size: 11px; padding: 3px 8px; border-radius: 99px; background: var(--green-pale); color: var(--green-dark); }
+
     /* DETAIL DRAWER */
     .drawer-overlay {
       display: none; position: fixed; inset: 0;
@@ -121,7 +124,7 @@
     }
     .detail-val { font-size: 14px; color: var(--text-primary); line-height: 1.6; }
     .detail-tags { display: flex; flex-wrap: wrap; gap: 5px; }
-    .detail-tags span { font-size: 12px; padding: 4px 10px; border-radius: 99px; }
+    .detail-tags span { font-size: 12px; padding: 4px 10px; border-radius: 99px; background: var(--green-pale); color: var(--green-dark); }
     .loc-chip {
       display: inline-flex; align-items: center; gap: 6px;
       background: var(--green-pale); color: var(--green-dark);
@@ -129,7 +132,8 @@
     }
     .drawer-actions { display: flex; gap: 10px; padding: 0 1.5rem 1.5rem; }
     .drawer-actions .btn { flex: 1; justify-content: center; }
-    /* ── MOBILE FIXES ── */
+
+    /* MOBILE FIXES */
     @media (max-width: 640px) {
       .toolbar-inner { gap: 8px; }
       .search-wrap { min-width: 100%; }
@@ -146,7 +150,6 @@
       .herb-english { font-size: 11px; }
       .herb-sci { font-size: 10px; }
 
-      /* Drawer full-screen on mobile */
       .drawer {
         right: -100%;
         max-width: 100%;
@@ -162,6 +165,7 @@
       .drawer-actions { padding: 0 1.25rem 1.25rem; flex-direction: column; }
       .drawer-actions .btn { min-height: 48px; }
     }
+  </style>
 </head>
 <body>
 
@@ -200,16 +204,24 @@
       <i class="ti ti-search"></i>
       <input type="text" id="searchInput" placeholder="Search by local name, English name, or use…" oninput="filterHerbs()" />
     </div>
+    <!-- Filter options now match actual Firestore useTags values -->
     <select class="filter-select" id="useFilter" onchange="filterHerbs()">
       <option value="">All uses</option>
-      <option value="fever">Fever</option>
-      <option value="wound">Wound / Cuts</option>
-      <option value="pain">Pain relief</option>
-      <option value="digestive">Digestive</option>
-      <option value="respiratory">Respiratory</option>
-      <option value="skin">Skin</option>
-      <option value="urinary">Urinary</option>
-      <option value="anti-inflammatory">Anti-inflammatory</option>
+      <option value="Kidney stones">Kidney Stones</option>
+      <option value="Anti-urolithiasis">Anti-urolithiasis</option>
+      <option value="Diuretic">Diuretic</option>
+      <option value="Expectorant">Expectorant</option>
+      <option value="Antidiarrheal">Antidiarrheal</option>
+      <option value="Anti-spasmodic">Anti-spasmodic</option>
+      <option value="Anti-inflammatory">Anti-inflammatory</option>
+      <option value="Astringent">Astringent</option>
+      <option value="Fever">Fever</option>
+      <option value="Wound">Wound / Cuts</option>
+      <option value="Pain">Pain Relief</option>
+      <option value="Digestive">Digestive</option>
+      <option value="Respiratory">Respiratory</option>
+      <option value="Skin">Skin</option>
+      <option value="Urinary">Urinary</option>
     </select>
     <span class="result-count" id="resultCount"></span>
   </div>
@@ -280,17 +292,13 @@
 
   let allHerbs = [];
 
-  // Tag class map
-  const tagClass = {
-    fever:'tag-fever', wound:'tag-wound', pain:'tag-pain',
-    digestive:'tag-digestive', respiratory:'tag-respiratory',
-    skin:'tag-skin', urinary:'tag-urinary', 'anti-inflammatory':'tag-anti-inflammatory'
-  };
-  const useLabel = {
-    fever:'Fever', wound:'Wound', pain:'Pain', digestive:'Digestive',
-    respiratory:'Respiratory', skin:'Skin', urinary:'Urinary',
-    'anti-inflammatory':'Anti-inflammatory'
-  };
+  // ── Safely normalize any field to an array ──
+  function toArray(val) {
+    if (!val) return [];
+    if (Array.isArray(val)) return val;
+    if (typeof val === 'string') return val.split(',').map(s => s.trim()).filter(Boolean);
+    return [];
+  }
 
   // ── Fetch herbs from Firestore ──
   async function loadHerbs() {
@@ -300,13 +308,35 @@
       snap.forEach(d => allHerbs.push({ id: d.id, ...d.data() }));
       allHerbs.sort((a, b) => (a.no || 0) - (b.no || 0));
       renderHerbs(allHerbs);
+
+      // Dynamically populate filter dropdown from actual data
+      buildFilterOptions();
     } catch(e) {
+      console.error('Firebase error:', e);
       document.getElementById('herbGrid').innerHTML =
         `<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:3rem">
           <i class="ti ti-alert-circle" style="font-size:32px;display:block;margin-bottom:1rem;color:#e53e3e"></i>
-          Could not connect to Firebase. Check your config in <code>js/firebase-config.js</code>.
+          Could not load herbs. Please try again later.
         </div>`;
     }
+  }
+
+  // ── Build filter dropdown dynamically from Firestore data ──
+  function buildFilterOptions() {
+    const allUses = new Set();
+    allHerbs.forEach(h => {
+      toArray(h.useTags).forEach(t => allUses.add(t.trim()));
+    });
+
+    const select = document.getElementById('useFilter');
+    // Clear existing options except the first "All uses"
+    select.innerHTML = '<option value="">All uses</option>';
+    [...allUses].sort().forEach(use => {
+      const opt = document.createElement('option');
+      opt.value = use;
+      opt.textContent = use;
+      select.appendChild(opt);
+    });
   }
 
   function renderHerbs(herbs) {
@@ -321,43 +351,59 @@
     }
     empty.style.display = 'none';
 
-    grid.innerHTML = herbs.map(h => `
-      <div class="herb-card" onclick="openDrawer('${h.id}')" tabindex="0" role="button" aria-label="${h.localName}">
-        <div class="herb-card-img">
-          ${h.imageUrl
-            ? `<img src="${h.imageUrl}" alt="${h.localName}" style="width:100%;height:100%;object-fit:cover;">`
-            : (h.emoji || '🌿')}
-          <div class="herb-num">${h.no || ''}</div>
-        </div>
-        <div class="herb-card-body">
-          <div class="herb-local">${h.localName}</div>
-          <div class="herb-english">${h.englishName || ''}</div>
-          <div class="herb-sci">${h.scientificName}</div>
-          <div class="herb-tags">
-            ${(h.uses || []).slice(0,2).map(u =>
-              `<span class="tag ${tagClass[u] || ''}">${useLabel[u] || u}</span>`).join('')}
+    grid.innerHTML = herbs.map(h => {
+      // Safely get uses/useTags as arrays
+      const useTags = toArray(h.useTags);
+      const displayTags = useTags.slice(0, 2);
+
+      return `
+        <div class="herb-card" onclick="openDrawer('${h.id}')" tabindex="0" role="button" aria-label="${h.localName || ''}">
+          <div class="herb-card-img">
+            ${h.imageUrl
+              ? `<img src="${h.imageUrl}" alt="${h.localName || ''}" style="width:100%;height:100%;object-fit:cover;">`
+              : (h.emoji || '🌿')}
+            <div class="herb-num">${h.no || ''}</div>
           </div>
-          <div class="herb-loc">
-            <i class="ti ti-map-pin"></i>
-            ${(h.location || '').split(',')[0]}
+          <div class="herb-card-body">
+            <div class="herb-local">${h.localName || '—'}</div>
+            <div class="herb-english">${h.englishName || ''}</div>
+            <div class="herb-sci">${h.scientificName || ''}</div>
+            <div class="herb-tags">
+              ${displayTags.map(t => `<span class="tag">${t}</span>`).join('')}
+            </div>
+            <div class="herb-loc">
+              <i class="ti ti-map-pin"></i>
+              ${(h.location || '').split(',')[0] || '—'}
+            </div>
           </div>
-        </div>
-      </div>`).join('');
+        </div>`;
+    }).join('');
   }
 
   // ── Filter ──
   window.filterHerbs = function() {
-    const q = document.getElementById('searchInput').value.toLowerCase();
-    const f = document.getElementById('useFilter').value;
+    const q = document.getElementById('searchInput').value.toLowerCase().trim();
+    const f = document.getElementById('useFilter').value.toLowerCase();
+
     const filtered = allHerbs.filter(h => {
+      const useTags = toArray(h.useTags).map(t => t.toLowerCase());
+      const uses    = toArray(h.uses).map(t => t.toLowerCase());
+
       const matchQ = !q ||
         (h.localName || '').toLowerCase().includes(q) ||
         (h.englishName || '').toLowerCase().includes(q) ||
         (h.scientificName || '').toLowerCase().includes(q) ||
-        (h.useTags || []).some(t => t.toLowerCase().includes(q));
-      const matchF = !f || (h.uses || []).includes(f);
+        useTags.some(t => t.includes(q)) ||
+        uses.some(t => t.includes(q));
+
+      // Match filter against both useTags and uses (case-insensitive)
+      const matchF = !f ||
+        useTags.some(t => t.includes(f)) ||
+        uses.some(t => t.includes(f));
+
       return matchQ && matchF;
     });
+
     renderHerbs(filtered);
   };
 
@@ -365,18 +411,22 @@
   window.openDrawer = function(id) {
     const h = allHerbs.find(x => x.id === id);
     if (!h) return;
+
+    const useTags = toArray(h.useTags);
+
     document.getElementById('d-emoji').textContent   = h.emoji || '🌿';
-    document.getElementById('d-local').textContent   = h.localName;
+    document.getElementById('d-local').textContent   = h.localName || '—';
     document.getElementById('d-english').textContent = h.englishName || '';
-    document.getElementById('d-sci').textContent     = h.scientificName;
+    document.getElementById('d-sci').textContent     = h.scientificName || '';
     document.getElementById('d-family').textContent  = h.family || '—';
     document.getElementById('d-parts').textContent   = h.parts || '—';
     document.getElementById('d-prep').textContent    = h.preparation || '—';
     document.getElementById('d-loc').textContent     = h.location || '—';
     document.getElementById('d-useTags').innerHTML   =
-      (h.useTags || []).map(t => `<span class="tag tag-anti-inflammatory">${t}</span>`).join('');
-    document.getElementById('d-mapLink').href   = `map.html?herb=${id}`;
+      useTags.map(t => `<span>${t}</span>`).join('');
+    document.getElementById('d-mapLink').href    = `map.html?herb=${id}`;
     document.getElementById('d-detailLink').href = `herb-detail.html?id=${id}`;
+
     document.getElementById('drawerOverlay').classList.add('open');
     document.getElementById('drawer').classList.add('open');
   };
