@@ -8,7 +8,7 @@ import { getFirestore, collection, getDocs, getDoc, doc, query, where, orderBy }
 import { getStorage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDK-4CuEL3NqHEwTqV-StBURFS6VMQJOH0",
+  apiKey: "👍",
   authDomain: "herbclass-a2c57.firebaseapp.com",
   projectId: "herbclass-a2c57",
   storageBucket: "herbclass-a2c57.firebasestorage.app",
