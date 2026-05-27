@@ -109,7 +109,6 @@
 
     /* PINNING MODE banner */
     .pin-mode-banner {
-      display: none;
       position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
       z-index: 500; background: #0a4a35; color: #fff;
       padding: 10px 18px; border-radius: 99px;
@@ -184,12 +183,16 @@
     /* map cursor when pinning */
     .map-layout.pinning #map { cursor: crosshair; }
 
-    /* Lemery border pulse animation */
-    @keyframes borderPulse {
-      0%   { opacity: 0.85; }
-      50%  { opacity: 0.5; }
-      100% { opacity: 0.85; }
+    /* Lemery badge */
+    .lemery-badge {
+      position: absolute; bottom: 14px; left: 14px; z-index: 400;
+      background: rgba(10,74,53,0.88); color: #fff;
+      font-size: 11px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+      padding: 5px 11px; border-radius: 99px;
+      display: flex; align-items: center; gap: 5px;
+      pointer-events: none; backdrop-filter: blur(4px);
     }
+    .lemery-badge i { font-size: 13px; color: #7eebb5; }
 
     /* MOBILE */
     @media (max-width: 768px) {
@@ -205,7 +208,6 @@
       }
       .map-sidebar.open { transform: translateY(0); }
       #map { height: calc(100vh - var(--nav-h)); }
-      .map-toggle-btn { display: flex !important; }
       .map-sidebar::before {
         content: ''; display: block; width: 36px; height: 4px;
         background: var(--border); border-radius: 2px;
@@ -225,23 +227,6 @@
     @media (max-width: 768px) {
       .map-toggle-btn { display: flex !important; }
     }
-
-    /* Lemery badge on map */
-    .lemery-badge {
-      position: absolute;
-      bottom: 14px; left: 14px;
-      z-index: 400;
-      background: rgba(10, 74, 53, 0.88);
-      color: #fff;
-      font-size: 11px; font-weight: 600;
-      font-family: 'DM Sans', sans-serif;
-      padding: 5px 11px;
-      border-radius: 99px;
-      display: flex; align-items: center; gap: 5px;
-      pointer-events: none;
-      backdrop-filter: blur(4px);
-    }
-    .lemery-badge i { font-size: 13px; color: #7eebb5; }
   </style>
 </head>
 <body>
@@ -301,13 +286,9 @@
   <!-- MAP -->
   <div style="position:relative;flex:1">
     <div id="map"></div>
-
-    <!-- Lemery location badge -->
     <div class="lemery-badge">
       <i class="ti ti-map-pin"></i> Lemery, Iloilo
     </div>
-
-    <!-- Pinning mode banner -->
     <div class="pin-mode-banner" id="pinBanner">
       <i class="ti ti-map-pin"></i>
       <span id="pinBannerText">Click anywhere on the map to pin the location</span>
@@ -330,112 +311,93 @@
     doc, updateDoc, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  // ── Center of Lemery, Iloilo ──
-  const LEMERY = [11.0392, 122.6291];
+  // ── Lemery, Iloilo — correct coordinates (11.227°N, 122.925°E) ──
+  const LEMERY_CENTER = [11.227, 122.925];
 
-  // ── Strict bounding box for Lemery, Iloilo ──
+  // ── Bounding box around Lemery municipality ──
   const LEMERY_BOUNDS = L.latLngBounds(
-    [10.980, 122.555],   // SW corner
-    [11.110, 122.710]    // NE corner
+    [11.130, 122.820],   // SW corner
+    [11.330, 123.020]    // NE corner
   );
 
   const map = L.map('map', {
-    center: LEMERY,
-    zoom: 14,
-    minZoom: 12,
+    center: LEMERY_CENTER,
+    zoom: 13,
+    minZoom: 11,
     maxZoom: 17,
     maxBounds: LEMERY_BOUNDS,
-    maxBoundsViscosity: 1.0,   // hard lock — no rubber-banding past bounds
+    maxBoundsViscosity: 1.0,
   });
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxZoom: 17,
+  // ── Satellite tile layer (Esri — no API key required) ──
+  L.tileLayer(
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    {
+      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics',
+      maxZoom: 17,
+    }
+  ).addTo(map);
+
+  // ── Hardcoded Lemery, Iloilo boundary polygon ──
+  // Approximate boundary based on the correct coordinates (11.23°N, 122.93°E)
+  // Replace these with the exact OSM export if you have it
+  const LEMERY_BORDER = [
+    [11.330, 122.880],
+    [11.320, 122.920],
+    [11.310, 122.960],
+    [11.295, 122.990],
+    [11.275, 123.010],
+    [11.250, 123.018],
+    [11.225, 123.012],
+    [11.200, 122.998],
+    [11.178, 122.975],
+    [11.162, 122.948],
+    [11.155, 122.918],
+    [11.158, 122.888],
+    [11.168, 122.858],
+    [11.185, 122.833],
+    [11.208, 122.820],
+    [11.235, 122.818],
+    [11.262, 122.825],
+    [11.285, 122.840],
+    [11.305, 122.858],
+    [11.320, 122.870],
+    [11.330, 122.880],
+  ];
+
+  // Outer glow ring
+  L.polygon(LEMERY_BORDER, {
+    color: '#22a06b',
+    weight: 10,
+    opacity: 0.2,
+    fill: false,
+    lineJoin: 'round',
+    lineCap: 'round',
+    smoothFactor: 2,
+    interactive: false,
   }).addTo(map);
 
-  // ── Load Lemery municipality border from Overpass API ──
-  async function loadLemeryBorder() {
-    try {
-      // Query Overpass for Lemery, Iloilo administrative boundary (admin_level 6 = municipality)
-      const query = `
-        [out:json][timeout:25];
-        relation["name"="Lemery"]["admin_level"="6"]["boundary"="administrative"];
-        out geom;
-      `;
-      const res = await fetch('https://overpass-api.de/api/interpreter', {
-        method: 'POST',
-        body: 'data=' + encodeURIComponent(query),
-      });
+  // Main border line
+  const borderLayer = L.polygon(LEMERY_BORDER, {
+    color: '#22a06b',
+    weight: 3,
+    opacity: 0.95,
+    fillColor: '#22a06b',
+    fillOpacity: 0.08,
+    lineJoin: 'round',
+    lineCap: 'round',
+    smoothFactor: 2,
+    interactive: false,
+  }).addTo(map);
 
-      if (!res.ok) throw new Error('Overpass HTTP error ' + res.status);
-      const data = await res.json();
+  // Fit map to border bounds
+  map.fitBounds(borderLayer.getBounds(), { padding: [32, 32], maxZoom: 13 });
 
-      if (!data.elements || !data.elements.length) {
-        throw new Error('No boundary relation found');
-      }
-
-      // Build coordinate arrays from relation way members
-      const members = data.elements[0].members || [];
-      const ways = members.filter(m => m.type === 'way' && m.geometry && m.geometry.length);
-
-      if (!ways.length) throw new Error('No way geometry in relation');
-
-      // Chain ways into a single continuous ring
-      const coords = ways.flatMap(w => w.geometry.map(pt => [pt.lat, pt.lon]));
-
-      // Outer border — solid green highlight
-      const border = L.polygon(coords, {
-        color: '#22a06b',
-        weight: 3,
-        opacity: 0.9,
-        fillColor: '#22a06b',
-        fillOpacity: 0.07,
-        lineJoin: 'round',
-        lineCap: 'round',
-        smoothFactor: 1.5,
-      }).addTo(map);
-
-      // Inner glow ring — slightly wider, more transparent
-      L.polygon(coords, {
-        color: '#22a06b',
-        weight: 8,
-        opacity: 0.18,
-        fill: false,
-        lineJoin: 'round',
-        lineCap: 'round',
-        smoothFactor: 1.5,
-        interactive: false,
-      }).addTo(map);
-
-      // Fit map neatly inside the border
-      map.fitBounds(border.getBounds(), { padding: [28, 28], maxZoom: 14 });
-
-    } catch (err) {
-      console.warn('Lemery border load failed, using bounding-box fallback:', err.message);
-
-      // Fallback: static dashed rectangle outline
-      L.rectangle(LEMERY_BOUNDS, {
-        color: '#22a06b',
-        weight: 2.5,
-        opacity: 0.75,
-        fillColor: '#22a06b',
-        fillOpacity: 0.05,
-        dashArray: '7 5',
-        lineJoin: 'round',
-        interactive: false,
-      }).addTo(map);
-
-      map.fitBounds(LEMERY_BOUNDS, { padding: [28, 28], maxZoom: 14 });
-    }
-  }
-
-  loadLemeryBorder();
-
-  let allHerbs     = [];
-  let markers      = {};       // herbId → { marker, herb }
-  let activeFilter = '';
-  let activeId     = null;
-  let pinningHerbId = null;    // which herb is being pinned right now
+  let allHerbs      = [];
+  let markers       = {};
+  let activeFilter  = '';
+  let activeId      = null;
+  let pinningHerbId = null;
 
   // ── Icon factory ──
   function makeIcon(emoji, selected = false) {
@@ -448,7 +410,7 @@
 
   // ── Popup HTML ──
   function popupHTML(h) {
-    const tags   = (h.useTags || []).slice(0, 3).map(t => `<span class="popup-tag">${t}</span>`).join('');
+    const tags   = (h.usesTags || []).slice(0, 3).map(t => `<span class="popup-tag">${t}</span>`).join('');
     const coords = h.lat && h.lng
       ? `<div class="popup-coords">📍 ${h.lat.toFixed(5)}, ${h.lng.toFixed(5)}</div>`
       : '';
@@ -477,10 +439,7 @@
   // ── Add or update marker on map ──
   function placeMarker(h) {
     if (!h.lat || !h.lng) return;
-
-    if (markers[h.id]) {
-      map.removeLayer(markers[h.id].marker);
-    }
+    if (markers[h.id]) map.removeLayer(markers[h.id].marker);
 
     const marker = L.marker([h.lat, h.lng], { icon: makeIcon(h.emoji) })
       .addTo(map)
@@ -493,9 +452,9 @@
 
   // ── Select herb ──
   function selectHerb(id) {
-    if (activeId && markers[activeId]) {
+    if (activeId && markers[activeId])
       markers[activeId].marker.setIcon(makeIcon(markers[activeId].herb.emoji, false));
-    }
+
     activeId = id;
     if (markers[id]) {
       const { marker, herb } = markers[id];
@@ -503,22 +462,20 @@
       map.setView(marker.getLatLng(), 15, { animate: true });
       marker.openPopup();
     }
-    document.querySelectorAll('.herb-list-item').forEach(el => {
-      el.classList.toggle('active', el.dataset.id === id);
-    });
+    document.querySelectorAll('.herb-list-item').forEach(el =>
+      el.classList.toggle('active', el.dataset.id === id));
     const el = document.querySelector(`.herb-list-item[data-id="${id}"]`);
     if (el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
 
   function deselectHerb() {
-    if (activeId && markers[activeId]) {
+    if (activeId && markers[activeId])
       markers[activeId].marker.setIcon(makeIcon(markers[activeId].herb.emoji, false));
-    }
     activeId = null;
     document.querySelectorAll('.herb-list-item').forEach(el => el.classList.remove('active'));
   }
 
-  // ── START PIN MODE for a herb ──
+  // ── START PIN MODE ──
   window._startPin = function(herbId) {
     pinningHerbId = herbId;
     const herb = allHerbs.find(h => h.id === herbId);
@@ -560,9 +517,7 @@
 
     showSaving(true);
     try {
-      await updateDoc(doc(db, 'herbs', herbId), {
-        lat, lng, pinnedAt: serverTimestamp()
-      });
+      await updateDoc(doc(db, 'herbs', herbId), { lat, lng, pinnedAt: serverTimestamp() });
       showToast(`📍 ${herb.localName} pinned on the map!`);
     } catch(err) {
       showToast('Could not save location: ' + err.message, 'error');
@@ -574,22 +529,14 @@
   window._removePin = async function(herbId) {
     const herb = allHerbs.find(h => h.id === herbId);
     if (!herb) return;
-
     if (!confirm(`Remove pin for "${herb.localName}"?`)) return;
 
     map.closePopup();
-    if (markers[herbId]) {
-      map.removeLayer(markers[herbId].marker);
-      delete markers[herbId];
-    }
-    herb.lat = null;
-    herb.lng = null;
+    if (markers[herbId]) { map.removeLayer(markers[herbId].marker); delete markers[herbId]; }
+    herb.lat = null; herb.lng = null;
 
     const btn = document.querySelector(`.pin-btn[data-id="${herbId}"]`);
-    if (btn) {
-      btn.classList.remove('pinned');
-      btn.innerHTML = `<i class="ti ti-map-pin"></i> Pin`;
-    }
+    if (btn) { btn.classList.remove('pinned'); btn.innerHTML = `<i class="ti ti-map-pin"></i> Pin`; }
 
     showSaving(true);
     try {
@@ -631,12 +578,11 @@
     }).join('');
   }
 
-  // ── Filter ──
+  // ── Filters ──
   window.setFilter = function(use) {
     activeFilter = use;
-    document.querySelectorAll('.pill').forEach(p => {
-      p.classList.toggle('active', p.textContent.toLowerCase() === (use || 'all'));
-    });
+    document.querySelectorAll('.pill').forEach(p =>
+      p.classList.toggle('active', p.textContent.toLowerCase() === (use || 'all')));
     applyFilters();
   };
   window.filterList = function() { applyFilters(); };
@@ -668,16 +614,12 @@
       const snap = await getDocs(collection(db, 'herbs'));
       snap.forEach(d => allHerbs.push({ id: d.id, ...d.data() }));
       allHerbs.sort((a, b) => (a.no || 0) - (b.no || 0));
-
       allHerbs.forEach(h => { if (h.lat && h.lng) placeMarker(h); });
-
       renderList(allHerbs);
       document.getElementById('countBadge').textContent = allHerbs.length;
 
-      // If coming from herb detail page (?herb=id)
       const herbId = new URLSearchParams(location.search).get('herb');
       if (herbId) setTimeout(() => selectHerb(herbId), 400);
-
     } catch(e) {
       document.getElementById('herbList').innerHTML =
         `<div style="padding:1.5rem;text-align:center;font-size:13px;color:var(--text-muted)">
@@ -707,7 +649,6 @@
     setTimeout(() => t.remove(), 3500);
   }
 
-  // ── Mobile toggle ──
   window.toggleSidebar = function() {
     const sidebar = document.getElementById('mapSidebar');
     const label   = document.getElementById('toggleLabel');

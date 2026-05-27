@@ -133,7 +133,7 @@
 
       <div class="info-section">
         <div class="info-section-title"><i class="ti ti-pill"></i> Medicinal uses</div>
-        <div class="info-tags" id="useTags"></div>
+        <div class="info-tags" id="usesTags"></div>
       </div>
 
       <div class="info-section">
@@ -230,8 +230,8 @@
         photoBox.textContent = h.emoji || '🌿';
       }
 
-      document.getElementById('useTags').innerHTML =
-        (h.useTags || []).map(t => `<span class="tag tag-anti-inflammatory">${t}</span>`).join('');
+      document.getElementById('usesTags').innerHTML =
+        (h.usesTags || []).map(t => `<span class="tag tag-anti-inflammatory">${t}</span>`).join('');
 
       document.getElementById('loadingState').style.display = 'none';
       document.getElementById('detailLayout').style.display = 'grid';

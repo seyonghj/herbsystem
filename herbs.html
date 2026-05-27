@@ -204,7 +204,7 @@
       <i class="ti ti-search"></i>
       <input type="text" id="searchInput" placeholder="Search by local name, English name, or use…" oninput="filterHerbs()" />
     </div>
-    <!-- Filter options now match actual Firestore useTags values -->
+    <!-- Filter options now match actual Firestore usesTags values -->
     <select class="filter-select" id="useFilter" onchange="filterHerbs()">
       <option value="">All uses</option>
       <option value="Kidney stones">Kidney Stones</option>
@@ -256,7 +256,7 @@
     </div>
     <div class="detail-row">
       <div class="detail-label">Medicinal uses</div>
-      <div class="detail-tags" id="d-useTags"></div>
+      <div class="detail-tags" id="d-usesTags"></div>
     </div>
     <div class="detail-row">
       <div class="detail-label">Parts used</div>
@@ -325,7 +325,7 @@
   function buildFilterOptions() {
     const allUses = new Set();
     allHerbs.forEach(h => {
-      toArray(h.useTags).forEach(t => allUses.add(t.trim()));
+      toArray(h.usesTags).forEach(t => allUses.add(t.trim()));
     });
 
     const select = document.getElementById('useFilter');
@@ -352,9 +352,9 @@
     empty.style.display = 'none';
 
     grid.innerHTML = herbs.map(h => {
-      // Safely get uses/useTags as arrays
-      const useTags = toArray(h.useTags);
-      const displayTags = useTags.slice(0, 2);
+      // Safely get uses/usesTags as arrays
+      const usesTags = toArray(h.usesTags);
+      const displayTags = usesTags.slice(0, 2);
 
       return `
         <div class="herb-card" onclick="openDrawer('${h.id}')" tabindex="0" role="button" aria-label="${h.localName || ''}">
@@ -386,19 +386,19 @@
     const f = document.getElementById('useFilter').value.toLowerCase();
 
     const filtered = allHerbs.filter(h => {
-      const useTags = toArray(h.useTags).map(t => t.toLowerCase());
+      const usesTags = toArray(h.usesTags).map(t => t.toLowerCase());
       const uses    = toArray(h.uses).map(t => t.toLowerCase());
 
       const matchQ = !q ||
         (h.localName || '').toLowerCase().includes(q) ||
         (h.englishName || '').toLowerCase().includes(q) ||
         (h.scientificName || '').toLowerCase().includes(q) ||
-        useTags.some(t => t.includes(q)) ||
+        usesTags.some(t => t.includes(q)) ||
         uses.some(t => t.includes(q));
 
-      // Match filter against both useTags and uses (case-insensitive)
+      // Match filter against both usesTags and uses (case-insensitive)
       const matchF = !f ||
-        useTags.some(t => t.includes(f)) ||
+        usesTags.some(t => t.includes(f)) ||
         uses.some(t => t.includes(f));
 
       return matchQ && matchF;
@@ -412,7 +412,7 @@
     const h = allHerbs.find(x => x.id === id);
     if (!h) return;
 
-    const useTags = toArray(h.useTags);
+    const usesTags = toArray(h.usesTags);
 
     document.getElementById('d-emoji').textContent   = h.emoji || '🌿';
     document.getElementById('d-local').textContent   = h.localName || '—';
@@ -422,8 +422,8 @@
     document.getElementById('d-parts').textContent   = h.parts || '—';
     document.getElementById('d-prep').textContent    = h.preparation || '—';
     document.getElementById('d-loc').textContent     = h.location || '—';
-    document.getElementById('d-useTags').innerHTML   =
-      useTags.map(t => `<span>${t}</span>`).join('');
+    document.getElementById('d-usesTags').innerHTML   =
+      usesTags.map(t => `<span>${t}</span>`).join('');
     document.getElementById('d-mapLink').href    = `map.html?herb=${id}`;
     document.getElementById('d-detailLink').href = `herb-detail.html?id=${id}`;
 
