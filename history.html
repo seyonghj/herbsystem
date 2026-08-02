@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Scan History — HerbID Iloilo</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css" />
+  <style>
+    .history-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px; padding: 2rem 0;
+    }
+    .scan-card {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .scan-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .scan-card-img {
+      height: 140px; background: var(--green-pale);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 52px; overflow: hidden; position: relative;
+    }
+    .scan-card-img img { width: 100%; height: 100%; object-fit: cover; }
+    .scan-method-badge {
+      position: absolute; top: 8px; right: 8px;
+      font-size: 10px; font-weight: 600; padding: 2px 8px;
+      border-radius: 99px;
+    }
+    .badge-cnn    { background: #dbeafe; color: #1e40af; }
+    .badge-gemini { background: #fef3c7; color: #92400e; }
+    .scan-card-body { padding: 12px 14px 14px; }
+    .scan-herb-name { font-size: 15px; font-weight: 600; color: var(--green-dark); margin-bottom: 2px; }
+    .scan-sci { font-size: 11px; color: var(--text-muted); font-style: italic; margin-bottom: 8px; }
+    .scan-meta { display: flex; align-items: center; justify-content: space-between; }
+    .scan-conf {
+      font-size: 12px; font-weight: 600; padding: 2px 9px;
+      border-radius: 99px;
+    }
+    .conf-high { background: #d1fae5; color: #065f46; }
+    .conf-med  { background: #fef3c7; color: #92400e; }
+    .conf-low  { background: #fee2e2; color: #991b1b; }
+    .scan-date { font-size: 11px; color: var(--text-light); }
+    .scan-no-match {
+      font-size: 13px; color: var(--text-muted); font-style: italic;
+    }
+    .scan-actions { display: flex; gap: 6px; margin-top: 10px; }
+    .scan-actions a, .scan-actions button {
+      flex: 1; padding: 7px; border-radius: var(--radius-sm);
+      font-size: 12px; font-weight: 500; text-align: center;
+      font-family: 'DM Sans', sans-serif; cursor: pointer;
+      text-decoration: none; transition: all 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 4px;
+      border: none;
+    }
+    .scan-actions a { background: var(--green-main); color: #fff; }
+    .scan-actions a:hover { background: var(--green-mid); }
+    .scan-actions button { background: #fee2e2; color: #991b1b; }
+    .scan-actions button:hover { background: #fecaca; }
+
+    /* stats bar */
+    .stats-bar {
+      display: flex; gap: 1.5rem; flex-wrap: wrap;
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1.25rem 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .stat-item { text-align: center; }
+    .stat-num { font-family: 'Playfair Display', serif; font-size: 1.75rem; font-weight: 700; color: var(--green-dark); }
+    .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    /* not logged in */
+    .auth-gate {
+      text-align: center; padding: 4rem 2rem;
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); margin: 2rem 0;
+    }
+    .auth-gate-icon { font-size: 52px; margin-bottom: 1rem; }
+    .auth-gate h3 { font-size: 18px; font-weight: 600; margin-bottom: 0.5rem; }
+    .auth-gate p { font-size: 14px; color: var(--text-muted); margin-bottom: 1.5rem; }
+
+    @media (max-width: 640px) {
+      .history-grid { grid-template-columns: 1fr; }
+      .stats-bar { gap: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-brand">
+    <div class="nav-brand-icon"><i class="ti ti-leaf"></i></div>
+    <div class="nav-brand-text">
+      <strong>HerbID Iloilo</strong>
+      <span>NISU Lemery Campus</span>
+    </div>
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="herbs.html">Herb Database</a></li>
+    <li><a href="identify.html">Identify Herb</a></li>
+    <li><a href="map.html">Map</a></li>
+    <li><a href="about.html">About</a></li>
+  </ul>
+  <button class="nav-hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Menu">
+    <i class="ti ti-menu-2"></i>
+  </button>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero-badge"><i class="ti ti-history"></i> Scan History</div>
+  <h1>My Scan History</h1>
+  <p>All your past herb identification scans</p>
+</div>
+
+<div class="container section">
+
+  <!-- NOT LOGGED IN STATE -->
+  <div id="authGate" style="display:none">
+    <div class="auth-gate">
+      <div class="auth-gate-icon">🔒</div>
+      <h3>Sign in to view your history</h3>
+      <p>You can still use HerbID Iloilo as a guest.<br>
+         Sign up for free to save and view your scan history.</p>
+      <button class="btn btn-primary" onclick="window._openSignIn()">
+        <i class="ti ti-user"></i> Sign in or create account
+      </button>
+      <div style="margin-top:1rem">
+        <a href="identify.html" class="btn btn-outline btn-sm">
+          <i class="ti ti-camera"></i> Identify a herb as guest
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGGED IN STATE -->
+  <div id="historySection" style="display:none">
+
+    <!-- Stats -->
+    <div class="stats-bar" id="statsBar">
+      <div class="stat-item">
+        <div class="stat-num" id="statTotal">—</div>
+        <div class="stat-label">Total scans</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" id="statMatched">—</div>
+        <div class="stat-label">Matched</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" id="statTopHerb">—</div>
+        <div class="stat-label">Most scanned</div>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center">
+        <a href="identify.html" class="btn btn-primary btn-sm">
+          <i class="ti ti-camera"></i> New scan
+        </a>
+      </div>
+    </div>
+
+    <!-- Scan grid -->
+    <div class="history-grid" id="historyGrid">
+      <div class="spinner" style="grid-column:1/-1"></div>
+    </div>
+
+    <div id="emptyHistory" style="display:none;text-align:center;padding:3rem;color:var(--text-muted)">
+      <div style="font-size:48px;margin-bottom:1rem">📷</div>
+      <h3 style="font-size:17px;margin-bottom:0.5rem;color:var(--text-primary)">No scans yet</h3>
+      <p style="font-size:14px">Upload a herb photo to start your history</p>
+      <a href="identify.html" class="btn btn-primary" style="margin-top:1rem;display:inline-flex">
+        <i class="ti ti-camera"></i> Identify a herb
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <p><strong>HerbID Iloilo</strong> — BSIT Capstone Project · NISU Lemery Campus · 2024–2025</p>
+</footer>
+
+<script type="module">
+  import { onAuthChange, getCurrentUser } from './js/auth.js';
+  import { showAuthModal }                from './js/auth-modal.js';
+  import { initNavAuth }                  from './js/nav-auth.js';
+  import {
+    getFirestore, collection, query, where,
+    orderBy, getDocs, deleteDoc, doc, limit
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  import { db } from './js/auth.js';
+  import { initNavAuth } from './js/nav-auth.js';
+
+  initNavAuth();
+
+  window._openSignIn = () =>
+    showAuthModal("Sign in to view your scan history", () => location.reload());
+
+  onAuthChange(async user => {
+    if (!user) {
+      document.getElementById("authGate").style.display      = "";
+      document.getElementById("historySection").style.display = "none";
+      return;
+    }
+
+    document.getElementById("authGate").style.display      = "none";
+    document.getElementById("historySection").style.display = "";
+
+    await loadHistory(user.uid);
+  });
+
+  async function loadHistory(uid) {
+    const grid = document.getElementById("historyGrid");
+    try {
+      const q    = query(
+        collection(db, "scans"),
+        where("uid", "==", uid),
+        orderBy("scannedAt", "desc"),
+        limit(50)
+      );
+      const snap = await getDocs(q);
+      const scans = [];
+      snap.forEach(d => scans.push({ id: d.id, ...d.data() }));
+
+      // Stats
+      const matched   = scans.filter(s => s.matched);
+      const herbCount = {};
+      matched.forEach(s => {
+        herbCount[s.identifiedHerb] = (herbCount[s.identifiedHerb] || 0) + 1;
+      });
+      const topHerb = Object.entries(herbCount).sort((a,b)=>b[1]-a[1])[0]?.[0] || "—";
+
+      document.getElementById("statTotal").textContent   = scans.length;
+      document.getElementById("statMatched").textContent = matched.length;
+      document.getElementById("statTopHerb").textContent = topHerb;
+
+      if (!scans.length) {
+        grid.style.display = "none";
+        document.getElementById("emptyHistory").style.display = "";
+        return;
+      }
+
+      grid.innerHTML = scans.map(s => {
+        const date  = s.scannedAt?.toDate?.()?.toLocaleDateString("en-PH", {
+          month: "short", day: "numeric", year: "numeric",
+          hour: "2-digit", minute: "2-digit"
+        }) || "—";
+
+        const confPct   = s.confidencePercent || 0;
+        const confClass = confPct >= 85 ? "conf-high" : confPct >= 70 ? "conf-med" : "conf-low";
+        const methodBadge = s.method === "gemini"
+          ? `<span class="scan-method-badge badge-gemini">✨ Gemini</span>`
+          : `<span class="scan-method-badge badge-cnn">🔵 CNN</span>`;
+
+        const imgContent = s.imageUrl
+          ? `<img src="${s.imageUrl}" alt="${s.identifiedHerb || 'scan'}" loading="lazy">`
+          : `<span style="font-size:48px">🌿</span>`;
+
+        if (!s.matched) {
+          return `
+            <div class="scan-card">
+              <div class="scan-card-img">${imgContent}${methodBadge}</div>
+              <div class="scan-card-body">
+                <div class="scan-no-match">No herb matched</div>
+                <div class="scan-meta" style="margin-top:6px">
+                  <span class="scan-conf conf-low">Low confidence</span>
+                  <span class="scan-date">${date}</span>
+                </div>
+                <div class="scan-actions">
+                  <button onclick="deleteScan('${s.id}', this)">
+                    <i class="ti ti-trash"></i> Delete
+                  </button>
+                </div>
+              </div>
+            </div>`;
+        }
+
+        return `
+          <div class="scan-card">
+            <div class="scan-card-img">${imgContent}${methodBadge}</div>
+            <div class="scan-card-body">
+              <div class="scan-herb-name">${s.identifiedHerb}</div>
+              <div class="scan-meta">
+                <span class="scan-conf ${confClass}">${confPct.toFixed(0)}% ${s.confidenceLabel || ''}</span>
+                <span class="scan-date">${date}</span>
+              </div>
+              <div class="scan-actions">
+                <a href="herbs.html">
+                  <i class="ti ti-info-circle"></i> View herb
+                </a>
+                <button onclick="deleteScan('${s.id}', this)">
+                  <i class="ti ti-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>`;
+      }).join("");
+
+    } catch(e) {
+      grid.innerHTML = `<p style="grid-column:1/-1;color:var(--text-muted);font-size:13px">
+        Could not load history: ${e.message}</p>`;
+    }
+  }
+
+  window.deleteScan = async function(scanId, btn) {
+    if (!confirm("Delete this scan from your history?")) return;
+    try {
+      await deleteDoc(doc(db, "scans", scanId));
+      btn.closest(".scan-card").remove();
+      const total = parseInt(document.getElementById("statTotal").textContent) - 1;
+      document.getElementById("statTotal").textContent = total;
+      if (!document.querySelectorAll(".scan-card").length) {
+        document.getElementById("historyGrid").style.display  = "none";
+        document.getElementById("emptyHistory").style.display = "";
+      }
+    } catch(e) { alert("Could not delete: " + e.message); }
+  };
+</script>
+</body>
+</html>

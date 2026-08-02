@@ -378,8 +378,9 @@
 </footer>
 
 <script type="module">
-  import { db, collection, getDocs } from './js/firebase-config.js';
-
+  import { db, collection, getDocs } from './js/firebase-config.js';  // ← FIRST
+  import { initNavAuth } from './js/nav-auth.js';                      // ← SECOND
+  initNavAuth();
   function pickRandom(arr, n) {
     return [...arr].sort(() => Math.random() - 0.5).slice(0, n);
   }

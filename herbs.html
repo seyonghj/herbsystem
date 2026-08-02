@@ -289,7 +289,8 @@
 
 <script type="module">
   import { db, collection, getDocs } from './js/firebase-config.js';
-
+  import { initNavAuth } from './js/nav-auth.js';
+  initNavAuth();
   let allHerbs = [];
 
   // ── Safely normalize any field to an array ──

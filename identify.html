@@ -307,7 +307,7 @@
   <div class="loading-card">
     <div class="leaf-spinner"></div>
     <h3>Analyzing your photo…</h3>
-    <p>Running CNN model against the Iloilo herb database</p>
+    <p>Running CNN model against the Iloilo herb database. This may take up to a minute if the server was recently asleep.</p>
   </div>
 </div>
 
@@ -340,16 +340,14 @@
 </footer>
 
 <script type="module">
-  import { db, storage, collection, getDocs } from './js/firebase-config.js';
-  import {
-    ref, uploadBytes, getDownloadURL
-  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+  import { db, collection, getDocs } from './js/firebase-config.js';
   import {
     addDoc, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-  // ── IMPORTANT: Replace with your Render URL after deploying ──
-  const API_URL = "https://herbid-iloilo-api.onrender.com";
+  import { initNavAuth } from './js/nav-auth.js';
+  initNavAuth();
+  // ── HerbID Flask API, deployed on Railway ──
+  const API_URL = "https://herbid-api-production.up.railway.app";
 
   let currentFile    = null;
   let herbDatabase   = [];
@@ -366,21 +364,12 @@
   }
   loadHerbs();
 
-  // ── Upload image to Firebase Storage + save scan log to Firestore ──
-  async function saveToFirebase(file, result) {
+  // ── Save prediction metadata only to Firestore scan history ──
+  // No image is uploaded or stored anywhere — just the identification
+  // result and a timestamp.
+  async function saveScanHistory(result) {
     try {
-      // 1. Upload image to Firebase Storage under scans/
-      const timestamp  = Date.now();
-      const ext        = file.name.split('.').pop() || 'jpg';
-      const filename   = `scans/${timestamp}_${Math.random().toString(36).slice(2,8)}.${ext}`;
-      const storageRef = ref(storage, filename);
-
-      const snapshot   = await uploadBytes(storageRef, file);
-      const imageUrl   = await getDownloadURL(snapshot.ref);
-
-      // 2. Save scan record to Firestore scans collection
       await addDoc(collection(db, 'scans'), {
-        imageUrl,
         matched:           result.matched,
         identifiedHerb:    result.matched ? result.localName : null,
         confidence:        result.confidence       || null,
@@ -388,14 +377,14 @@
         confidenceLabel:   result.confidenceLabel   || null,
         top3:              result.top3              || [],
         scannedAt:         serverTimestamp(),
-        filename,
       });
 
-      console.log('✓ Scan saved to Firebase');
-      showToast('📸 Photo saved to database', 'ok');
+      console.log('✓ Scan history saved to Firebase');
     } catch(e) {
-      console.warn('Could not save to Firebase:', e.message);
-      showToast('Could not save photo: ' + e.message, 'error');
+      console.warn('Could not save scan history:', e.message);
+      // Non-fatal: the identification result is already shown to the
+      // user, so a scan-history logging failure shouldn't surface as
+      // an error toast.
     }
   }
 
@@ -457,7 +446,7 @@
     if (file && file.type.startsWith('image/')) loadFile(file);
   };
 
-  // ── IDENTIFY — calls your Flask API on Render ──
+  // ── IDENTIFY — calls your Flask API on Railway ──
   window.identifyHerb = async function() {
     if (!currentFile) return;
 
@@ -469,30 +458,58 @@
       const formData = new FormData();
       formData.append('image', currentFile);
 
-      const response = await fetch(`${API_URL}/identify`, {
-        method: 'POST',
-        body: formData
-      });
+      // Give the server plenty of room to respond before giving up
+      // (model loading on first request can take a little while),
+      // and let the user know while waiting.
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 90000); // 90s
+
+      let response;
+      try {
+        response = await fetch(`${API_URL}/identify`, {
+          method: 'POST',
+          body: formData,
+          signal: controller.signal
+        });
+      } finally {
+        clearTimeout(timeoutId);
+      }
 
       if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || `Server error ${response.status}`);
+        let message = `Server error ${response.status}`;
+        try {
+          const err = await response.json();
+          message = err.error || message;
+        } catch (_) {
+          // Response wasn't JSON (e.g. a proxy/error page from Render) — fall back to status text
+        }
+        throw new Error(message);
       }
 
       const result = await response.json();
 
-      // ── Save image + result to Firebase ──
-      await saveToFirebase(currentFile, result);
+      // ── Stop the spinner as soon as we have a response ──
+      document.getElementById('loadingPanel').classList.remove('active');
+      document.getElementById('identifyBtn').disabled = false;
 
       showResult(result);
 
+      // ── Log prediction metadata to scan history (no image stored) ──
+      // Fired after the result is already shown, so a slow/failed
+      // Firestore write never delays or blocks the UI.
+      saveScanHistory(result);
+
     } catch(e) {
       console.error('API error:', e);
-      showError(e.message);
-    }
+      const msg = e.name === 'AbortError'
+        ? 'The server took too long to respond. It may still be loading the model — please try again.'
+        : (e.message || 'Could not reach the identification server.');
 
-    document.getElementById('loadingPanel').classList.remove('active');
-    document.getElementById('identifyBtn').disabled = false;
+      document.getElementById('loadingPanel').classList.remove('active');
+      document.getElementById('identifyBtn').disabled = false;
+
+      showError(msg);
+    }
   };
 
   // ── Render result ──
@@ -530,7 +547,7 @@
           <div class="match-names">
             <h2>${result.localName}</h2>
             <p class="match-english">${herb?.englishName || ''}</p>
-            <p>${herb?.scientificName || ''}</p>
+            <p>${herb?.scientificName || result.scientificName || ''}</p>
           </div>
           <div class="match-confidence" style="background:${confColor}">
             ${result.confidencePercent}% ${result.confidenceLabel}

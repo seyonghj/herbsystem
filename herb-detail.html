@@ -191,7 +191,8 @@
 
 <script type="module">
   import { db, doc, getDoc } from './js/firebase-config.js';
-
+  import { initNavAuth } from './js/nav-auth.js';
+  initNavAuth();
   const params = new URLSearchParams(location.search);
   const id = params.get('id');
 

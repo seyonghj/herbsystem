@@ -310,7 +310,8 @@
   import {
     doc, updateDoc, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
+  import { initNavAuth } from './js/nav-auth.js';
+  initNavAuth();
   // ── Lemery, Iloilo — correct coordinates (11.227°N, 122.925°E) ──
   const LEMERY_CENTER = [11.227, 122.925];
 
