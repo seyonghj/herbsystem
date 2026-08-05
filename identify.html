@@ -345,6 +345,7 @@
     addDoc, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { initNavAuth } from './js/nav-auth.js';
+  import { getCurrentUser } from './js/auth.js';
   initNavAuth();
   // ── HerbID Flask API, deployed on Railway ──
   const API_URL = "https://herbid-api-production.up.railway.app";
@@ -369,7 +370,9 @@
   // result and a timestamp.
   async function saveScanHistory(result) {
     try {
+      const user = getCurrentUser();
       await addDoc(collection(db, 'scans'), {
+        uid:               user?.uid || null,
         matched:           result.matched,
         identifiedHerb:    result.matched ? result.localName : null,
         confidence:        result.confidence       || null,

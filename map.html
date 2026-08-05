@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
   <style>
     .map-layout {
       display: grid;
@@ -15,17 +14,23 @@
       height: calc(100vh - var(--nav-h));
     }
 
+    /* ── MODE BANNER (admin/user indicator) ── */
+    .mode-banner {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 1.25rem; font-size: 12px; font-weight: 500;
+      border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .mode-banner.admin { background: #fef3c7; color: #92400e; }
+    .mode-banner.user  { background: #f0faf5; color: #065f46; }
+    .mode-banner i { font-size: 14px; }
+
     /* ── SIDEBAR ── */
     .map-sidebar {
-      background: var(--white);
-      border-right: 1px solid var(--border);
-      display: flex; flex-direction: column;
-      overflow: hidden;
+      background: var(--white); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; overflow: hidden;
     }
     .sidebar-header {
-      padding: 1rem 1.25rem;
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
+      padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); flex-shrink: 0;
     }
     .sidebar-title {
       font-size: 14px; font-weight: 600; color: var(--green-dark);
@@ -47,11 +52,8 @@
       outline: none; border-color: var(--green-main);
       box-shadow: 0 0 0 3px rgba(34,160,107,0.1);
     }
-
-    /* filter pills */
     .filter-pills {
-      padding: 0.75rem 1.25rem;
-      display: flex; gap: 6px; flex-wrap: wrap;
+      padding: 0.75rem 1.25rem; display: flex; gap: 6px; flex-wrap: wrap;
       border-bottom: 1px solid var(--border); flex-shrink: 0;
     }
     .pill {
@@ -63,7 +65,7 @@
     .pill.active { background: var(--green-main); color: #fff; border-color: var(--green-main); }
     .pill:hover:not(.active) { background: var(--green-pale); color: var(--green-dark); border-color: var(--green-main); }
 
-    /* herb list */
+    /* ── HERB LIST ── */
     .herb-list { overflow-y: auto; flex: 1; padding: 0.5rem 0; }
     .herb-list-item {
       display: flex; align-items: center; gap: 10px;
@@ -79,6 +81,8 @@
     .herb-list-sci { font-size: 11px; color: var(--text-muted); font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .herb-list-loc { font-size: 10px; color: var(--text-light); margin-top: 1px; display: flex; align-items: center; gap: 3px; }
     .herb-list-loc i { font-size: 11px; color: var(--green-main); }
+
+    /* Pin button — admin only */
     .pin-btn {
       flex-shrink: 0; background: none; border: 1.5px solid var(--border);
       border-radius: 8px; padding: 5px 8px; cursor: pointer;
@@ -90,10 +94,20 @@
     .pin-btn.pinned { background: var(--green-main); border-color: var(--green-main); color: #fff; }
     .pin-btn i { font-size: 13px; }
 
+    /* No-pin indicator for user mode */
+    .pin-status {
+      flex-shrink: 0; font-size: 10px; font-weight: 500;
+      padding: 3px 8px; border-radius: 99px;
+      display: flex; align-items: center; gap: 3px;
+    }
+    .pin-status.pinned   { background: #d1fae5; color: #065f46; }
+    .pin-status.unpinned { background: #f3f4f6; color: #9ca3af; }
+    .pin-status i { font-size: 11px; }
+
     /* MAP */
     #map { width: 100%; height: 100%; z-index: 1; }
 
-    /* CUSTOM MARKER */
+    /* MARKERS */
     .herb-marker {
       width: 36px; height: 36px; border-radius: 50%;
       background: var(--green-main); border: 3px solid #fff;
@@ -106,33 +120,32 @@
       background: var(--green-dark); transform: scale(1.2);
       box-shadow: 0 4px 14px rgba(0,0,0,0.35);
     }
+    .herb-marker.admin-marker { border-color: #fbbf24; box-shadow: 0 2px 8px rgba(251,191,36,0.4); }
 
-    /* PINNING MODE banner */
+    /* PIN MODE BANNER */
     .pin-mode-banner {
       position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-      z-index: 500; background: #0a4a35; color: #fff;
+      z-index: 500; background: #92400e; color: #fff;
       padding: 10px 18px; border-radius: 99px;
       font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif;
       box-shadow: 0 4px 16px rgba(0,0,0,0.25);
       display: none; align-items: center; gap: 8px; white-space: nowrap;
     }
     .pin-mode-banner.active { display: flex; }
-    .pin-mode-banner i { font-size: 16px; color: #7eebb5; }
+    .pin-mode-banner i { font-size: 16px; color: #fde68a; }
     .pin-cancel {
-      margin-left: 10px; background: rgba(255,255,255,0.15);
+      margin-left: 10px; background: rgba(255,255,255,0.2);
       border: none; color: #fff; padding: 3px 10px; border-radius: 99px;
       font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif;
     }
-    .pin-cancel:hover { background: rgba(255,255,255,0.25); }
+    .pin-cancel:hover { background: rgba(255,255,255,0.3); }
 
     /* POPUP */
     .leaflet-popup-content-wrapper {
-      border-radius: 14px !important;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important;
-      padding: 0 !important; overflow: hidden;
-      font-family: 'DM Sans', sans-serif !important;
+      border-radius: 14px !important; box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important;
+      padding: 0 !important; overflow: hidden; font-family: 'DM Sans', sans-serif !important;
     }
-    .leaflet-popup-content { margin: 0 !important; width: 240px !important; }
+    .leaflet-popup-content { margin: 0 !important; width: 250px !important; }
     .leaflet-popup-tip-container { margin-top: -1px; }
     .popup-header {
       background: var(--green-dark); padding: 12px 14px;
@@ -145,7 +158,7 @@
     .popup-row { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; display: flex; gap: 6px; }
     .popup-row i { color: var(--green-main); font-size: 13px; flex-shrink: 0; margin-top: 1px; }
     .popup-row span { color: var(--text-primary); }
-    .popup-coords { font-size: 11px; color: var(--text-light); font-family: monospace; margin-bottom: 8px; }
+    .popup-coords { font-size: 10px; color: var(--text-light); font-family: monospace; margin-bottom: 8px; }
     .popup-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
     .popup-tag { font-size: 10px; padding: 2px 8px; border-radius: 99px; background: var(--green-pale); color: var(--green-dark); font-weight: 500; }
     .popup-actions { display: flex; gap: 6px; }
@@ -159,15 +172,19 @@
     .popup-btn-remove {
       padding: 8px 10px; background: #fee2e2; color: #991b1b; border: none;
       border-radius: var(--radius-sm); font-size: 12px; font-weight: 500;
-      font-family: 'DM Sans', sans-serif; cursor: pointer;
-      transition: background 0.15s;
+      font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s;
     }
     .popup-btn-remove:hover { background: #fecaca; }
+    .popup-admin-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 10px; background: #fef3c7; color: #92400e;
+      padding: 2px 7px; border-radius: 99px; margin-bottom: 8px;
+    }
 
-    /* saving indicator */
+    /* saving dot */
     .saving-dot {
       display: none; width: 8px; height: 8px; border-radius: 50%;
-      background: var(--green-main); animation: pulse 1s infinite;
+      background: #f59e0b; animation: pulse 1s infinite;
     }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
@@ -176,57 +193,83 @@
       display: inline-flex; align-items: center; justify-content: center;
       min-width: 20px; height: 20px; padding: 0 5px;
       background: var(--green-main); color: #fff;
-      font-size: 11px; font-weight: 600; border-radius: 99px;
-      margin-left: auto;
+      font-size: 11px; font-weight: 600; border-radius: 99px; margin-left: auto;
     }
 
-    /* map cursor when pinning */
     .map-layout.pinning #map { cursor: crosshair; }
 
-    /* Lemery badge */
-    .lemery-badge {
-      position: absolute; bottom: 14px; left: 14px; z-index: 400;
-      background: rgba(10,74,53,0.88); color: #fff;
-      font-size: 11px; font-weight: 600; font-family: 'DM Sans', sans-serif;
-      padding: 5px 11px; border-radius: 99px;
-      display: flex; align-items: center; gap: 5px;
-      pointer-events: none; backdrop-filter: blur(4px);
+    /* LEGEND */
+    .map-legend {
+      position: absolute; bottom: 24px; right: 12px; z-index: 400;
+      background: rgba(255,255,255,0.95); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 10px 14px;
+      font-size: 12px; font-family: 'DM Sans', sans-serif;
+      box-shadow: var(--shadow-md);
     }
-    .lemery-badge i { font-size: 13px; color: #7eebb5; }
+    .legend-title { font-weight: 600; color: var(--green-dark); margin-bottom: 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .legend-row { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; color: var(--text-muted); }
+    .legend-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.2); flex-shrink: 0; }
 
     /* MOBILE */
     @media (max-width: 768px) {
       .map-layout { grid-template-columns: 1fr; position: relative; }
       .map-sidebar {
         position: absolute; bottom: 0; left: 0; right: 0; z-index: 400;
-        height: 45vh; border-right: none;
-        border-top: 1px solid var(--border);
-        border-radius: 20px 20px 0 0;
-        box-shadow: 0 -4px 24px rgba(0,0,0,0.12);
-        transform: translateY(100%);
-        transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+        height: 45vh; border-right: none; border-top: 1px solid var(--border);
+        border-radius: 20px 20px 0 0; box-shadow: 0 -4px 24px rgba(0,0,0,0.12);
+        transform: translateY(100%); transition: transform 0.3s cubic-bezier(.4,0,.2,1);
       }
       .map-sidebar.open { transform: translateY(0); }
       #map { height: calc(100vh - var(--nav-h)); }
+      .map-toggle-btn { display: flex !important; }
       .map-sidebar::before {
         content: ''; display: block; width: 36px; height: 4px;
-        background: var(--border); border-radius: 2px;
-        margin: 8px auto 4px; flex-shrink: 0;
+        background: var(--border); border-radius: 2px; margin: 8px auto 4px; flex-shrink: 0;
       }
+      .map-legend { bottom: 70px; }
     }
-
     .map-toggle-btn {
-      display: none !important;
-      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+      display: none !important; position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
       z-index: 500; background: var(--green-dark); color: #fff;
       padding: 10px 20px; border-radius: 99px; border: none;
       font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif;
-      cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-      align-items: center; gap: 7px;
+      cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.25); align-items: center; gap: 7px;
     }
-    @media (max-width: 768px) {
-      .map-toggle-btn { display: flex !important; }
+    @media (max-width: 768px) { .map-toggle-btn { display: flex !important; } }
+    /* GPS button */
+    .map-gps-btn {
+      position: fixed; right: 1.5rem; bottom: 1.5rem; z-index: 600;
+      width: 48px; height: 48px; border-radius: 12px; border: none;
+      background: #fff; box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+      display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 18px; color: var(--green-dark);
     }
+    .map-gps-btn.active { background: var(--green-main); color: #fff; }
+    .user-gps-marker { width: 14px; height: 14px; border-radius: 50%; background: #2563eb; box-shadow: 0 2px 10px rgba(37,99,235,0.35); border: 3px solid #fff; }
+    .route-panel {
+      position: absolute; left: 1.25rem; bottom: 1.25rem; z-index: 500;
+      width: min(360px, calc(100% - 3rem)); max-height: 38vh;
+      background: rgba(255,255,255,0.95); border: 1px solid var(--border);
+      border-radius: var(--radius-md); box-shadow: var(--shadow-md);
+      overflow: hidden; display: none; font-family: 'DM Sans', sans-serif;
+    }
+    .route-panel.active { display: block; }
+    .route-panel-header {
+      padding: 10px 14px; background: var(--green-dark); color: #fff;
+      font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: space-between;
+    }
+    .route-panel-body {
+      padding: 10px 14px; overflow-y: auto; max-height: calc(38vh - 44px);
+    }
+    .route-step { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 10px; }
+    .route-step:last-child { margin-bottom: 0; }
+    .route-step-index {
+      width: 20px; height: 20px; flex-shrink: 0; background: var(--green-main); color: #fff;
+      border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700;
+    }
+    .route-step-text { flex: 1; font-size: 12px; color: var(--text-primary); line-height: 1.4; }
+    .route-step-distance { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
   </style>
 </head>
 <body>
@@ -256,6 +299,13 @@
 
   <!-- SIDEBAR -->
   <aside class="map-sidebar" id="mapSidebar">
+
+    <!-- Mode banner -->
+    <div class="mode-banner user" id="modeBanner">
+      <i class="ti ti-map-2"></i>
+      <span id="modeBannerText">Viewing herb locations in Lemery, Iloilo</span>
+    </div>
+
     <div class="sidebar-header">
       <div class="sidebar-title">
         <i class="ti ti-map-pin"></i> Herb Locations
@@ -268,7 +318,7 @@
       </div>
     </div>
 
-    <div class="filter-pills" id="filterPills">
+    <div class="filter-pills">
       <div class="pill active" onclick="setFilter('')">All</div>
       <div class="pill" onclick="setFilter('fever')">Fever</div>
       <div class="pill" onclick="setFilter('wound')">Wound</div>
@@ -283,138 +333,135 @@
     </div>
   </aside>
 
-  <!-- MAP -->
-  <div style="position:relative;flex:1">
+  <!-- MAP AREA -->
+  <div style="position:relative;flex:1;overflow:hidden">
     <div id="map"></div>
-    <div class="lemery-badge">
-      <i class="ti ti-map-pin"></i> Lemery, Iloilo
-    </div>
+
+    <!-- Admin pin mode banner -->
     <div class="pin-mode-banner" id="pinBanner">
       <i class="ti ti-map-pin"></i>
-      <span id="pinBannerText">Click anywhere on the map to pin the location</span>
+      <span id="pinBannerText">Click on the map to pin the herb location</span>
       <button class="pin-cancel" onclick="cancelPinMode()">Cancel</button>
     </div>
-  </div>
 
+    <!-- Legend -->
+    <div class="map-legend">
+      <div class="legend-title">Legend</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#22a06b"></div><span>Herb pinned</span></div>
+      <div class="legend-row"><div class="legend-dot" style="background:#0a4a35"></div><span>Selected</span></div>
+      <div class="legend-row" id="adminLegendRow" style="display:none">
+        <div class="legend-dot" style="background:#22a06b;border-color:#fbbf24"></div>
+        <span>Admin pin</span>
+      </div>
+    </div>
+    <div class="route-panel" id="routePanel">
+      <div class="route-panel-header">
+        <span>Route to selected herb</span>
+        <button onclick="clearRoute()" style="border:none;background:none;color:#fff;cursor:pointer;font-size:14px;">✕</button>
+      </div>
+      <div class="route-panel-body" id="routeSteps"></div>
+    </div>
+  </div>
 </div>
 
 <!-- Mobile toggle -->
-<button class="map-toggle-btn" id="toggleBtn" onclick="toggleSidebar()">
+<button class="map-toggle-btn" onclick="toggleSidebar()">
   <i class="ti ti-list"></i> <span id="toggleLabel">Show herb list</span>
+</button>
+
+<!-- GPS button -->
+<button id="gpsBtn" class="map-gps-btn" title="Center map on my location" onclick="locateMe()">
+  <i class="ti ti-compass"></i>
 </button>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script type="module">
-  import { db, collection, getDocs } from './js/firebase-config.js';
+  import { initNavAuth }   from './js/nav-auth.js';
+  import { onAuthChange }  from './js/auth.js';
+  import { db, collection, getDocs }
+    from './js/firebase-config.js';
   import {
     doc, updateDoc, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-  import { initNavAuth } from './js/nav-auth.js';
-  initNavAuth();
-  // ── Lemery, Iloilo — correct coordinates (11.227°N, 122.925°E) ──
-  const LEMERY_CENTER = [11.227, 122.925];
 
-  // ── Bounding box around Lemery municipality ──
-  const LEMERY_BOUNDS = L.latLngBounds(
-    [11.130, 122.820],   // SW corner
-    [11.330, 123.020]    // NE corner
-  );
+  initNavAuth();
+
+  // ── ADMIN EMAIL ──
+  const ADMIN_EMAIL = "marklouiepanares7@gmail.com";
+
+  // ── Map center: Lemery, Iloilo ──
+  const LEMERY = [11.23, 122.93];
 
   const map = L.map('map', {
-    center: LEMERY_CENTER,
-    zoom: 13,
-    minZoom: 11,
-    maxZoom: 17,
-    maxBounds: LEMERY_BOUNDS,
-    maxBoundsViscosity: 1.0,
+    center: LEMERY, zoom: 13, minZoom: 10, maxZoom: 18,
+    maxBounds: L.latLngBounds([10.8, 122.5], [11.6, 123.3]),
+    maxBoundsViscosity: 0.85,
   });
 
-  // ── Satellite tile layer (Esri — no API key required) ──
-  L.tileLayer(
-    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    {
-      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics',
-      maxZoom: 17,
-    }
-  ).addTo(map);
-
-  // ── Hardcoded Lemery, Iloilo boundary polygon ──
-  // Approximate boundary based on the correct coordinates (11.23°N, 122.93°E)
-  // Replace these with the exact OSM export if you have it
-  const LEMERY_BORDER = [
-    [11.330, 122.880],
-    [11.320, 122.920],
-    [11.310, 122.960],
-    [11.295, 122.990],
-    [11.275, 123.010],
-    [11.250, 123.018],
-    [11.225, 123.012],
-    [11.200, 122.998],
-    [11.178, 122.975],
-    [11.162, 122.948],
-    [11.155, 122.918],
-    [11.158, 122.888],
-    [11.168, 122.858],
-    [11.185, 122.833],
-    [11.208, 122.820],
-    [11.235, 122.818],
-    [11.262, 122.825],
-    [11.285, 122.840],
-    [11.305, 122.858],
-    [11.320, 122.870],
-    [11.330, 122.880],
-  ];
-
-  // Outer glow ring
-  L.polygon(LEMERY_BORDER, {
-    color: '#22a06b',
-    weight: 10,
-    opacity: 0.2,
-    fill: false,
-    lineJoin: 'round',
-    lineCap: 'round',
-    smoothFactor: 2,
-    interactive: false,
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 19,
   }).addTo(map);
 
-  // Main border line
-  const borderLayer = L.polygon(LEMERY_BORDER, {
-    color: '#22a06b',
-    weight: 3,
-    opacity: 0.95,
-    fillColor: '#22a06b',
-    fillOpacity: 0.08,
-    lineJoin: 'round',
-    lineCap: 'round',
-    smoothFactor: 2,
-    interactive: false,
-  }).addTo(map);
-
-  // Fit map to border bounds
-  map.fitBounds(borderLayer.getBounds(), { padding: [32, 32], maxZoom: 13 });
-
+  // ── State ──
   let allHerbs      = [];
   let markers       = {};
   let activeFilter  = '';
   let activeId      = null;
   let pinningHerbId = null;
+  let isAdmin       = false;
+  let _userLocationLatLng = null;
+  let _userLocationMarker = null;
+  let _userLocationCircle = null;
+  let _routeLayer = null;
+
+  // ── Watch auth — check if admin ──
+  onAuthChange(user => {
+    isAdmin = !!(user && user.email === ADMIN_EMAIL);
+    updateModeUI();
+    // Re-render list to show/hide pin buttons
+    if (allHerbs.length) renderList(allHerbs);
+  });
+
+  function updateModeUI() {
+    const banner     = document.getElementById('modeBanner');
+    const bannerText = document.getElementById('modeBannerText');
+    const adminLegend = document.getElementById('adminLegendRow');
+
+    if (isAdmin) {
+      banner.className      = 'mode-banner admin';
+      bannerText.innerHTML  = '<i class="ti ti-shield-check" style="font-size:13px"></i> Admin mode — you can add and move pins';
+      adminLegend.style.display = '';
+    } else {
+      banner.className      = 'mode-banner user';
+      bannerText.innerHTML  = '<i class="ti ti-map-2" style="font-size:13px"></i> Viewing herb locations in Lemery, Iloilo';
+      adminLegend.style.display = 'none';
+    }
+  }
 
   // ── Icon factory ──
-  function makeIcon(emoji, selected = false) {
+  function makeIcon(emoji, selected = false, admin = false) {
     return L.divIcon({
       className: '',
-      html: `<div class="herb-marker${selected ? ' selected' : ''}">${emoji || '🌿'}</div>`,
-      iconSize: [36, 36], iconAnchor: [18, 18], popupAnchor: [0, -20],
+      html: `<div class="herb-marker${selected ? ' selected' : ''}${admin ? ' admin-marker' : ''}">${emoji || '🌿'}</div>`,
+      iconSize: [36, 36], iconAnchor: [18, 18], popupAnchor: [0, -22],
     });
   }
 
-  // ── Popup HTML ──
+  // ── Popup HTML — different for admin vs user ──
   function popupHTML(h) {
-    const tags   = (h.usesTags || []).slice(0, 3).map(t => `<span class="popup-tag">${t}</span>`).join('');
+    const tags   = (h.usesTags || h.useTags || []).slice(0, 3)
+      .map(t => `<span class="popup-tag">${t}</span>`).join('');
     const coords = h.lat && h.lng
-      ? `<div class="popup-coords">📍 ${h.lat.toFixed(5)}, ${h.lng.toFixed(5)}</div>`
-      : '';
+      ? `<div class="popup-coords">📍 ${h.lat.toFixed(5)}, ${h.lng.toFixed(5)}</div>` : '';
+    const adminBadge = isAdmin
+      ? `<div class="popup-admin-badge"><i class="ti ti-shield-check" style="font-size:10px"></i> Admin view</div>` : '';
+    const removeBtn  = isAdmin
+      ? `<button class="popup-btn-remove" onclick="window._removePin('${h.id}')" title="Remove pin">
+           <i class="ti ti-trash" style="font-size:13px"></i>
+         </button>` : '';
+
     return `
       <div class="popup-header">
         <div class="popup-emoji">${h.emoji || '🌿'}</div>
@@ -424,28 +471,25 @@
         </div>
       </div>
       <div class="popup-body">
+        ${adminBadge}
         <div class="popup-row"><i class="ti ti-tag"></i><span>${h.englishName || '—'}</span></div>
         <div class="popup-row"><i class="ti ti-map-pin"></i><span>${h.location || 'Lemery, Iloilo'}</span></div>
         ${coords}
         <div class="popup-tags">${tags}</div>
         <div class="popup-actions">
           <a class="popup-btn" href="herb-detail.html?id=${h.id}">View details →</a>
-          <button class="popup-btn-remove" onclick="window._removePin('${h.id}')" title="Remove pin">
-            <i class="ti ti-trash" style="font-size:14px"></i>
-          </button>
+          ${removeBtn}
         </div>
       </div>`;
   }
 
-  // ── Add or update marker on map ──
+  // ── Place marker ──
   function placeMarker(h) {
     if (!h.lat || !h.lng) return;
     if (markers[h.id]) map.removeLayer(markers[h.id].marker);
-
-    const marker = L.marker([h.lat, h.lng], { icon: makeIcon(h.emoji) })
+    const marker = L.marker([h.lat, h.lng], { icon: makeIcon(h.emoji, false, isAdmin) })
       .addTo(map)
-      .bindPopup(popupHTML(h), { maxWidth: 260 });
-
+      .bindPopup(popupHTML(h), { maxWidth: 270 });
     marker.on('click', () => selectHerb(h.id));
     marker.on('popupclose', () => { if (activeId === h.id) deselectHerb(); });
     markers[h.id] = { marker, herb: h };
@@ -453,31 +497,38 @@
 
   // ── Select herb ──
   function selectHerb(id) {
-    if (activeId && markers[activeId])
-      markers[activeId].marker.setIcon(makeIcon(markers[activeId].herb.emoji, false));
-
+    if (activeId && markers[activeId]) {
+      markers[activeId].marker.setIcon(makeIcon(markers[activeId].herb.emoji, false, isAdmin));
+    }
     activeId = id;
     if (markers[id]) {
       const { marker, herb } = markers[id];
-      marker.setIcon(makeIcon(herb.emoji, true));
+      marker.setIcon(makeIcon(herb.emoji, true, isAdmin));
       map.setView(marker.getLatLng(), 15, { animate: true });
+      // Update popup with current admin state
+      marker.setPopupContent(popupHTML(herb));
       marker.openPopup();
+      showRouteToHerb(herb);
+    } else {
+      clearRoute();
     }
     document.querySelectorAll('.herb-list-item').forEach(el =>
       el.classList.toggle('active', el.dataset.id === id));
-    const el = document.querySelector(`.herb-list-item[data-id="${id}"]`);
-    if (el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    document.querySelector(`.herb-list-item[data-id="${id}"]`)
+      ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
 
   function deselectHerb() {
-    if (activeId && markers[activeId])
-      markers[activeId].marker.setIcon(makeIcon(markers[activeId].herb.emoji, false));
+    if (activeId && markers[activeId]) {
+      markers[activeId].marker.setIcon(makeIcon(markers[activeId].herb.emoji, false, isAdmin));
+    }
     activeId = null;
     document.querySelectorAll('.herb-list-item').forEach(el => el.classList.remove('active'));
   }
 
-  // ── START PIN MODE ──
+  // ── PIN MODE (admin only) ──
   window._startPin = function(herbId) {
+    if (!isAdmin) return;
     pinningHerbId = herbId;
     const herb = allHerbs.find(h => h.id === herbId);
     document.getElementById('pinBanner').classList.add('active');
@@ -487,65 +538,58 @@
     map.closePopup();
   };
 
-  // ── CANCEL PIN MODE ──
   window.cancelPinMode = function() {
     pinningHerbId = null;
     document.getElementById('pinBanner').classList.remove('active');
     document.getElementById('mapLayout').classList.remove('pinning');
   };
 
-  // ── MAP CLICK → place pin ──
+  // ── MAP CLICK → only admin can pin ──
   map.on('click', async function(e) {
-    if (!pinningHerbId) return;
-
+    if (!pinningHerbId || !isAdmin) return;
     const { lat, lng } = e.latlng;
     const herbId = pinningHerbId;
     cancelPinMode();
 
     const herb = allHerbs.find(h => h.id === herbId);
     if (!herb) return;
-    herb.lat = lat;
-    herb.lng = lng;
-
+    herb.lat = lat; herb.lng = lng;
     placeMarker(herb);
     selectHerb(herbId);
 
     const btn = document.querySelector(`.pin-btn[data-id="${herbId}"]`);
-    if (btn) {
-      btn.classList.add('pinned');
-      btn.innerHTML = `<i class="ti ti-map-pin-filled"></i> Pinned`;
-    }
+    if (btn) { btn.classList.add('pinned'); btn.innerHTML = `<i class="ti ti-map-pin-filled"></i> Pinned`; }
+
+    const locEl = document.querySelector(`.herb-list-item[data-id="${herbId}"] .herb-list-loc`);
+    if (locEl) locEl.innerHTML = `<i class="ti ti-map-pin"></i>${lat.toFixed(4)}, ${lng.toFixed(4)}`;
 
     showSaving(true);
     try {
-      await updateDoc(doc(db, 'herbs', herbId), { lat, lng, pinnedAt: serverTimestamp() });
-      showToast(`📍 ${herb.localName} pinned on the map!`);
-    } catch(err) {
-      showToast('Could not save location: ' + err.message, 'error');
-    }
+      await updateDoc(doc(db, 'herbs', herbId), { lat, lng, pinnedAt: serverTimestamp(), pinnedBy: ADMIN_EMAIL });
+      showToast(`📍 ${herb.localName} pinned!`);
+    } catch(err) { showToast('Could not save: ' + err.message, 'error'); }
     showSaving(false);
   });
 
-  // ── REMOVE PIN ──
+  // ── REMOVE PIN (admin only) ──
   window._removePin = async function(herbId) {
+    if (!isAdmin) return;
     const herb = allHerbs.find(h => h.id === herbId);
-    if (!herb) return;
-    if (!confirm(`Remove pin for "${herb.localName}"?`)) return;
-
+    if (!herb || !confirm(`Remove pin for "${herb.localName}"?`)) return;
     map.closePopup();
     if (markers[herbId]) { map.removeLayer(markers[herbId].marker); delete markers[herbId]; }
     herb.lat = null; herb.lng = null;
 
     const btn = document.querySelector(`.pin-btn[data-id="${herbId}"]`);
     if (btn) { btn.classList.remove('pinned'); btn.innerHTML = `<i class="ti ti-map-pin"></i> Pin`; }
+    const locEl = document.querySelector(`.herb-list-item[data-id="${herbId}"] .herb-list-loc`);
+    if (locEl) locEl.innerHTML = `<i class="ti ti-map-pin"></i>No location yet`;
 
     showSaving(true);
     try {
       await updateDoc(doc(db, 'herbs', herbId), { lat: null, lng: null });
       showToast(`Pin removed for ${herb.localName}`);
-    } catch(err) {
-      showToast('Could not remove pin: ' + err.message, 'error');
-    }
+    } catch(err) { showToast('Could not remove: ' + err.message, 'error'); }
     showSaving(false);
   };
 
@@ -558,6 +602,19 @@
     }
     list.innerHTML = herbs.map(h => {
       const isPinned = !!(h.lat && h.lng);
+
+      // Admin: show Pin button | User: show pinned/not-pinned badge
+      const rightEl = isAdmin
+        ? `<button class="pin-btn ${isPinned ? 'pinned' : ''}" data-id="${h.id}"
+              onclick="event.stopPropagation(); window._startPin('${h.id}')"
+              title="${isPinned ? 'Re-pin location' : 'Pin on map'}">
+             <i class="ti ti-map-pin${isPinned ? '-filled' : ''}"></i>
+             ${isPinned ? 'Pinned' : 'Pin'}
+           </button>`
+        : isPinned
+          ? `<span class="pin-status pinned"><i class="ti ti-map-pin-filled"></i> On map</span>`
+          : `<span class="pin-status unpinned"><i class="ti ti-map-pin-off"></i> No pin</span>`;
+
       return `
         <div class="herb-list-item" data-id="${h.id}" onclick="window._selectHerb('${h.id}')">
           <div class="herb-list-emoji">${h.emoji || '🌿'}</div>
@@ -569,12 +626,7 @@
               ${isPinned ? `${h.lat.toFixed(4)}, ${h.lng.toFixed(4)}` : 'No location yet'}
             </div>
           </div>
-          <button class="pin-btn ${isPinned ? 'pinned' : ''}" data-id="${h.id}"
-            onclick="event.stopPropagation(); window._startPin('${h.id}')"
-            title="${isPinned ? 'Re-pin location' : 'Pin location on map'}">
-            <i class="ti ti-map-pin${isPinned ? '-filled' : ''}"></i>
-            ${isPinned ? 'Pinned' : 'Pin'}
-          </button>
+          ${rightEl}
         </div>`;
     }).join('');
   }
@@ -589,7 +641,7 @@
   window.filterList = function() { applyFilters(); };
 
   function applyFilters() {
-    const q = document.getElementById('sidebarSearch').value.toLowerCase();
+    const q        = document.getElementById('sidebarSearch').value.toLowerCase();
     const filtered = allHerbs.filter(h => {
       const matchQ = !q ||
         (h.localName || '').toLowerCase().includes(q) ||
@@ -599,9 +651,9 @@
       return matchQ && matchF;
     });
     Object.entries(markers).forEach(([id, { marker }]) => {
-      const visible = filtered.find(h => h.id === id);
-      if (visible) { if (!map.hasLayer(marker)) marker.addTo(map); }
-      else          { if (map.hasLayer(marker))  map.removeLayer(marker); }
+      const vis = filtered.find(h => h.id === id);
+      if (vis) { if (!map.hasLayer(marker)) marker.addTo(map); }
+      else      { if (map.hasLayer(marker))  map.removeLayer(marker); }
     });
     renderList(filtered);
     document.getElementById('countBadge').textContent = filtered.length;
@@ -609,7 +661,7 @@
 
   window._selectHerb = selectHerb;
 
-  // ── Load herbs from Firestore ──
+  // ── Load herbs ──
   async function loadMap() {
     try {
       const snap = await getDocs(collection(db, 'herbs'));
@@ -618,7 +670,6 @@
       allHerbs.forEach(h => { if (h.lat && h.lng) placeMarker(h); });
       renderList(allHerbs);
       document.getElementById('countBadge').textContent = allHerbs.length;
-
       const herbId = new URLSearchParams(location.search).get('herb');
       if (herbId) setTimeout(() => selectHerb(herbId), 400);
     } catch(e) {
@@ -628,34 +679,146 @@
         </div>`;
     }
   }
-  loadMap();
+  loadMap().then(() => {
+    locateMe();
+  });
 
   // ── Helpers ──
   function showSaving(on) {
     document.getElementById('savingDot').style.display = on ? 'block' : 'none';
   }
-
   function showToast(msg, type = 'ok') {
     let wrap = document.getElementById('toastWrap');
     if (!wrap) {
       wrap = document.createElement('div');
       wrap.id = 'toastWrap';
-      wrap.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;z-index:999;display:flex;flex-direction:column;gap:8px';
+      wrap.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:8px';
       document.body.appendChild(wrap);
     }
+    const colors = { ok:'#0a4a35', error:'#7f1d1d', warn:'#92400e' };
     const t = document.createElement('div');
-    t.style.cssText = `background:${type === 'error' ? '#7f1d1d' : '#0a4a35'};color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;box-shadow:0 4px 20px rgba(0,0,0,0.2)`;
+    t.style.cssText = `background:${colors[type]||colors.ok};color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;box-shadow:0 4px 20px rgba(0,0,0,0.2)`;
     t.textContent = msg;
     wrap.appendChild(t);
     setTimeout(() => t.remove(), 3500);
   }
-
   window.toggleSidebar = function() {
     const sidebar = document.getElementById('mapSidebar');
     const label   = document.getElementById('toggleLabel');
     const isOpen  = sidebar.classList.toggle('open');
     label.textContent = isOpen ? 'Hide list' : 'Show herb list';
   };
+
+  // ── GPS / locate me ──
+  window.locateMe = function() {
+    const btn = document.getElementById('gpsBtn');
+    if (!navigator.geolocation) { showToast('Geolocation is not supported by your browser', 'warn'); return; }
+    btn.disabled = true; btn.classList.add('active');
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const lat = pos.coords.latitude; const lng = pos.coords.longitude; const acc = pos.coords.accuracy || 0;
+      _userLocationLatLng = L.latLng(lat, lng);
+      // Remove previous location layers
+      if (_userLocationMarker) { map.removeLayer(_userLocationMarker); _userLocationMarker = null; }
+      if (_userLocationCircle) { map.removeLayer(_userLocationCircle); _userLocationCircle = null; }
+
+      _userLocationMarker = L.marker([lat, lng], {
+        icon: L.divIcon({ className: '', html: '<div class="user-gps-marker"></div>', iconSize: [20,20], iconAnchor: [10,10] }),
+        interactive: false
+      }).addTo(map);
+
+      _userLocationCircle = L.circle([lat, lng], { radius: acc, color: '#3b82f6', fillColor: 'rgba(59,130,246,0.08)', weight: 2 }).addTo(map);
+
+      if (activeId && markers[activeId]) {
+        showRouteToHerb(markers[activeId].herb);
+      }
+      map.setView([lat, lng], Math.max(15, map.getZoom()), { animate: true });
+      showToast('Centered to your location');
+      btn.disabled = false; btn.classList.remove('active');
+    }, (err) => {
+      btn.disabled = false; btn.classList.remove('active');
+      const msg = err.code === 1 ? 'Location permission denied' : 'Could not get your location';
+      showToast(msg, 'error');
+    }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+  };
+
+  function clearRoute() {
+    if (_routeLayer) { map.removeLayer(_routeLayer); _routeLayer = null; }
+    renderRoutePanel([]);
+  }
+
+  async function showRouteToHerb(herb) {
+    clearRoute();
+    if (!_userLocationLatLng || !herb?.lat || !herb?.lng) {
+      renderRoutePanel([]);
+      return;
+    }
+
+    const start = `${_userLocationLatLng.lng},${_userLocationLatLng.lat}`;
+    const end = `${herb.lng},${herb.lat}`;
+    const url = `https://router.project-osrm.org/route/v1/driving/${start};${end}?overview=full&geometries=geojson&steps=true&annotations=distance`;
+
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Routing service unavailable');
+      const data = await response.json();
+      if (!data.routes?.length) throw new Error('Route not found');
+
+      const route = data.routes[0];
+      const coordinates = route.geometry.coordinates.map(c => [c[1], c[0]]);
+      _routeLayer = L.polyline(coordinates, {
+        color: '#2563eb', weight: 6, opacity: 0.85, lineCap: 'round', lineJoin: 'round'
+      }).addTo(map);
+
+      const bounds = L.latLngBounds(coordinates);
+      map.fitBounds(bounds.pad(0.2), { animate: true, maxZoom: 16 });
+      renderRoutePanel(route.legs?.[0]?.steps || []);
+    } catch (err) {
+      showToast('Could not load route. Showing direct line instead.', 'warn');
+      const herbLatLng = L.latLng(herb.lat, herb.lng);
+      _routeLayer = L.polyline([_userLocationLatLng, herbLatLng], {
+        color: '#2563eb', weight: 5, opacity: 0.8, dashArray: '10,8', lineCap: 'round'
+      }).addTo(map);
+      const bounds = L.latLngBounds([_userLocationLatLng, herbLatLng]);
+      map.fitBounds(bounds.pad(0.25), { animate: true, maxZoom: 16 });
+      renderRoutePanel([]);
+      console.warn(err);
+    }
+  }
+
+  function renderRoutePanel(steps) {
+    const panel = document.getElementById('routePanel');
+    const body = document.getElementById('routeSteps');
+    if (!steps || !steps.length) {
+      panel.classList.remove('active');
+      body.innerHTML = '';
+      return;
+    }
+
+    panel.classList.add('active');
+    body.innerHTML = steps.map((step, index) => {
+      const instruction = step.maneuver?.instruction || formatStepInstruction(step);
+      const distance = step.distance != null ? `${(step.distance / 1000).toFixed(1)} km` : '';
+      return `
+        <div class="route-step">
+          <div class="route-step-index">${index + 1}</div>
+          <div class="route-step-text">
+            ${instruction}
+            ${distance ? `<div class="route-step-distance">${distance}</div>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function formatStepInstruction(step) {
+    const type = step.maneuver?.type || 'Continue';
+    const modifier = step.maneuver?.modifier ? `${step.maneuver.modifier} ` : '';
+    const name = step.name || 'road';
+    return `${capitalize(type)} ${modifier}onto ${name}`.replace(/\s+/g, ' ').trim();
+  }
+
+  function capitalize(value) {
+    return typeof value === 'string' && value.length ? value[0].toUpperCase() + value.slice(1) : value;
+  }
 </script>
 </body>
 </html>
