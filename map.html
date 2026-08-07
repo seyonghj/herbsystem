@@ -200,14 +200,15 @@
 
     /* LEGEND */
     .map-legend {
-      position: absolute; bottom: 24px; right: 12px; z-index: 400;
+      position: absolute; top: 24px; right: 12px; z-index: 600;
+      max-width: 220px;
       background: rgba(255,255,255,0.95); border: 1px solid var(--border);
       border-radius: var(--radius-md); padding: 10px 14px;
       font-size: 12px; font-family: 'DM Sans', sans-serif;
       box-shadow: var(--shadow-md);
     }
     .legend-title { font-weight: 600; color: var(--green-dark); margin-bottom: 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
-    .legend-row { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; color: var(--text-muted); }
+    .legend-row { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; color: var(--text-muted); flex-wrap: wrap; }
     .legend-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.2); flex-shrink: 0; }
 
     /* MOBILE */
@@ -219,14 +220,31 @@
         border-radius: 20px 20px 0 0; box-shadow: 0 -4px 24px rgba(0,0,0,0.12);
         transform: translateY(100%); transition: transform 0.3s cubic-bezier(.4,0,.2,1);
       }
-      .map-sidebar.open { transform: translateY(0); }
+      .filter-pills { display: none; }
+      .map-sidebar.open {
+        transform: translateY(0);
+        top: 0;
+        height: 100%;
+        border-radius: 0;
+      }
       #map { height: calc(100vh - var(--nav-h)); }
       .map-toggle-btn { display: flex !important; }
       .map-sidebar::before {
         content: ''; display: block; width: 36px; height: 4px;
         background: var(--border); border-radius: 2px; margin: 8px auto 4px; flex-shrink: 0;
       }
-      .map-legend { bottom: 70px; }
+      .map-legend {
+        top: 12px;
+        right: 12px;
+        left: auto;
+        bottom: auto;
+        width: auto;
+        max-width: 220px;
+        padding: 10px 12px;
+      }
+      .legend-title { font-size: 10px; margin-bottom: 5px; }
+      .legend-row { gap: 6px; margin-bottom: 3px; }
+      .legend-dot { width: 10px; height: 10px; }
     }
     .map-toggle-btn {
       display: none !important; position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
@@ -659,7 +677,13 @@
     document.getElementById('countBadge').textContent = filtered.length;
   }
 
-  window._selectHerb = selectHerb;
+  window._selectHerb = function(id) {
+    selectHerb(id);
+    if (window.innerWidth <= 768) {
+      document.getElementById('mapSidebar').classList.remove('open');
+      document.getElementById('toggleLabel').textContent = 'Show herb list';
+    }
+  };
 
   // ── Load herbs ──
   async function loadMap() {
@@ -741,10 +765,10 @@
     }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
   };
 
-  function clearRoute() {
+  window.clearRoute = function clearRoute() {
     if (_routeLayer) { map.removeLayer(_routeLayer); _routeLayer = null; }
     renderRoutePanel([]);
-  }
+  };
 
   async function showRouteToHerb(herb) {
     clearRoute();

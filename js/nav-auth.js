@@ -169,7 +169,21 @@ export function initNavAuth() {
   // ── Find nav ──
   const nav       = document.querySelector(".nav");
   const hamburger = document.querySelector(".nav-hamburger");
+  const navLinks  = document.getElementById("navLinks");
   if (!nav) return;
+
+  let currentUser = null;
+  const updateHamburger = () => {
+    if (!hamburger) return;
+    if (window.innerWidth <= 640 && currentUser) {
+      hamburger.style.display = "none";
+      navLinks?.classList.remove("open");
+    } else {
+      hamburger.style.display = "";
+    }
+  };
+
+  window.addEventListener("resize", updateHamburger);
 
   // Remove existing slot if any
   document.getElementById("navAuthSlot")?.remove();
@@ -181,6 +195,8 @@ export function initNavAuth() {
 
   // ── Auth state listener ──
   onAuthChange(user => {
+    currentUser = user;
+    updateHamburger();
     if (!user) {
       renderLoggedOut(slot);
     } else {
@@ -214,10 +230,10 @@ function renderLoggedIn(slot, user) {
   slot.innerHTML = `
     <div class="nav-account-btn" id="navAccountBtn" onclick="window._toggleNavDropdown(event)">
       <div class="nav-profile-photo">${avatarHTML}</div>
-      <span class="nav-account-label">${displayName}</span>
       <i class="ti ti-chevron-down nav-chevron"></i>
+    </div>
 
-      <div class="nav-account-dropdown" id="navAccountDropdown">
+    <div class="nav-account-dropdown" id="navAccountDropdown">
         <!-- Profile header -->
         <div class="dd-profile">
           <div class="dd-profile-photo">${avatarHTML}</div>
@@ -228,6 +244,10 @@ function renderLoggedIn(slot, user) {
         </div>
 
         <!-- Menu items -->
+        <a class="dd-item" href="index.html">
+          <i class="ti ti-home"></i>
+          <div class="dd-item-label">Home</div>
+        </a>
         <a class="dd-item" href="history.html">
           <i class="ti ti-history"></i>
           <div class="dd-item-label">
@@ -245,6 +265,10 @@ function renderLoggedIn(slot, user) {
         <a class="dd-item" href="herbs.html">
           <i class="ti ti-database"></i>
           <div class="dd-item-label">Herb database</div>
+        </a>
+        <a class="dd-item" href="map.html">
+          <i class="ti ti-map-pin"></i>
+          <div class="dd-item-label">Map</div>
         </a>
 
         <div class="dd-divider"></div>
