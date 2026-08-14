@@ -180,6 +180,21 @@
       font-size: 10px; background: #fef3c7; color: #92400e;
       padding: 2px 7px; border-radius: 99px; margin-bottom: 8px;
     }
+    .popup-pin-list {
+      margin: 0 -14px 10px;
+      padding: 0 14px;
+      border-top: 1px solid rgba(0,0,0,0.05);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .popup-pin-item {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; padding: 8px 0; font-size: 11px; color: var(--text-primary);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .popup-pin-item:last-child { border-bottom: none; }
+    .popup-pin-label { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); }
+    .popup-pin-label i { font-size: 11px; color: var(--green-main); }
+    .popup-pin-meta { color: var(--text-light); font-size: 10px; }
 
     /* saving dot */
     .saving-dot {
@@ -400,7 +415,7 @@
   import { db, collection, getDocs }
     from './js/firebase-config.js';
   import {
-    doc, updateDoc, serverTimestamp
+    doc, updateDoc, serverTimestamp, arrayUnion, arrayRemove
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   initNavAuth();
@@ -426,7 +441,8 @@
   let allHerbs      = [];
   let markers       = {};
   let activeFilter  = '';
-  let activeId      = null;
+  let activeHerbId  = null;
+  let activeMarkerKey = null;
   let pinningHerbId = null;
   let isAdmin       = false;
   let _userLocationLatLng = null;
@@ -467,18 +483,55 @@
     });
   }
 
+  function getHerbPins(h) {
+    if (Array.isArray(h.pins) && h.pins.length) return h.pins;
+    if (h.lat != null && h.lng != null) {
+      return [{ id: h.pinId || `pin_${h.id || 'legacy'}`, lat: h.lat, lng: h.lng, createdBy: null }];
+    }
+    return [];
+  }
+
+  function makeMarkerKey(herb, pin) {
+    return `${herb.id}::${pin.id || `${pin.lat.toFixed(6)}:${pin.lng.toFixed(6)}`}`;
+  }
+
+  function createPinId() {
+    return typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `pin_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`;
+  }
+
+  function getPinLabel(h) {
+    const pins = getHerbPins(h);
+    if (!pins.length) return 'No location yet';
+    if (pins.length === 1) return `${pins[0].lat.toFixed(4)}, ${pins[0].lng.toFixed(4)}`;
+    return `${pins.length} locations`;
+  }
+
   // ── Popup HTML — different for admin vs user ──
-  function popupHTML(h) {
+  function popupHTML(h, pin) {
     const tags   = (h.usesTags || h.useTags || []).slice(0, 3)
       .map(t => `<span class="popup-tag">${t}</span>`).join('');
-    const coords = h.lat && h.lng
-      ? `<div class="popup-coords">📍 ${h.lat.toFixed(5)}, ${h.lng.toFixed(5)}</div>` : '';
+    const coords = pin && pin.lat != null && pin.lng != null
+      ? `<div class="popup-coords">📍 ${pin.lat.toFixed(5)}, ${pin.lng.toFixed(5)}</div>` : '';
+    const pins = getHerbPins(h);
+    const locationText = pins.length > 1
+      ? `${pins.length} pinned locations`
+      : (h.location || 'Lemery, Iloilo');
     const adminBadge = isAdmin
       ? `<div class="popup-admin-badge"><i class="ti ti-shield-check" style="font-size:10px"></i> Admin view</div>` : '';
-    const removeBtn  = isAdmin
-      ? `<button class="popup-btn-remove" onclick="window._removePin('${h.id}')" title="Remove pin">
+    const removeBtn  = isAdmin && pin
+      ? `<button class="popup-btn-remove" onclick="window._removePin('${h.id}','${pin.id}')" title="Remove this pin">
            <i class="ti ti-trash" style="font-size:13px"></i>
          </button>` : '';
+    const pinList = pins.length > 1
+      ? `<div class="popup-pin-list">
+           ${pins.map(p => `<div class="popup-pin-item">
+             <div class="popup-pin-label"><i class="ti ti-map-pin"></i>${p.lat.toFixed(4)}, ${p.lng.toFixed(4)}</div>
+             ${isAdmin ? `<button class="popup-btn-remove" onclick="window._removePin('${h.id}','${p.id}')" title="Remove this pin"><i class="ti ti-trash" style="font-size:13px"></i></button>` : ''}
+           </div>`).join('')}
+         </div>`
+      : '';
 
     return `
       <div class="popup-header">
@@ -491,8 +544,9 @@
       <div class="popup-body">
         ${adminBadge}
         <div class="popup-row"><i class="ti ti-tag"></i><span>${h.englishName || '—'}</span></div>
-        <div class="popup-row"><i class="ti ti-map-pin"></i><span>${h.location || 'Lemery, Iloilo'}</span></div>
+        <div class="popup-row"><i class="ti ti-map-pin"></i><span>${locationText}</span></div>
         ${coords}
+        ${pinList}
         <div class="popup-tags">${tags}</div>
         <div class="popup-actions">
           <a class="popup-btn" href="herb-detail.html?id=${h.id}">View details →</a>
@@ -502,31 +556,33 @@
   }
 
   // ── Place marker ──
-  function placeMarker(h) {
-    if (!h.lat || !h.lng) return;
-    if (markers[h.id]) map.removeLayer(markers[h.id].marker);
-    const marker = L.marker([h.lat, h.lng], { icon: makeIcon(h.emoji, false, isAdmin) })
+  function placeMarker(h, pin) {
+    if (!pin || pin.lat == null || pin.lng == null) return;
+    const key = makeMarkerKey(h, pin);
+    if (markers[key]) map.removeLayer(markers[key].marker);
+    const marker = L.marker([pin.lat, pin.lng], { icon: makeIcon(h.emoji, false, isAdmin) })
       .addTo(map)
-      .bindPopup(popupHTML(h), { maxWidth: 270 });
-    marker.on('click', () => selectHerb(h.id));
-    marker.on('popupclose', () => { if (activeId === h.id) deselectHerb(); });
-    markers[h.id] = { marker, herb: h };
+      .bindPopup(popupHTML(h, pin), { maxWidth: 270 });
+    marker.on('click', () => selectHerb(h.id, key));
+    marker.on('popupclose', () => { if (activeMarkerKey === key) deselectHerb(); });
+    markers[key] = { marker, herb: h, pin };
   }
 
   // ── Select herb ──
-  function selectHerb(id) {
-    if (activeId && markers[activeId]) {
-      markers[activeId].marker.setIcon(makeIcon(markers[activeId].herb.emoji, false, isAdmin));
+  function selectHerb(id, markerKey) {
+    if (activeMarkerKey && markers[activeMarkerKey]) {
+      const { marker, herb } = markers[activeMarkerKey];
+      marker.setIcon(makeIcon(herb.emoji, false, isAdmin));
     }
-    activeId = id;
-    if (markers[id]) {
-      const { marker, herb } = markers[id];
+    activeHerbId = id;
+    activeMarkerKey = markerKey;
+    if (markerKey && markers[markerKey]) {
+      const { marker, herb, pin } = markers[markerKey];
       marker.setIcon(makeIcon(herb.emoji, true, isAdmin));
       map.setView(marker.getLatLng(), 15, { animate: true });
-      // Update popup with current admin state
-      marker.setPopupContent(popupHTML(herb));
+      marker.setPopupContent(popupHTML(herb, pin));
       marker.openPopup();
-      showRouteToHerb(herb);
+      showRouteToHerb({ ...herb, lat: pin.lat, lng: pin.lng });
     } else {
       clearRoute();
     }
@@ -537,10 +593,12 @@
   }
 
   function deselectHerb() {
-    if (activeId && markers[activeId]) {
-      markers[activeId].marker.setIcon(makeIcon(markers[activeId].herb.emoji, false, isAdmin));
+    if (activeMarkerKey && markers[activeMarkerKey]) {
+      const { marker, herb } = markers[activeMarkerKey];
+      marker.setIcon(makeIcon(herb.emoji, false, isAdmin));
     }
-    activeId = null;
+    activeHerbId = null;
+    activeMarkerKey = null;
     document.querySelectorAll('.herb-list-item').forEach(el => el.classList.remove('active'));
   }
 
@@ -571,41 +629,54 @@
 
     const herb = allHerbs.find(h => h.id === herbId);
     if (!herb) return;
-    herb.lat = lat; herb.lng = lng;
-    placeMarker(herb);
-    selectHerb(herbId);
+    const pin = { id: createPinId(), lat, lng, createdBy: ADMIN_EMAIL };
+    herb.pins = [...getHerbPins(herb), pin];
+    placeMarker(herb, pin);
+    selectHerb(herbId, makeMarkerKey(herb, pin));
 
     const btn = document.querySelector(`.pin-btn[data-id="${herbId}"]`);
-    if (btn) { btn.classList.add('pinned'); btn.innerHTML = `<i class="ti ti-map-pin-filled"></i> Pinned`; }
+    if (btn) { btn.classList.add('pinned'); btn.innerHTML = `<i class="ti ti-map-pin-filled"></i> Add pin`; }
 
     const locEl = document.querySelector(`.herb-list-item[data-id="${herbId}"] .herb-list-loc`);
-    if (locEl) locEl.innerHTML = `<i class="ti ti-map-pin"></i>${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    if (locEl) locEl.innerHTML = `<i class="ti ti-map-pin"></i>${getPinLabel(herb)}`;
 
     showSaving(true);
     try {
-      await updateDoc(doc(db, 'herbs', herbId), { lat, lng, pinnedAt: serverTimestamp(), pinnedBy: ADMIN_EMAIL });
+      await updateDoc(doc(db, 'herbs', herbId), {
+        pins: arrayUnion(pin), pinnedAt: serverTimestamp(), pinnedBy: ADMIN_EMAIL
+      });
       showToast(`📍 ${herb.localName} pinned!`);
     } catch(err) { showToast('Could not save: ' + err.message, 'error'); }
     showSaving(false);
   });
 
   // ── REMOVE PIN (admin only) ──
-  window._removePin = async function(herbId) {
+  window._removePin = async function(herbId, pinId) {
     if (!isAdmin) return;
     const herb = allHerbs.find(h => h.id === herbId);
-    if (!herb || !confirm(`Remove pin for "${herb.localName}"?`)) return;
-    map.closePopup();
-    if (markers[herbId]) { map.removeLayer(markers[herbId].marker); delete markers[herbId]; }
-    herb.lat = null; herb.lng = null;
+    if (!herb) return;
+    const pin = getHerbPins(herb).find(p => p.id === pinId);
+    if (!pin || !confirm(`Remove this pinned location for "${herb.localName}"?`)) return;
 
+    map.closePopup();
+    const key = makeMarkerKey(herb, pin);
+    if (markers[key]) { map.removeLayer(markers[key].marker); delete markers[key]; }
+
+    herb.pins = getHerbPins(herb).filter(p => p.id !== pinId);
     const btn = document.querySelector(`.pin-btn[data-id="${herbId}"]`);
-    if (btn) { btn.classList.remove('pinned'); btn.innerHTML = `<i class="ti ti-map-pin"></i> Pin`; }
+    if (btn) {
+      const hasPins = getHerbPins(herb).length > 0;
+      btn.classList.toggle('pinned', hasPins);
+      btn.innerHTML = hasPins
+        ? `<i class="ti ti-map-pin-filled"></i> Add pin`
+        : `<i class="ti ti-map-pin"></i> Pin`;
+    }
     const locEl = document.querySelector(`.herb-list-item[data-id="${herbId}"] .herb-list-loc`);
-    if (locEl) locEl.innerHTML = `<i class="ti ti-map-pin"></i>No location yet`;
+    if (locEl) locEl.innerHTML = `<i class="ti ti-map-pin"></i>${getPinLabel(herb)}`;
 
     showSaving(true);
     try {
-      await updateDoc(doc(db, 'herbs', herbId), { lat: null, lng: null });
+      await updateDoc(doc(db, 'herbs', herbId), { pins: arrayRemove(pin) });
       showToast(`Pin removed for ${herb.localName}`);
     } catch(err) { showToast('Could not remove: ' + err.message, 'error'); }
     showSaving(false);
@@ -619,15 +690,17 @@
       return;
     }
     list.innerHTML = herbs.map(h => {
-      const isPinned = !!(h.lat && h.lng);
+      const pins = getHerbPins(h);
+      const isPinned = pins.length > 0;
+      const pinLabel = getPinLabel(h);
 
       // Admin: show Pin button | User: show pinned/not-pinned badge
       const rightEl = isAdmin
         ? `<button class="pin-btn ${isPinned ? 'pinned' : ''}" data-id="${h.id}"
               onclick="event.stopPropagation(); window._startPin('${h.id}')"
-              title="${isPinned ? 'Re-pin location' : 'Pin on map'}">
+              title="${isPinned ? 'Add another pin' : 'Pin on map'}">
              <i class="ti ti-map-pin${isPinned ? '-filled' : ''}"></i>
-             ${isPinned ? 'Pinned' : 'Pin'}
+             ${isPinned ? 'Add pin' : 'Pin'}
            </button>`
         : isPinned
           ? `<span class="pin-status pinned"><i class="ti ti-map-pin-filled"></i> On map</span>`
@@ -641,7 +714,7 @@
             <div class="herb-list-sci">${h.scientificName}</div>
             <div class="herb-list-loc">
               <i class="ti ti-map-pin"></i>
-              ${isPinned ? `${h.lat.toFixed(4)}, ${h.lng.toFixed(4)}` : 'No location yet'}
+              ${pinLabel}
             </div>
           </div>
           ${rightEl}
@@ -668,8 +741,8 @@
       const matchF = !activeFilter || (h.uses || []).includes(activeFilter);
       return matchQ && matchF;
     });
-    Object.entries(markers).forEach(([id, { marker }]) => {
-      const vis = filtered.find(h => h.id === id);
+    Object.entries(markers).forEach(([key, { marker, herb }]) => {
+      const vis = filtered.find(h => h.id === herb.id);
       if (vis) { if (!map.hasLayer(marker)) marker.addTo(map); }
       else      { if (map.hasLayer(marker))  map.removeLayer(marker); }
     });
@@ -691,7 +764,9 @@
       const snap = await getDocs(collection(db, 'herbs'));
       snap.forEach(d => allHerbs.push({ id: d.id, ...d.data() }));
       allHerbs.sort((a, b) => (a.no || 0) - (b.no || 0));
-      allHerbs.forEach(h => { if (h.lat && h.lng) placeMarker(h); });
+      allHerbs.forEach(h => {
+        getHerbPins(h).forEach(pin => placeMarker(h, pin));
+      });
       renderList(allHerbs);
       document.getElementById('countBadge').textContent = allHerbs.length;
       const herbId = new URLSearchParams(location.search).get('herb');
@@ -752,8 +827,8 @@
 
       _userLocationCircle = L.circle([lat, lng], { radius: acc, color: '#3b82f6', fillColor: 'rgba(59,130,246,0.08)', weight: 2 }).addTo(map);
 
-      if (activeId && markers[activeId]) {
-        showRouteToHerb(markers[activeId].herb);
+      if (activeMarkerKey && markers[activeMarkerKey]) {
+        showRouteToHerb(markers[activeMarkerKey].herb);
       }
       map.setView([lat, lng], Math.max(15, map.getZoom()), { animate: true });
       showToast('Centered to your location');
