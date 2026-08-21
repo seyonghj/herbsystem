@@ -248,6 +248,10 @@ function renderLoggedIn(slot, user) {
           <i class="ti ti-home"></i>
           <div class="dd-item-label">Home</div>
         </a>
+        <a class="dd-item" href="feed.html">
+          <i class="ti ti-home"></i>
+          <div class="dd-item-label">Feed</div>
+        </a>
         <a class="dd-item" href="history.html">
           <i class="ti ti-history"></i>
           <div class="dd-item-label">
