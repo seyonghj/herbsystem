@@ -422,8 +422,18 @@
 
   initNavAuth();
 
-  // ── ADMIN EMAIL ──
-  const ADMIN_EMAIL = "marklouiepanares7@gmail.com";
+  // ── ADMIN EMAILS ──
+  // Add more admin emails here to allow additional accounts to manage pins.
+  const ADMIN_EMAILS = [
+    "marklouiepanares7@gmail.com",
+    "agolitorenerose5@gmail.com",
+    "bilbaobenjamin11@gmail.com",
+    "jermilynazuela073@gmail.com",
+    "kurtmatthewjunealborote@gmail.com",
+    "maeloufaithluminate@gmail.com"
+  ];
+
+  let currentUser = null;
 
   // ── Map center: Lemery, Iloilo ──
   const LEMERY = [11.23, 122.93];
@@ -454,7 +464,8 @@
 
   // ── Watch auth — check if admin ──
   onAuthChange(user => {
-    isAdmin = !!(user && user.email === ADMIN_EMAIL);
+    currentUser = user;
+    isAdmin = !!(user && user.email && ADMIN_EMAILS.includes(user.email));
     updateModeUI();
     // Re-render list to show/hide pin buttons
     if (allHerbs.length) renderList(allHerbs);
@@ -631,7 +642,8 @@
 
     const herb = allHerbs.find(h => h.id === herbId);
     if (!herb) return;
-    const pin = { id: createPinId(), lat, lng, createdBy: ADMIN_EMAIL };
+    const signedInEmail = currentUser?.email || 'unknown-admin';
+    const pin = { id: createPinId(), lat, lng, createdBy: signedInEmail };
     herb.pins = [...getHerbPins(herb), pin];
     placeMarker(herb, pin);
     selectHerb(herbId, makeMarkerKey(herb, pin));
@@ -645,7 +657,7 @@
     showSaving(true);
     try {
       await updateDoc(doc(db, 'herbs', herbId), {
-        pins: arrayUnion(pin), pinnedAt: serverTimestamp(), pinnedBy: ADMIN_EMAIL
+        pins: arrayUnion(pin), pinnedAt: serverTimestamp(), pinnedBy: signedInEmail
       });
       showToast(`📍 ${herb.localName} pinned!`);
     } catch(err) { showToast('Could not save: ' + err.message, 'error'); }

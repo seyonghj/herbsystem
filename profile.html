@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Profile — HerbID Iloilo</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css" />
+  <style>
+    /* ── RESET & BASE ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green-dark:  #0a4a35;
+      --green-mid:   #1a7a55;
+      --green-main:  #22a06b;
+      --green-light: #d4f0e4;
+      --green-pale:  #f0faf5;
+      --border:      #dde5e0;
+      --text:        #1a1a1a;
+      --text-soft:   #5a6472;
+      --text-muted:  #8c96a0;
+      --radius-sm:   8px;
+      --radius-md:   12px;
+      --radius-lg:   20px;
+      --shadow-sm:   0 1px 4px rgba(0,0,0,0.06);
+      --shadow-md:   0 4px 16px rgba(0,0,0,0.10);
+    }
+    body {
+      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+      background: #f0f2f1; color: var(--text); min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ── */
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--green-dark); color: #fff;
+      display: flex; align-items: center; gap: 1rem;
+      padding: 0 1.25rem; height: 58px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: #fff; flex-shrink: 0;
+    }
+    .nav-brand-icon {
+      width: 34px; height: 34px; border-radius: 10px;
+      background: var(--green-main);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .nav-brand strong { font-size: 15px; display: block; line-height: 1.2; }
+    .nav-brand span   { font-size: 10px; opacity: 0.7; }
+    .nav-links {
+      display: flex; list-style: none; gap: 2px; margin-left: auto;
+    }
+    .nav-links a {
+      display: block; padding: 6px 11px; border-radius: 8px;
+      color: rgba(255,255,255,0.8); text-decoration: none; font-size: 13px;
+      font-weight: 500; transition: background 0.15s, color 0.15s;
+    }
+    .nav-links a:hover, .nav-links a.active {
+      background: rgba(255,255,255,0.12); color: #fff;
+    }
+    .nav-hamburger {
+      display: none; background: none; border: none; color: #fff;
+      font-size: 22px; cursor: pointer; padding: 4px; margin-left: auto;
+    }
+    @media (max-width: 680px) {
+      .nav-links { display: none; position: absolute; top: 58px; left: 0; right: 0;
+        background: var(--green-dark); flex-direction: column; padding: 0.5rem 1rem 1rem;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.2); gap: 2px; }
+      .nav-links.open { display: flex; }
+      .nav-hamburger { display: flex; }
+    }
+
+    /* ── PAGE HERO ── */
+    .page-hero {
+      background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 100%);
+      color: #fff; text-align: center; padding: 2.5rem 1rem 3rem;
+      position: relative; overflow: hidden;
+    }
+    .page-hero::before {
+      content: ''; position: absolute; inset: 0; opacity: 0.07;
+      background-image: radial-gradient(circle, #fff 1px, transparent 1px);
+      background-size: 22px 22px;
+    }
+    .page-hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 99px; padding: 4px 14px; font-size: 12px; font-weight: 600;
+      margin-bottom: 0.75rem; position: relative;
+    }
+    .page-hero h1 { font-size: clamp(22px, 5vw, 32px); font-weight: 800; position: relative; margin-bottom: 0.5rem; }
+    .page-hero p  { font-size: 14px; opacity: 0.8; position: relative; max-width: 440px; margin: 0 auto; }
+
+    /* ── LAYOUT ── */
+    .profile-layout {
+      max-width: 780px; margin: 0 auto; padding: 1.5rem 1rem 5rem;
+    }
+
+    /* ── CARD BASE ── */
+    .card {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden;
+      box-shadow: var(--shadow-sm); margin-bottom: 1.25rem;
+    }
+
+    /* ── AUTH GATE ── */
+    .auth-gate {
+      text-align: center; padding: 5rem 2rem;
+    }
+    .auth-gate-icon { font-size: 60px; margin-bottom: 1rem; }
+    .auth-gate h3 { font-size: 20px; font-weight: 700; color: var(--green-dark); margin-bottom: 0.5rem; }
+    .auth-gate p  { font-size: 14px; color: var(--text-soft); margin-bottom: 1.5rem; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 11px 24px; background: var(--green-main); color: #fff;
+      border: none; border-radius: var(--radius-md);
+      font-size: 14px; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: background 0.15s;
+      text-decoration: none;
+    }
+    .btn-primary:hover { background: var(--green-mid); }
+
+    /* ── PROFILE COVER + AVATAR ── */
+    .profile-cover {
+      height: 120px;
+      background: linear-gradient(135deg, #07382a 0%, var(--green-main) 100%);
+      position: relative;
+    }
+    .profile-cover-dots {
+      position: absolute; inset: 0; opacity: 0.08;
+      background-image: radial-gradient(circle, #fff 1.5px, transparent 1.5px);
+      background-size: 20px 20px;
+    }
+    .profile-avatar-wrap {
+      position: absolute; bottom: -40px; left: 1.25rem;
+    }
+    .profile-avatar {
+      width: 82px; height: 82px; border-radius: 50%;
+      border: 4px solid #fff; background: var(--green-main);
+      color: #fff; font-size: 30px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    }
+    .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .profile-info {
+      padding: 54px 1.25rem 1.25rem;
+      display: flex; align-items: flex-start; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .profile-name  { font-size: 21px; font-weight: 800; color: var(--text); line-height: 1.2; }
+    .profile-email { font-size: 13px; color: var(--text-soft); margin-top: 3px; }
+    .provider-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 600; padding: 3px 10px;
+      border-radius: 99px; margin-top: 7px;
+    }
+    .provider-google { background: #fef3c7; color: #92400e; }
+    .provider-email  { background: var(--green-pale); color: var(--green-dark); border: 1px solid var(--green-light); }
+
+    .btn-edit {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 18px; border-radius: var(--radius-md);
+      border: 1.5px solid var(--green-main); background: #fff;
+      color: var(--green-main); font-size: 13px; font-weight: 600;
+      font-family: inherit; cursor: pointer; transition: background 0.15s, color 0.15s;
+      flex-shrink: 0;
+    }
+    .btn-edit:hover { background: var(--green-main); color: #fff; }
+
+    /* ── STATS ROW ── */
+    .profile-stats {
+      display: flex; border-top: 1px solid var(--border);
+    }
+    .stat-item {
+      flex: 1; text-align: center; padding: 16px 8px;
+      border-right: 1px solid var(--border);
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-num { font-size: 22px; font-weight: 800; color: var(--green-dark); }
+    .stat-lbl { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+
+    /* ── EDIT PANEL ── */
+    .edit-panel {
+      display: none; padding: 1.25rem;
+    }
+    .edit-panel.open { display: block; }
+    .edit-panel-title {
+      font-size: 15px; font-weight: 700; color: var(--green-dark);
+      margin-bottom: 1.1rem; display: flex; align-items: center; gap: 7px;
+    }
+    .edit-field { margin-bottom: 14px; }
+    .edit-label {
+      display: block; font-size: 12px; font-weight: 600;
+      color: var(--text-soft); margin-bottom: 5px;
+    }
+    .edit-input {
+      width: 100%; padding: 10px 13px; border: 1.5px solid var(--border);
+      border-radius: var(--radius-md); font-size: 14px; font-family: inherit;
+      color: var(--text); background: #fff; transition: border-color 0.15s;
+    }
+    .edit-input:focus { outline: none; border-color: var(--green-main); box-shadow: 0 0 0 3px rgba(34,160,107,0.1); }
+    .edit-input:disabled { background: #f5f6f7; color: var(--text-muted); cursor: not-allowed; }
+
+    .edit-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 4px; }
+    .btn-save {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 10px 22px; background: var(--green-main); color: #fff;
+      border: none; border-radius: var(--radius-md);
+      font-size: 13px; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .btn-save:hover:not(:disabled) { background: var(--green-mid); }
+    .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-cancel {
+      padding: 10px 18px; background: #fff; color: var(--text-soft);
+      border: 1.5px solid var(--border); border-radius: var(--radius-md);
+      font-size: 13px; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: border-color 0.15s;
+    }
+    .btn-cancel:hover { border-color: #aab3bb; }
+    .btn-danger {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 10px 18px; background: #fff; color: #e53e3e;
+      border: 1.5px solid #fca5a5; border-radius: var(--radius-md);
+      font-size: 13px; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: background 0.15s; margin-left: auto;
+    }
+    .btn-danger:hover { background: #fff5f5; }
+
+    .edit-divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+
+    .pw-toggle-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; color: var(--green-main); font-weight: 600;
+      background: none; border: none; font-family: inherit; cursor: pointer; padding: 0;
+    }
+    .pw-toggle-btn:hover { color: var(--green-dark); }
+    .pw-fields { display: none; }
+    .pw-fields.open { display: block; }
+
+    .google-notice {
+      display: flex; align-items: flex-start; gap: 10px;
+      background: #fffbeb; border: 1px solid #fde68a;
+      border-radius: var(--radius-md); padding: 13px 15px;
+      font-size: 13px; color: #92400e; line-height: 1.6;
+    }
+    .google-notice i { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+    .google-notice a { color: var(--green-dark); font-weight: 600; }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex; background: #fff; border: 1px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden;
+      box-shadow: var(--shadow-sm); margin-bottom: 1.25rem;
+    }
+    .tab-btn {
+      flex: 1; padding: 14px 10px; border: none; background: none;
+      font-size: 13px; font-weight: 600; color: var(--text-soft);
+      font-family: inherit; cursor: pointer;
+      border-bottom: 3px solid transparent;
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tab-btn i { font-size: 16px; }
+    .tab-btn.active { color: var(--green-main); border-bottom-color: var(--green-main); background: var(--green-pale); }
+    .tab-btn:not(.active):hover { color: var(--green-dark); background: #f8f9f8; }
+
+    /* ── SCAN GRID ── */
+    .scan-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 1rem;
+    }
+    .scan-card {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow 0.15s, transform 0.15s;
+    }
+    .scan-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .scan-img {
+      width: 100%; height: 145px; object-fit: cover; display: block;
+      background: var(--green-pale);
+    }
+    .scan-placeholder {
+      width: 100%; height: 145px; background: var(--green-pale);
+      display: flex; align-items: center; justify-content: center; font-size: 48px;
+    }
+    .scan-body { padding: 10px 12px 13px; }
+    .scan-herb { font-size: 13px; font-weight: 700; color: var(--green-dark); margin-bottom: 5px; line-height: 1.3; }
+    .scan-conf {
+      display: inline-block; font-size: 11px; font-weight: 600;
+      padding: 2px 9px; border-radius: 99px; margin-bottom: 6px;
+    }
+    .conf-high { background: #d1fae5; color: #065f46; }
+    .conf-med  { background: #fef3c7; color: #92400e; }
+    .conf-low  { background: #fee2e2; color: #991b1b; }
+    .scan-date { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+
+    /* ── POST LIST ── */
+    .post-list { display: flex; flex-direction: column; gap: 1rem; }
+    .mini-post {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden;
+      display: flex; box-shadow: var(--shadow-sm);
+      transition: box-shadow 0.15s;
+    }
+    .mini-post:hover { box-shadow: var(--shadow-md); }
+    .mini-post-thumb {
+      width: 105px; flex-shrink: 0; object-fit: cover;
+      background: var(--green-pale); display: block;
+    }
+    .mini-post-thumb-placeholder {
+      width: 105px; flex-shrink: 0; background: var(--green-pale);
+      display: flex; align-items: center; justify-content: center; font-size: 38px;
+    }
+    .mini-post-body { padding: 12px 14px; flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+    .mini-post-herb {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: var(--green-pale); border: 1px solid var(--green-light);
+      color: var(--green-dark); font-size: 11px; font-weight: 600;
+      padding: 2px 9px; border-radius: 99px; width: fit-content;
+    }
+    .mini-post-caption {
+      font-size: 13px; color: var(--text); line-height: 1.55;
+      display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .mini-post-footer { display: flex; align-items: center; gap: 12px; margin-top: auto; flex-wrap: wrap; }
+    .mini-stat { font-size: 12px; color: var(--text-soft); display: flex; align-items: center; gap: 4px; }
+    .mini-date { font-size: 11px; color: var(--text-muted); margin-left: auto; }
+    .mini-delete {
+      background: none; border: none; cursor: pointer; color: #c0c8d0;
+      font-size: 14px; padding: 4px 6px; border-radius: 6px;
+      font-family: inherit; transition: color 0.15s, background 0.15s;
+    }
+    .mini-delete:hover { color: #e53e3e; background: #fff5f5; }
+
+    /* ── EMPTY STATE ── */
+    .empty {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: var(--radius-lg); text-align: center;
+      padding: 3.5rem 1rem;
+    }
+    .empty-icon { font-size: 48px; margin-bottom: 1rem; }
+    .empty h3 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 0.4rem; }
+    .empty p  { font-size: 13px; color: var(--text-soft); }
+    .empty a  { color: var(--green-main); font-weight: 600; text-decoration: none; }
+
+    /* ── SPINNER ── */
+    .spinner-wrap { text-align: center; padding: 3rem 1rem; }
+    .spinner {
+      width: 30px; height: 30px; border: 3px solid var(--green-light);
+      border-top-color: var(--green-main); border-radius: 50%;
+      animation: spin 0.7s linear infinite; margin: 0 auto 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── TOAST ── */
+    #toastWrap {
+      position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .toast {
+      background: var(--green-dark); color: #fff;
+      padding: 10px 16px; border-radius: 10px; font-size: 13px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      animation: slideUp 0.25s ease;
+    }
+    .toast.error { background: #7f1d1d; }
+    .toast.warn  { background: #92400e; }
+    @keyframes slideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── FOOTER ── */
+    .footer {
+      text-align: center; padding: 1.5rem 1rem;
+      font-size: 12px; color: var(--text-muted);
+      border-top: 1px solid var(--border); background: #fff; margin-top: 2rem;
+    }
+
+    @media (max-width: 500px) {
+      .scan-grid { grid-template-columns: repeat(2, 1fr); }
+      .mini-post-thumb, .mini-post-thumb-placeholder { width: 80px; }
+      .profile-info { flex-direction: column; }
+      .btn-edit { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="nav-brand">
+    <div class="nav-brand-icon"><i class="ti ti-leaf"></i></div>
+    <div class="nav-brand-text">
+      <strong>HerbID Iloilo</strong>
+      <span>NISU Lemery Campus</span>
+    </div>
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="herbs.html">Herb Database</a></li>
+    <li><a href="identify.html">Identify Herb</a></li>
+    <li><a href="feed.html">Community</a></li>
+    <li><a href="map.html">Map</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="profile.html" class="active">My Profile</a></li>
+  </ul>
+  <button class="nav-hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Menu">
+    <i class="ti ti-menu-2"></i>
+  </button>
+</nav>
+
+<!-- HERO -->
+<div class="page-hero">
+  <div class="page-hero-badge"><i class="ti ti-user-circle"></i> Account</div>
+  <h1>My Profile</h1>
+  <p>Scan history, community posts, and account settings</p>
+</div>
+
+<div class="profile-layout">
+
+  <!-- AUTH GATE -->
+  <div id="authGate" style="display:none">
+    <div class="card auth-gate">
+      <div class="auth-gate-icon">🔐</div>
+      <h3>Sign in to view your profile</h3>
+      <p>You need to be signed in to access your profile, scan history, and posts.</p>
+      <button class="btn-primary" onclick="window._navOpenLogin?.()">
+        <i class="ti ti-user"></i> Sign in
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN PROFILE CONTENT -->
+  <div id="profileContent" style="display:none">
+
+    <!-- ── PROFILE CARD ── -->
+    <div class="card" style="overflow:visible">
+      <!-- Cover + Avatar -->
+      <div class="profile-cover" style="border-radius:var(--radius-lg) var(--radius-lg) 0 0">
+        <div class="profile-cover-dots"></div>
+        <div class="profile-avatar-wrap">
+          <div class="profile-avatar" id="profileAvatar">?</div>
+        </div>
+      </div>
+
+      <!-- Info row -->
+      <div class="profile-info">
+        <div>
+          <div class="profile-name"  id="profileName">—</div>
+          <div class="profile-email" id="profileEmail">—</div>
+          <div id="profileBadge"></div>
+        </div>
+        <button class="btn-edit" id="editToggleBtn" onclick="toggleEdit()">
+          <i class="ti ti-pencil"></i> Edit Profile
+        </button>
+      </div>
+
+      <!-- Edit panel (inside card, below info) -->
+      <div id="editPanel" class="edit-panel" style="border-top:1px solid var(--border)">
+
+        <!-- GOOGLE USER: notice only -->
+        <div id="googleNotice" style="display:none">
+          <div class="google-notice">
+            <i class="ti ti-brand-google"></i>
+            <div>
+              <strong>Signed in with Google</strong><br>
+              Your name and photo are managed by your Google account.
+              To update them, visit <a href="https://myaccount.google.com" target="_blank">myaccount.google.com</a>.
+            </div>
+          </div>
+        </div>
+
+        <!-- EMAIL USER: full form -->
+        <div id="emailForm" style="display:none">
+          <div class="edit-panel-title"><i class="ti ti-user-edit"></i> Edit Profile</div>
+
+          <div class="edit-field">
+            <label class="edit-label">Display Name</label>
+            <input class="edit-input" id="editName" type="text" placeholder="Your name" maxlength="40" />
+          </div>
+          <div class="edit-field">
+            <label class="edit-label">Email Address</label>
+            <input class="edit-input" id="editEmail" type="email" placeholder="your@email.com" />
+          </div>
+
+          <div class="edit-actions">
+            <button class="btn-save" id="saveBtn" onclick="saveProfile()">
+              <i class="ti ti-check"></i> Save Changes
+            </button>
+            <button class="btn-cancel" onclick="toggleEdit()">Cancel</button>
+          </div>
+
+          <hr class="edit-divider">
+
+          <!-- Change password -->
+          <button class="pw-toggle-btn" onclick="togglePwFields()">
+            <i class="ti ti-lock"></i> Change Password
+          </button>
+          <div class="pw-fields" id="pwFields">
+            <div style="height:12px"></div>
+            <div class="edit-field">
+              <label class="edit-label">Current Password</label>
+              <input class="edit-input" id="currentPw" type="password" placeholder="Current password" />
+            </div>
+            <div class="edit-field">
+              <label class="edit-label">New Password</label>
+              <input class="edit-input" id="newPw" type="password" placeholder="Min 6 characters" />
+            </div>
+            <div class="edit-field">
+              <label class="edit-label">Confirm New Password</label>
+              <input class="edit-input" id="confirmPw" type="password" placeholder="Repeat new password" />
+            </div>
+            <div class="edit-actions">
+              <button class="btn-save" onclick="changePassword()">
+                <i class="ti ti-lock-check"></i> Update Password
+              </button>
+            </div>
+          </div>
+
+          <hr class="edit-divider">
+          <div class="edit-actions">
+            <button class="btn-danger" onclick="confirmDelete()">
+              <i class="ti ti-trash"></i> Delete Account
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Stats row -->
+      <div class="profile-stats">
+        <div class="stat-item">
+          <div class="stat-num" id="statScans">—</div>
+          <div class="stat-lbl">Scans</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" id="statPosts">—</div>
+          <div class="stat-lbl">Posts</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" id="statLikes">—</div>
+          <div class="stat-lbl">Likes Received</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TABS ── -->
+    <div class="tabs">
+      <button class="tab-btn active" id="tab-scans" onclick="switchTab('scans')">
+        <i class="ti ti-history"></i> Scan History
+      </button>
+      <button class="tab-btn" id="tab-posts" onclick="switchTab('posts')">
+        <i class="ti ti-layout-cards"></i> My Posts
+      </button>
+    </div>
+
+    <!-- SCAN HISTORY -->
+    <div id="tabScans">
+      <div class="spinner-wrap">
+        <div class="spinner"></div>
+        <p style="color:var(--text-muted);font-size:13px">Loading your scans…</p>
+      </div>
+    </div>
+
+    <!-- MY POSTS -->
+    <div id="tabPosts" style="display:none">
+      <div class="spinner-wrap">
+        <div class="spinner"></div>
+        <p style="color:var(--text-muted);font-size:13px">Loading your posts…</p>
+      </div>
+    </div>
+
+  </div><!-- /profileContent -->
+</div><!-- /profile-layout -->
+
+<div id="toastWrap"></div>
+
+<footer class="footer">
+  <strong>HerbID Iloilo</strong> — BSIT Capstone Project · NISU Lemery Campus · 2024–2025
+</footer>
+
+<script type="module">
+  import { db }           from './js/firebase-config.js';
+  import { onAuthChange } from './js/auth.js';
+  import { initNavAuth }  from './js/nav-auth.js';
+  import {
+    collection, getDocs, deleteDoc, doc,
+    query, orderBy, limit, where
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import {
+    getAuth, updateProfile, updateEmail, updatePassword,
+    reauthenticateWithCredential, EmailAuthProvider, deleteUser
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  initNavAuth();
+
+  let currentUser  = null;
+  let isGoogle     = false;
+
+  // ── Auth ──
+  onAuthChange(async user => {
+    currentUser = user;
+    if (!user) {
+      document.getElementById('authGate').style.display      = '';
+      document.getElementById('profileContent').style.display = 'none';
+      return;
+    }
+    document.getElementById('authGate').style.display      = 'none';
+    document.getElementById('profileContent').style.display = '';
+    isGoogle = user.providerData.some(p => p.providerId === 'google.com');
+    renderHeader(user);
+    await Promise.all([loadScans(user.uid), loadPosts(user.uid)]);
+  });
+
+  function renderHeader(user) {
+    const av = document.getElementById('profileAvatar');
+    av.innerHTML = user.photoURL
+      ? `<img src="${user.photoURL}" referrerpolicy="no-referrer">`
+      : (user.displayName || user.email || 'U')[0].toUpperCase();
+
+    document.getElementById('profileName').textContent  = user.displayName || 'No name set';
+    document.getElementById('profileEmail').textContent = user.email || '';
+    document.getElementById('profileBadge').innerHTML   = isGoogle
+      ? `<span class="provider-badge provider-google"><i class="ti ti-brand-google"></i> Google Account</span>`
+      : `<span class="provider-badge provider-email"><i class="ti ti-mail"></i> Email Account</span>`;
+
+    if (!isGoogle) {
+      document.getElementById('editName').value  = user.displayName || '';
+      document.getElementById('editEmail').value = user.email || '';
+    }
+  }
+
+  // ── Edit panel ──
+  window.toggleEdit = function() {
+    const panel = document.getElementById('editPanel');
+    const open  = panel.classList.toggle('open');
+    document.getElementById('editToggleBtn').innerHTML = open
+      ? '<i class="ti ti-x"></i> Close'
+      : '<i class="ti ti-pencil"></i> Edit Profile';
+    if (open) {
+      document.getElementById('googleNotice').style.display = isGoogle  ? '' : 'none';
+      document.getElementById('emailForm').style.display    = !isGoogle ? '' : 'none';
+    }
+  };
+
+  window.togglePwFields = function() {
+    document.getElementById('pwFields').classList.toggle('open');
+  };
+
+  window.saveProfile = async function() {
+    if (!currentUser || isGoogle) return;
+    const name  = document.getElementById('editName').value.trim();
+    const email = document.getElementById('editEmail').value.trim();
+    if (!name)  { showToast('Name cannot be empty', 'warn');  return; }
+    if (!email) { showToast('Email cannot be empty', 'warn'); return; }
+
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i> Saving…';
+    try {
+      const auth = getAuth();
+      if (name  !== currentUser.displayName) await updateProfile(auth.currentUser, { displayName: name });
+      if (email !== currentUser.email)       await updateEmail(auth.currentUser, email);
+      currentUser = auth.currentUser;
+      renderHeader(currentUser);
+      toggleEdit();
+      showToast('✅ Profile updated!');
+    } catch(e) {
+      showToast(e.code === 'auth/requires-recent-login'
+        ? 'Sign out and back in before changing email.'
+        : 'Error: ' + e.message, 'error');
+    } finally {
+      btn.disabled = false; btn.innerHTML = '<i class="ti ti-check"></i> Save Changes';
+    }
+  };
+
+  window.changePassword = async function() {
+    if (!currentUser || isGoogle) return;
+    const cur  = document.getElementById('currentPw').value;
+    const nw   = document.getElementById('newPw').value;
+    const conf = document.getElementById('confirmPw').value;
+    if (!cur)         { showToast('Enter your current password', 'warn'); return; }
+    if (nw.length < 6){ showToast('New password needs 6+ characters', 'warn'); return; }
+    if (nw !== conf)  { showToast('Passwords do not match', 'warn'); return; }
+    try {
+      const auth = getAuth();
+      await reauthenticateWithCredential(auth.currentUser, EmailAuthProvider.credential(currentUser.email, cur));
+      await updatePassword(auth.currentUser, nw);
+      ['currentPw','newPw','confirmPw'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('pwFields').classList.remove('open');
+      showToast('✅ Password updated!');
+    } catch(e) {
+      showToast(e.code === 'auth/wrong-password' ? 'Current password is wrong' : 'Error: ' + e.message, 'error');
+    }
+  };
+
+  window.confirmDelete = async function() {
+    if (!currentUser || isGoogle) return;
+    if (!confirm('Delete your account? This cannot be undone.')) return;
+    const pw = prompt('Enter your password to confirm:');
+    if (!pw) return;
+    try {
+      const auth = getAuth();
+      await reauthenticateWithCredential(auth.currentUser, EmailAuthProvider.credential(currentUser.email, pw));
+      await deleteUser(auth.currentUser);
+      window.location.href = 'index.html';
+    } catch(e) {
+      showToast(e.code === 'auth/wrong-password' ? 'Wrong password' : 'Error: ' + e.message, 'error');
+    }
+  };
+
+  // ── Tabs ──
+  window.switchTab = function(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`tab-${tab}`).classList.add('active');
+    document.getElementById('tabScans').style.display = tab === 'scans' ? '' : 'none';
+    document.getElementById('tabPosts').style.display = tab === 'posts' ? '' : 'none';
+  };
+
+  // ── Scans ──
+  async function loadScans(uid) {
+    const wrap = document.getElementById('tabScans');
+    try {
+      const q    = query(collection(db,'scans'), where('uid','==',uid), orderBy('scannedAt','desc'), limit(50));
+      const snap = await getDocs(q);
+      const scans = []; snap.forEach(d => scans.push({ id:d.id, ...d.data() }));
+      document.getElementById('statScans').textContent = scans.length;
+
+      if (!scans.length) {
+        wrap.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div><h3>No scans yet</h3>
+          <p>Go to <a href="identify.html">Identify Herb</a> to scan your first herb!</p></div>`;
+        return;
+      }
+      wrap.innerHTML = `<div class="scan-grid">${scans.map(s => {
+        const date    = s.scannedAt?.toDate?.()?.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}) || '';
+        const herb    = s.identifiedHerb || s.herbName || s.herb || 'Unknown Herb';
+        const confRaw = s.confidencePercent ?? s.confidence ?? null;
+        const confNum = confRaw !== null ? parseFloat(confRaw) : null;
+        const lbl     = s.confidenceLabel || (confNum !== null ? (confNum >= 80 ? 'High' : confNum >= 50 ? 'Medium' : 'Low') : null);
+        const cls     = lbl === 'High' ? 'conf-high' : lbl === 'Medium' ? 'conf-med' : 'conf-low';
+        // Cover all possible field names the identify/scan page might save
+        const imgSrc  = s.imageBase64 || s.image || s.imageData || s.imageUrl || s.photo || s.photoURL || null;
+        return `
+          <div class="scan-card">
+            ${imgSrc
+              ? `<img class="scan-img" src="${imgSrc}" loading="lazy"
+                   onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+              : ''}
+            <div class="scan-placeholder" style="${imgSrc ? 'display:none' : ''}">🌿</div>
+            <div class="scan-body">
+              <div class="scan-herb">${herb}</div>
+              ${lbl ? `<span class="scan-conf ${cls}">${confNum !== null ? confNum.toFixed(0)+'% ' : ''}${lbl}</span>` : ''}
+              <div class="scan-date"><i class="ti ti-calendar"></i> ${date}</div>
+            </div>
+          </div>`;
+      }).join('')}</div>`;
+    } catch(e) {
+      wrap.innerHTML = `<div class="empty"><p style="color:#e53e3e">Could not load scans: ${e.message}</p></div>`;
+    }
+  }
+
+  // ── Posts ──
+  async function loadPosts(uid) {
+    const wrap = document.getElementById('tabPosts');
+    try {
+      const q    = query(collection(db,'posts'), where('uid','==',uid), orderBy('createdAt','desc'), limit(50));
+      const snap = await getDocs(q);
+      const posts = []; snap.forEach(d => posts.push({ id:d.id, ...d.data() }));
+      document.getElementById('statPosts').textContent = posts.length;
+      document.getElementById('statLikes').textContent = posts.reduce((s,p) => s + (p.likeCount||0), 0);
+
+      if (!posts.length) {
+        wrap.innerHTML = `<div class="empty"><div class="empty-icon">📝</div><h3>No posts yet</h3>
+          <p>Share discoveries in the <a href="feed.html">Community Feed</a>!</p></div>`;
+        return;
+      }
+      wrap.innerHTML = `<div class="post-list">${posts.map(p => {
+        const date    = p.createdAt?.toDate?.()?.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}) || '';
+        const caption = p.caption || '(No caption)';
+        return `
+          <div class="mini-post" id="mp-${p.id}">
+            ${p.imageBase64
+              ? `<img class="mini-post-thumb" src="${p.imageBase64}" loading="lazy">`
+              : `<div class="mini-post-thumb-placeholder">🌿</div>`}
+            <div class="mini-post-body">
+              ${p.herbName ? `<span class="mini-post-herb"><i class="ti ti-leaf" style="font-size:10px"></i> ${p.herbName}</span>` : ''}
+              <div class="mini-post-caption">${escHTML(caption)}</div>
+              <div class="mini-post-footer">
+                <span class="mini-stat"><i class="ti ti-heart" style="color:#e53e3e"></i> ${p.likeCount||0}</span>
+                <span class="mini-stat"><i class="ti ti-message-circle" style="color:var(--green-main)"></i> ${p.commentCount||0}</span>
+                <span class="mini-date">${date}</span>
+                <button class="mini-delete" onclick="deleteMyPost('${p.id}')" title="Delete"><i class="ti ti-trash"></i></button>
+              </div>
+            </div>
+          </div>`;
+      }).join('')}</div>`;
+    } catch(e) {
+      wrap.innerHTML = `<div class="empty"><p style="color:#e53e3e">Could not load posts: ${e.message}</p></div>`;
+    }
+  }
+
+  window.deleteMyPost = async function(postId) {
+    if (!confirm('Delete this post?')) return;
+    try {
+      await deleteDoc(doc(db,'posts',postId));
+      document.getElementById(`mp-${postId}`)?.remove();
+      const el = document.getElementById('statPosts');
+      el.textContent = Math.max(0, parseInt(el.textContent||0) - 1);
+      showToast('Post deleted');
+    } catch(e) { showToast('Could not delete: ' + e.message, 'error'); }
+  };
+
+  function escHTML(s) {
+    return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/\n/g,'<br>');
+  }
+
+  function showToast(msg, type='ok') {
+    const wrap = document.getElementById('toastWrap');
+    const t = document.createElement('div');
+    t.className = `toast${type==='error'?' error':type==='warn'?' warn':''}`;
+    t.textContent = msg;
+    wrap.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+</script>
+</body>
+</html>

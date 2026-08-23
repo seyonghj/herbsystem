@@ -244,12 +244,16 @@ function renderLoggedIn(slot, user) {
         </div>
 
         <!-- Menu items -->
+        <a class="dd-item" href="profile.html">
+          <i class="ti ti-user-circle"></i>
+          <div class="dd-item-label">My Profile</div>
+        </a>
         <a class="dd-item" href="index.html">
           <i class="ti ti-home"></i>
           <div class="dd-item-label">Home</div>
         </a>
         <a class="dd-item" href="feed.html">
-          <i class="ti ti-home"></i>
+          <i class="ti ti-feed"></i>
           <div class="dd-item-label">Feed</div>
         </a>
         <a class="dd-item" href="history.html">
