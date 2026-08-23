@@ -47,6 +47,7 @@ async function saveUserProfile(user) {
       photoURL:    user.photoURL || "",
       createdAt:   serverTimestamp(),
       lastLogin:   serverTimestamp(),
+      provider: isGoogle ? "google" : "email",
     });
   } else {
     // Update last login
