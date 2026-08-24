@@ -207,15 +207,15 @@
     .user-row-stats { display: flex; gap: 10px; flex-shrink: 0; }
     .user-row-stat  { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 3px; }
 
-    .user-row-menu { flex-shrink: 0; }
+    .user-row-menu { position: relative; flex-shrink: 0; }
     .user-dots-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 20px; padding: 6px; border-radius: 8px; transition: background 0.15s; display: flex; align-items: center; }
     .user-dots-btn:hover { background: var(--admin-pale); color: var(--admin); }
 
     .user-dropdown {
-      position: fixed; z-index: 9000;
+      position: absolute; top: calc(100% + 4px); right: 0; z-index: 9000;
       background: #fff; border: 1px solid var(--border);
       border-radius: var(--radius-md); box-shadow: 0 8px 28px rgba(0,0,0,0.16);
-      min-width: 175px; display: none; overflow: hidden;
+      min-width: 175px; max-width: calc(100vw - 2rem); display: none; overflow: hidden;
     }
     .user-dropdown.open { display: block; }
     .user-dropdown-item { display: flex; align-items: center; gap: 8px; padding: 11px 14px; font-size: 13px; cursor: pointer; font-family: inherit; background: none; border: none; width: 100%; text-align: left; transition: background 0.12s; color: var(--text); }
@@ -931,13 +931,9 @@
 
   window.toggleUserMenu = function(uid, e) {
     e.stopPropagation();
-    const btn  = e.currentTarget;
     const drop = document.getElementById(`udrop-${uid}`);
     document.querySelectorAll('.user-dropdown.open').forEach(d => { if (d !== drop) d.classList.remove('open'); });
     if (drop.classList.contains('open')) { drop.classList.remove('open'); return; }
-    const rect = btn.getBoundingClientRect();
-    drop.style.top  = (rect.bottom + window.scrollY + 4) + 'px';
-    drop.style.left = (rect.right + window.scrollX - 175) + 'px';
     drop.classList.add('open');
   };
 
