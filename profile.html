@@ -44,13 +44,6 @@
       .nav-hamburger { display: flex; }
     }
 
-    /* HERO */
-    .page-hero { background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 100%); color: #fff; text-align: center; padding: 2.5rem 1rem 3rem; position: relative; overflow: hidden; }
-    .page-hero::before { content: ''; position: absolute; inset: 0; opacity: 0.07; background-image: radial-gradient(circle, #fff 1px, transparent 1px); background-size: 22px 22px; }
-    .page-hero-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 99px; padding: 4px 14px; font-size: 12px; font-weight: 600; margin-bottom: 0.75rem; position: relative; }
-    .page-hero h1 { font-size: clamp(22px,5vw,32px); font-weight: 800; position: relative; margin-bottom: 0.5rem; }
-    .page-hero p  { font-size: 14px; opacity: 0.8; position: relative; max-width: 440px; margin: 0 auto; }
-
     /* LAYOUT */
     .profile-layout { max-width: 820px; margin: 0 auto; padding: 1.5rem 1rem 5rem; }
 
@@ -157,9 +150,7 @@
     .mini-delete { background: none; border: none; cursor: pointer; color: #c0c8d0; font-size: 14px; padding: 4px 6px; border-radius: 6px; font-family: inherit; transition: color 0.15s, background 0.15s; }
     .mini-delete:hover { color: #e53e3e; background: #fff5f5; }
 
-    /* ══════════════════════
-       ADMIN USER CARDS
-    ══════════════════════ */
+    /* ADMIN BANNER */
     .admin-banner { display: flex; align-items: center; gap: 10px; background: var(--admin-pale); border: 1px solid var(--admin-light); border-radius: var(--radius-md); padding: 12px 16px; margin-bottom: 1.25rem; }
     .admin-banner i { font-size: 20px; color: var(--admin); flex-shrink: 0; }
     .admin-banner strong { font-size: 13px; color: var(--admin); }
@@ -169,16 +160,16 @@
     .user-search-bar input { flex: 1; padding: 10px 13px; border: 1.5px solid var(--border); border-radius: var(--radius-md); font-size: 13px; font-family: inherit; color: var(--text); }
     .user-search-bar input:focus { outline: none; border-color: var(--admin); box-shadow: 0 0 0 3px rgba(109,40,217,0.1); }
 
+    /* USER LIST */
     .user-list { display: flex; flex-direction: column; gap: 10px; }
 
-    /* Clickable user row */
     .user-row {
       background: #fff; border: 1px solid var(--border);
       border-radius: var(--radius-md); padding: 12px 14px;
       display: flex; align-items: center; gap: 12px;
       box-shadow: var(--shadow-sm);
       cursor: pointer; transition: box-shadow 0.15s, transform 0.12s;
-      position: relative;
+      /* no position:relative — let dropdown use fixed positioning */
     }
     .user-row:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
     .user-row-avatar { width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0; background: var(--green-main); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 700; overflow: hidden; }
@@ -188,85 +179,60 @@
     .user-row-email { font-size: 11px; color: var(--text-muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .user-row-date  { font-size: 10px; color: var(--text-muted); margin-top: 3px; }
 
-    /* 3-dot menu on user row */
+    /* 3-dot menu */
     .user-row-menu { position: relative; flex-shrink: 0; }
     .user-dots-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 20px; padding: 6px; border-radius: 8px; transition: background 0.15s; display: flex; align-items: center; }
     .user-dots-btn:hover { background: var(--admin-pale); color: var(--admin); }
-    .user-dropdown { position: absolute; top: calc(100% + 4px); right: 0; z-index: 50; background: #fff; border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: 0 6px 24px rgba(0,0,0,0.13); min-width: 160px; display: none; overflow: hidden; }
+
+    /* Dropdown — anchored to the three-dot button */
+    .user-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      right: 0;
+      z-index: 9000;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.16);
+      min-width: 175px;
+      max-width: calc(100vw - 2rem);
+      display: none;
+      overflow: hidden;
+    }
     .user-dropdown.open { display: block; }
     .user-dropdown-item { display: flex; align-items: center; gap: 8px; padding: 11px 14px; font-size: 13px; cursor: pointer; font-family: inherit; background: none; border: none; width: 100%; text-align: left; transition: background 0.12s; color: var(--text); }
     .user-dropdown-item:hover { background: var(--admin-pale); color: var(--admin); }
     .user-dropdown-item.danger { color: #e53e3e; }
-    .user-dropdown-item.danger:hover { background: #fff5f5; }
+    .user-dropdown-item.danger:hover { background: #fff5f5; color: #e53e3e; }
 
-    /* ══════════════════════
-       USER PROFILE DRAWER
-    ══════════════════════ */
-    .drawer-overlay {
-      display: none; position: fixed; inset: 0; z-index: 400;
-      background: rgba(10,20,15,0.45); backdrop-filter: blur(3px);
-    }
+    /* USER PROFILE DRAWER */
+    .drawer-overlay { display: none; position: fixed; inset: 0; z-index: 400; background: rgba(10,20,15,0.45); backdrop-filter: blur(3px); }
     .drawer-overlay.open { display: block; }
-    .drawer {
-      position: fixed; top: 0; right: -100%; bottom: 0; z-index: 401;
-      width: 100%; max-width: 420px;
-      background: #fff; box-shadow: -8px 0 40px rgba(0,0,0,0.18);
-      display: flex; flex-direction: column;
-      transition: right 0.3s cubic-bezier(0.4,0,0.2,1);
-      overflow: hidden;
-    }
+    .drawer { position: fixed; top: 0; right: -100%; bottom: 0; z-index: 401; width: 100%; max-width: 420px; background: #fff; box-shadow: -8px 0 40px rgba(0,0,0,0.18); display: flex; flex-direction: column; transition: right 0.3s cubic-bezier(0.4,0,0.2,1); overflow: hidden; }
     .drawer.open { right: 0; }
-
-    .drawer-cover {
-      height: 110px; flex-shrink: 0;
-      background: linear-gradient(135deg, #07382a 0%, var(--green-main) 100%);
-      position: relative;
-    }
+    .drawer-cover { height: 110px; flex-shrink: 0; background: linear-gradient(135deg, #07382a 0%, var(--green-main) 100%); position: relative; }
     .drawer-cover-dots { position: absolute; inset: 0; opacity: 0.08; background-image: radial-gradient(circle, #fff 1.5px, transparent 1.5px); background-size: 20px 20px; }
-    .drawer-close-btn {
-      position: absolute; top: 12px; right: 12px;
-      background: rgba(255,255,255,0.15); border: none; color: #fff;
-      width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
-      font-size: 17px; display: flex; align-items: center; justify-content: center;
-      transition: background 0.15s;
-    }
+    .drawer-close-btn { position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.15); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 17px; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
     .drawer-close-btn:hover { background: rgba(255,255,255,0.28); }
     .drawer-avatar-wrap { position: absolute; bottom: -34px; left: 1.25rem; }
-    .drawer-avatar {
-      width: 70px; height: 70px; border-radius: 50%;
-      border: 4px solid #fff; background: var(--green-main); color: #fff;
-      font-size: 26px; font-weight: 800;
-      display: flex; align-items: center; justify-content: center;
-      overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.18);
-    }
+    .drawer-avatar { width: 70px; height: 70px; border-radius: 50%; border: 4px solid #fff; background: var(--green-main); color: #fff; font-size: 26px; font-weight: 800; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.18); }
     .drawer-avatar img { width: 100%; height: 100%; object-fit: cover; }
-
     .drawer-info { padding: 44px 1.25rem 1rem; flex-shrink: 0; border-bottom: 1px solid var(--border); }
     .drawer-name  { font-size: 19px; font-weight: 800; color: var(--text); }
     .drawer-email { font-size: 13px; color: var(--text-soft); margin-top: 3px; }
     .drawer-since { font-size: 11px; color: var(--text-muted); margin-top: 5px; display: flex; align-items: center; gap: 4px; }
-
     .drawer-stats { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .drawer-stat { flex: 1; text-align: center; padding: 14px 6px; border-right: 1px solid var(--border); }
     .drawer-stat:last-child { border-right: none; }
     .drawer-stat-num { font-size: 20px; font-weight: 800; color: var(--green-dark); }
     .drawer-stat-lbl { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
-
     .drawer-body { flex: 1; overflow-y: auto; padding: 1rem 1.25rem; }
     .drawer-section-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
-
-    /* Drawer scans mini grid */
     .drawer-scan-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 1.25rem; }
-    .drawer-scan-thumb {
-      aspect-ratio: 1; border-radius: 10px; overflow: hidden;
-      background: var(--green-pale); display: flex; align-items: center; justify-content: center;
-      font-size: 28px; border: 1px solid var(--border);
-    }
+    .drawer-scan-thumb { aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: var(--green-pale); display: flex; align-items: center; justify-content: center; font-size: 28px; border: 1px solid var(--border); }
     .drawer-scan-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-    /* ══════════════════════
-       EDIT USER MODAL
-    ══════════════════════ */
+    /* EDIT USER MODAL */
     .modal-overlay { display: none; position: fixed; inset: 0; z-index: 600; background: rgba(10,30,20,0.55); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 1rem; }
     .modal-overlay.open { display: flex; }
     .modal-box { background: #fff; border-radius: var(--radius-lg); width: 100%; max-width: 460px; box-shadow: 0 20px 60px rgba(0,0,0,0.22); animation: popIn 0.25s cubic-bezier(0.34,1.56,0.64,1); overflow: hidden; max-height: 90vh; overflow-y: auto; }
@@ -335,12 +301,6 @@
     <i class="ti ti-menu-2"></i>
   </button>
 </nav>
-
-<div class="page-hero">
-  <div class="page-hero-badge" id="heroBadge"><i class="ti ti-user-circle"></i> Account</div>
-  <h1 id="heroTitle">My Profile</h1>
-  <p id="heroSub">Scan history, community posts, and account settings</p>
-</div>
 
 <div class="profile-layout">
 
@@ -445,7 +405,7 @@
   </div>
 </div>
 
-<!-- ══ USER PROFILE DRAWER ══ -->
+<!-- USER PROFILE DRAWER -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
 <div class="drawer" id="userDrawer">
   <div class="drawer-cover" id="drawerCover">
@@ -470,7 +430,7 @@
   </div>
 </div>
 
-<!-- ══ EDIT USER MODAL ══ -->
+<!-- EDIT USER MODAL -->
 <div class="modal-overlay" id="editUserModal" onclick="onUserModalOverlay(event)">
   <div class="modal-box">
     <div class="modal-head">
@@ -485,7 +445,6 @@
           <div style="font-size:11px;color:var(--admin)" id="modalUserEmail">—</div>
         </div>
       </div>
-
       <div class="modal-section-title">Profile Photo</div>
       <div class="photo-upload-area" style="margin-bottom:0">
         <div class="photo-preview" id="modalAvatarPreview">?</div>
@@ -495,10 +454,8 @@
           <input type="file" id="modalPhotoInput" accept="image/jpeg,image/png,image/webp" onchange="onModalPhotoSelect(event)" style="display:none" />
         </div>
       </div>
-
       <div class="modal-section-title" style="margin-top:1rem">Display Name</div>
       <input class="edit-input" id="modalEditName" type="text" placeholder="Display name" maxlength="40" />
-
       <div class="modal-section-title" style="margin-top:1rem">New Password <span style="font-weight:400;color:var(--text-muted)">(leave blank to keep current)</span></div>
       <input class="edit-input" id="modalEditPw" type="password" placeholder="Min 6 characters" />
       <p class="pw-hint">Password reset will be queued for your backend to process.</p>
@@ -532,13 +489,12 @@
   //  ★ ADMIN EMAILS — add yours here ★
   // ══════════════════════════════════════
   const ADMIN_EMAILS = [
-     "marklouiepanares7@gmail.com",
+    "marklouiepanares7@gmail.com",
     "agolitorenerose5@gmail.com",
     "bilbaobenjamin11@gmail.com",
     "jermilynazuela073@gmail.com",
     "kurtmatthewjunealborote@gmail.com",
     "maeloufaithluminate@gmail.com"
-
   ];
 
   let currentUser   = null;
@@ -570,9 +526,6 @@
 
   function setupAdminUI() {
     if (!isAdmin) return;
-    document.getElementById('heroBadge').innerHTML  = '<i class="ti ti-shield-check"></i> Admin';
-    document.getElementById('heroTitle').textContent = 'Admin Dashboard';
-    document.getElementById('heroSub').textContent   = 'Manage users and view your activity';
     document.getElementById('profileCover').classList.add('admin-cover');
     const tabsBar = document.getElementById('tabsBar');
     if (!document.getElementById('tab-admin')) {
@@ -686,7 +639,9 @@
   window.switchTab = function(tab) {
     document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
     document.getElementById(`tab-${tab}`)?.classList.add('active');
-    ['scans','posts','admin'].forEach(t => document.getElementById(`tab${t.charAt(0).toUpperCase()+t.slice(1)}`).style.display = t===tab?'':'none');
+    ['scans','posts','admin'].forEach(t =>
+      document.getElementById(`tab${t.charAt(0).toUpperCase()+t.slice(1)}`).style.display = t===tab?'':'none'
+    );
   };
 
   async function loadScans(uid) {
@@ -726,7 +681,7 @@
       wrap.innerHTML = `<div class="post-list">${posts.map(p=>{
         const date=p.createdAt?.toDate?.()?.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'})||'';
         return `<div class="mini-post" id="mp-${p.id}">
-          ${p.imageBase64?`<img class="mini-post-thumb" src="${p.imageBase64}" loading="lazy" decoding="async" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"> <div class="mini-post-thumb-placeholder" style="display:none">🌿</div>`:`<div class="mini-post-thumb-placeholder">🌿</div>`}
+          ${p.imageBase64?`<img class="mini-post-thumb" src="${p.imageBase64}" loading="lazy" decoding="async" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="mini-post-thumb-placeholder" style="display:none">🌿</div>`:`<div class="mini-post-thumb-placeholder">🌿</div>`}
           <div class="mini-post-body">
             ${p.herbName?`<span class="mini-post-herb"><i class="ti ti-leaf" style="font-size:10px"></i> ${p.herbName}</span>`:''}
             <div class="mini-post-caption">${escHTML(p.caption||'(No caption)')}</div>
@@ -756,7 +711,6 @@
   //  ADMIN — LOAD & RENDER USERS
   // ══════════════════════════════════════
   async function loadUsers() {
-    const wrap = document.getElementById('userList');
     try {
       const snap = await getDocs(collection(db,'users'));
       const users = [];
@@ -790,7 +744,6 @@
             <div class="user-row-email">${escHTML(u.email||'')}</div>
             ${since?`<div class="user-row-date"><i class="ti ti-calendar" style="font-size:10px"></i> Joined ${since}</div>`:''}
           </div>
-          <!-- 3-dot menu -->
           <div class="user-row-menu" onclick="event.stopPropagation()">
             <button class="user-dots-btn" onclick="toggleUserMenu('${u.id}',event)" title="Options">
               <i class="ti ti-dots-vertical"></i>
@@ -816,30 +769,39 @@
     renderUsers(allUsers.filter(u=>(u.displayName||'').toLowerCase().includes(q)||(u.email||'').toLowerCase().includes(q)));
   };
 
-  // Close all dropdowns on outside click
+  // Close dropdowns on outside click
   document.addEventListener('click', () => {
     document.querySelectorAll('.user-dropdown.open').forEach(d=>d.classList.remove('open'));
   });
 
+  // ── 3-dot menu ──
   window.toggleUserMenu = function(uid, e) {
     e.stopPropagation();
+    const btn  = e.currentTarget;
     const drop = document.getElementById(`udrop-${uid}`);
-    document.querySelectorAll('.user-dropdown.open').forEach(d=>{ if(d!==drop) d.classList.remove('open'); });
-    drop?.classList.toggle('open');
+
+    // Close all others
+    document.querySelectorAll('.user-dropdown.open').forEach(d => {
+      if (d !== drop) d.classList.remove('open');
+    });
+
+    if (drop.classList.contains('open')) {
+      drop.classList.remove('open');
+      return;
+    }
+
+    drop.classList.add('open');
   };
 
   // ══════════════════════════════════════
   //  USER PROFILE DRAWER
   // ══════════════════════════════════════
   window.openDrawer = async function(userId) {
-    // close any open dropdown
     document.querySelectorAll('.user-dropdown.open').forEach(d=>d.classList.remove('open'));
-
     const u = allUsers.find(x=>x.id===userId);
     if (!u) return;
     drawerUser = u;
 
-    // Fill static info
     const avHTML = u.photoURL
       ? `<img src="${u.photoURL}" referrerpolicy="no-referrer">`
       : (u.displayName||u.email||'U')[0].toUpperCase();
@@ -847,21 +809,17 @@
     document.getElementById('drawerName').textContent  = u.displayName || 'No name';
     document.getElementById('drawerEmail').textContent = u.email || '';
     const since = u.createdAt?.toDate?.()?.toLocaleDateString('en-PH',{month:'long',day:'numeric',year:'numeric'})||'';
-    document.getElementById('drawerSince').innerHTML = since
-      ? `<i class="ti ti-calendar"></i> Member since ${since}` : '';
+    document.getElementById('drawerSince').innerHTML = since ? `<i class="ti ti-calendar"></i> Member since ${since}` : '';
 
-    // Reset stats
     document.getElementById('drawerStatScans').textContent = '…';
     document.getElementById('drawerStatPosts').textContent = '…';
     document.getElementById('drawerStatLikes').textContent = '…';
     document.getElementById('drawerBody').innerHTML = `<div class="spinner-wrap"><div class="spinner"></div></div>`;
 
-    // Open drawer
     document.getElementById('drawerOverlay').classList.add('open');
     document.getElementById('userDrawer').classList.add('open');
     document.body.style.overflow = 'hidden';
 
-    // Load user's scans & posts
     try {
       const [scanSnap, postSnap] = await Promise.all([
         getDocs(query(collection(db,'scans'),  where('uid','==',userId), orderBy('scannedAt','desc'), limit(20))),
@@ -876,30 +834,23 @@
       document.getElementById('drawerStatPosts').textContent = posts.length;
       document.getElementById('drawerStatLikes').textContent = totalLikes;
 
-      // Build drawer body
       let html = '';
 
-      // Recent scans mini grid
       if (scans.length) {
-        html += `<div class="drawer-section-title" style="margin-bottom:8px">Recent Scans</div>
-        <div class="drawer-scan-grid">`;
+        html += `<div class="drawer-section-title" style="margin-bottom:8px">Recent Scans</div><div class="drawer-scan-grid">`;
         scans.slice(0,6).forEach(s=>{
           const imgSrc = s.imageBase64||s.image||null;
-          html += `<div class="drawer-scan-thumb">
-            ${imgSrc?`<img src="${imgSrc}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.parentElement.textContent='🌿'">`:'🌿'}
-          </div>`;
+          html += `<div class="drawer-scan-thumb">${imgSrc?`<img src="${imgSrc}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.parentElement.textContent='🌿'">`:'🌿'}</div>`;
         });
         html += `</div>`;
       }
 
-      // Recent posts
       if (posts.length) {
-        html += `<div class="drawer-section-title" style="margin:1rem 0 8px">Recent Posts</div>
-        <div class="post-list">`;
+        html += `<div class="drawer-section-title" style="margin:1rem 0 8px">Recent Posts</div><div class="post-list">`;
         posts.slice(0,4).forEach(p=>{
           const date=p.createdAt?.toDate?.()?.toLocaleDateString('en-PH',{month:'short',day:'numeric'})||'';
           html += `<div class="mini-post" style="border-radius:var(--radius-md)">
-            ${p.imageBase64?`<img class="mini-post-thumb" src="${p.imageBase64}" loading="lazy" decoding="async" style="width:80px" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"> <div class="mini-post-thumb-placeholder" style="width:80px;display:none">🌿</div>`:`<div class="mini-post-thumb-placeholder" style="width:80px">🌿</div>`}
+            ${p.imageBase64?`<img class="mini-post-thumb" src="${p.imageBase64}" loading="lazy" decoding="async" style="width:80px" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="mini-post-thumb-placeholder" style="width:80px;display:none">🌿</div>`:`<div class="mini-post-thumb-placeholder" style="width:80px">🌿</div>`}
             <div class="mini-post-body">
               ${p.herbName?`<span class="mini-post-herb"><i class="ti ti-leaf" style="font-size:10px"></i> ${p.herbName}</span>`:''}
               <div class="mini-post-caption">${escHTML(p.caption||'(No caption)')}</div>
@@ -917,7 +868,6 @@
         html = `<div style="text-align:center;padding:2rem;color:var(--text-muted);font-size:13px">No activity yet.</div>`;
       }
 
-      // Edit button at bottom of drawer
       html += `<div style="margin-top:1.5rem">
         <button onclick="openUserModal('${userId}')" style="width:100%;padding:11px;background:var(--admin);color:#fff;border:none;border-radius:var(--radius-md);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
           <i class="ti ti-pencil"></i> Edit This User
@@ -941,7 +891,6 @@
   //  EDIT USER MODAL
   // ══════════════════════════════════════
   window.openUserModal = function(userId) {
-    // close drawer if open
     closeDrawer();
     const u = allUsers.find(x=>x.id===userId);
     if (!u) return;
@@ -995,7 +944,6 @@
       if (modalPhotoB64) updates.photoURL = modalPhotoB64;
       await setDoc(doc(db,'users',editingUser.id), updates, { merge:true });
 
-      // Update local cache & re-render
       const idx = allUsers.findIndex(u=>u.id===editingUser.id);
       if (idx!==-1) {
         allUsers[idx].displayName = name;
