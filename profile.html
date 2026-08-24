@@ -706,7 +706,7 @@
         const cls=lbl==='High'?'conf-high':lbl==='Medium'?'conf-med':'conf-low';
         const imgSrc=s.imageBase64||s.image||s.imageData||s.imageUrl||null;
         return `<div class="scan-card">
-          ${imgSrc?`<img class="scan-img" src="${imgSrc}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`:''} 
+          ${imgSrc?`<img class="scan-img" src="${imgSrc}" loading="lazy" decoding="async" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`:''}
           <div class="scan-placeholder" style="${imgSrc?'display:none':''}">🌿</div>
           <div class="scan-body"><div class="scan-herb">${herb}</div>${lbl?`<span class="scan-conf ${cls}">${confNum!==null?confNum.toFixed(0)+'% ':''}${lbl}</span>`:''}<div class="scan-date"><i class="ti ti-calendar"></i> ${date}</div></div>
         </div>`;
@@ -726,7 +726,7 @@
       wrap.innerHTML = `<div class="post-list">${posts.map(p=>{
         const date=p.createdAt?.toDate?.()?.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'})||'';
         return `<div class="mini-post" id="mp-${p.id}">
-          ${p.imageBase64?`<img class="mini-post-thumb" src="${p.imageBase64}" loading="lazy">`:`<div class="mini-post-thumb-placeholder">🌿</div>`}
+          ${p.imageBase64?`<img class="mini-post-thumb" src="${p.imageBase64}" loading="lazy" decoding="async" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"> <div class="mini-post-thumb-placeholder" style="display:none">🌿</div>`:`<div class="mini-post-thumb-placeholder">🌿</div>`}
           <div class="mini-post-body">
             ${p.herbName?`<span class="mini-post-herb"><i class="ti ti-leaf" style="font-size:10px"></i> ${p.herbName}</span>`:''}
             <div class="mini-post-caption">${escHTML(p.caption||'(No caption)')}</div>
@@ -886,7 +886,7 @@
         scans.slice(0,6).forEach(s=>{
           const imgSrc = s.imageBase64||s.image||null;
           html += `<div class="drawer-scan-thumb">
-            ${imgSrc?`<img src="${imgSrc}" loading="lazy" style="width:100%;height:100%;object-fit:cover">`:'🌿'}
+            ${imgSrc?`<img src="${imgSrc}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.parentElement.textContent='🌿'">`:'🌿'}
           </div>`;
         });
         html += `</div>`;
@@ -899,7 +899,7 @@
         posts.slice(0,4).forEach(p=>{
           const date=p.createdAt?.toDate?.()?.toLocaleDateString('en-PH',{month:'short',day:'numeric'})||'';
           html += `<div class="mini-post" style="border-radius:var(--radius-md)">
-            ${p.imageBase64?`<img class="mini-post-thumb" src="${p.imageBase64}" loading="lazy" style="width:80px">`:`<div class="mini-post-thumb-placeholder" style="width:80px">🌿</div>`}
+            ${p.imageBase64?`<img class="mini-post-thumb" src="${p.imageBase64}" loading="lazy" decoding="async" style="width:80px" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"> <div class="mini-post-thumb-placeholder" style="width:80px;display:none">🌿</div>`:`<div class="mini-post-thumb-placeholder" style="width:80px">🌿</div>`}
             <div class="mini-post-body">
               ${p.herbName?`<span class="mini-post-herb"><i class="ti ti-leaf" style="font-size:10px"></i> ${p.herbName}</span>`:''}
               <div class="mini-post-caption">${escHTML(p.caption||'(No caption)')}</div>

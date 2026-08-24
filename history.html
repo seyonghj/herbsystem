@@ -249,8 +249,9 @@
           ? `<span class="scan-method-badge badge-gemini">✨ Gemini</span>`
           : `<span class="scan-method-badge badge-cnn">🔵 CNN</span>`;
 
-        const imgContent = s.imageUrl
-          ? `<img src="${s.imageUrl}" alt="${s.identifiedHerb || 'scan'}" loading="lazy">`
+        const imageSrc = s.imageBase64 || s.imageUrl || null;
+        const imgContent = imageSrc
+          ? `<img src="${imageSrc}" alt="${s.identifiedHerb || 'scan'}" loading="lazy" decoding="async" onerror="this.style.display='none';this.parentElement.insertAdjacentHTML('beforeend','<span style=\'font-size:48px\'>🌿</span>')">`
           : `<span style="font-size:48px">🌿</span>`;
 
         if (!s.matched) {
