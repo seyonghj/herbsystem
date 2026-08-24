@@ -636,7 +636,7 @@
     // image
     const imgEl = document.getElementById('detailImage');
     imgEl.innerHTML = p.imageBase64
-      ? `<img class="detail-image" src="${p.imageBase64}" alt="herb photo" loading="lazy" decoding="async" onerror="this.style.display='none';this.parentElement.innerHTML='<div class=\"detail-image-placeholder\">🌿</div>'">`
+      ? `<img class="detail-image" src="${p.imageBase64}" alt="herb photo" loading="lazy" decoding="async" onerror="this.style.display='none'">`
       : p.herbName ? `<div class="detail-image-placeholder">🌿</div>` : '';
 
     // meta (author + caption + confidence)
@@ -898,7 +898,7 @@
       : (p.userName || 'U')[0].toUpperCase();
 
     const imageHTML = p.imageBase64
-      ? `<img class="feed-image" src="${p.imageBase64}" alt="herb photo" loading="lazy" decoding="async" onerror="this.style.display='none';this.parentElement.insertAdjacentHTML('afterbegin','<div class=\"feed-image-placeholder\">🌿</div>')">`
+      ? `<img class="feed-image" src="${p.imageBase64}" alt="herb photo" loading="lazy" decoding="async" onerror="this.style.display='none'">`
       : p.herbName ? `<div class="feed-image-placeholder">🌿</div>` : '';
 
     const herbBadge = p.herbName
