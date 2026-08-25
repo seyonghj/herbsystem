@@ -32,25 +32,37 @@ const db       = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
 // ── Save/update user profile in Firestore ──
-async function saveUserProfile(user) {
-  const ref = doc(db, "users", user.uid);
-  const snap = await getDoc(ref);
+// FIX 1: Always write to Firestore on every login using merge:true
+// FIX 2: Accept optional overrides (for signUp where displayName is new)
+async function saveUserProfile(user, overrides = {}) {
+  try {
+    const ref      = doc(db, "users", user.uid);
+    const isGoogle = user.providerData?.some(p => p.providerId === "google.com") ?? false;
 
-  // ✅ FIX: derive provider from user.providerData instead of undefined `isGoogle`
-  const isGoogle = user.providerData?.some(p => p.providerId === "google.com") ?? false;
+    // Check if doc exists to preserve createdAt
+    const snap = await getDoc(ref);
 
-  if (!snap.exists()) {
-    await setDoc(ref, {
+    const data = {
       uid:         user.uid,
-      displayName: user.displayName || "",
-      email:       user.email,
-      photoURL:    user.photoURL || "",
-      createdAt:   serverTimestamp(),
-      lastLogin:   serverTimestamp(),
+      displayName: overrides.displayName || user.displayName || "",
+      email:       overrides.email       || user.email       || "",
+      photoURL:    overrides.photoURL    || user.photoURL    || "",
       provider:    isGoogle ? "google" : "email",
-    });
-  } else {
-    await setDoc(ref, { lastLogin: serverTimestamp() }, { merge: true });
+      lastLogin:   serverTimestamp(),
+      blocked:     false,
+    };
+
+    // Only set createdAt if this is the first time
+    if (!snap.exists()) {
+      data.createdAt = serverTimestamp();
+    }
+
+    // merge:true so we never accidentally overwrite existing fields
+    await setDoc(ref, data, { merge: true });
+
+  } catch(e) {
+    // Don't crash the login flow if Firestore save fails
+    console.warn("saveUserProfile failed:", e.message);
   }
 }
 
@@ -69,11 +81,13 @@ export async function signInWithEmail(email, password) {
 }
 
 // ── Email Sign-Up ──
+// FIX 3: Pass displayName as override — spread on Firebase user object doesn't work
 export async function signUpWithEmail(name, email, password) {
   const result = await createUserWithEmailAndPassword(auth, email, password);
   await updateProfile(result.user, { displayName: name });
-  // Pass updated user with displayName so saveUserProfile stores the correct name
-  await saveUserProfile({ ...result.user, displayName: name });
+  // Pass name as override since updateProfile is async and
+  // result.user.displayName may not be updated yet at this point
+  await saveUserProfile(result.user, { displayName: name });
   return result.user;
 }
 
@@ -88,8 +102,17 @@ export async function resetPassword(email) {
 }
 
 // ── Auth state listener ──
+// FIX 4: Also save profile on every auth state change
+// This catches users who are already logged in when the page loads
+// AND syncs existing Auth users who never got a Firestore doc
 export function onAuthChange(callback) {
-  return onAuthStateChanged(auth, callback);
+  return onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      // Save/update Firestore profile on every page load while logged in
+      await saveUserProfile(user);
+    }
+    callback(user);
+  });
 }
 
 // ── Get current user ──

@@ -204,6 +204,7 @@
     .user-row-name  { font-size: 14px; font-weight: 700; color: var(--text); }
     .user-row-email { font-size: 11px; color: var(--text-muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .user-row-date  { font-size: 10px; color: var(--text-muted); margin-top: 3px; }
+    .user-row-badge { margin-top: 6px; }
     .user-row-stats { display: flex; gap: 10px; flex-shrink: 0; }
     .user-row-stat  { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 3px; }
 
@@ -299,6 +300,7 @@
     .drawer-name  { font-size: 19px; font-weight: 800; color: var(--text); }
     .drawer-email { font-size: 13px; color: var(--text-soft); margin-top: 3px; }
     .drawer-since { font-size: 11px; color: var(--text-muted); margin-top: 5px; display: flex; align-items: center; gap: 4px; }
+    .drawer-badge { margin-top: 8px; }
     .drawer-stats { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .drawer-stat { flex: 1; text-align: center; padding: 14px 6px; border-right: 1px solid var(--border); }
     .drawer-stat:last-child { border-right: none; }
@@ -488,6 +490,21 @@
         <div class="user-search-bar">
           <input type="text" id="userSearchInput" placeholder="Search by name or email…" oninput="filterUsers()" />
         </div>
+
+        <!-- Account type filter -->
+        <div class="sort-bar">
+          <span class="sort-bar-label">Show:</span>
+          <button class="sort-btn active" id="uftype-all" onclick="filterUserType('all')">
+            <i class="ti ti-users"></i> All
+          </button>
+          <button class="sort-btn" id="uftype-email" onclick="filterUserType('email')">
+            <i class="ti ti-mail"></i> Email Users
+          </button>
+          <button class="sort-btn" id="uftype-google" onclick="filterUserType('google')">
+            <i class="ti ti-brand-google"></i> Google Users
+          </button>
+        </div>
+
         <div class="sort-bar">
           <span class="sort-bar-label">Sort:</span>
           <button class="sort-btn active" id="usort-name" onclick="sortUsers('name')">
@@ -497,6 +514,7 @@
             <i class="ti ti-calendar"></i> Joined <span class="sort-dir" id="usort-date-dir">↓</span>
           </button>
         </div>
+        <div class="results-count" id="usersResultCount"></div>
         <div id="userList"><div class="spinner-wrap"><div class="spinner"></div></div></div>
       </div>
 
@@ -535,6 +553,7 @@
     <div class="drawer-name"  id="drawerName">—</div>
     <div class="drawer-email" id="drawerEmail">—</div>
     <div class="drawer-since" id="drawerSince"></div>
+    <div class="drawer-badge" id="drawerBadge"></div>
   </div>
   <div class="drawer-stats">
     <div class="drawer-stat"><div class="drawer-stat-num" id="drawerStatScans">—</div><div class="drawer-stat-lbl">Scans</div></div>
@@ -561,20 +580,30 @@
           <div style="font-size:11px;color:var(--admin)" id="modalUserEmail">—</div>
         </div>
       </div>
-      <div class="modal-section-title">Profile Photo</div>
-      <div class="photo-upload-area" style="margin-bottom:0">
-        <div class="photo-preview" id="modalAvatarPreview">?</div>
-        <div class="photo-upload-info">
-          <p>JPG or PNG, stored in Firestore.</p>
-          <button class="btn-upload" onclick="document.getElementById('modalPhotoInput').click()"><i class="ti ti-upload"></i> Choose photo</button>
-          <input type="file" id="modalPhotoInput" accept="image/jpeg,image/png,image/webp" onchange="onModalPhotoSelect(event)" style="display:none" />
+
+      <div id="modalGoogleNotice" style="display:none">
+        <div class="google-notice" style="margin-bottom:1rem">
+          <i class="ti ti-brand-google"></i>
+          <div><strong>Google Account</strong><br>This user signs in with Google. Their name and photo are managed by Google, and there is no password to reset here.</div>
         </div>
       </div>
-      <div class="modal-section-title" style="margin-top:1rem">Display Name</div>
-      <input class="edit-input" id="modalEditName" type="text" placeholder="Display name" maxlength="40" />
-      <div class="modal-section-title" style="margin-top:1rem">New Password <span style="font-weight:400;color:var(--text-muted)">(leave blank to keep current)</span></div>
-      <input class="edit-input" id="modalEditPw" type="password" placeholder="Min 6 characters" />
-      <p class="pw-hint">Password reset will be queued for your backend to process.</p>
+
+      <div id="modalEmailFields">
+        <div class="modal-section-title">Profile Photo</div>
+        <div class="photo-upload-area" style="margin-bottom:0">
+          <div class="photo-preview" id="modalAvatarPreview">?</div>
+          <div class="photo-upload-info">
+            <p>JPG or PNG, stored in Firestore.</p>
+            <button class="btn-upload" onclick="document.getElementById('modalPhotoInput').click()"><i class="ti ti-upload"></i> Choose photo</button>
+            <input type="file" id="modalPhotoInput" accept="image/jpeg,image/png,image/webp" onchange="onModalPhotoSelect(event)" style="display:none" />
+          </div>
+        </div>
+        <div class="modal-section-title" style="margin-top:1rem">Display Name</div>
+        <input class="edit-input" id="modalEditName" type="text" placeholder="Display name" maxlength="40" />
+        <div class="modal-section-title" style="margin-top:1rem">New Password <span style="font-weight:400;color:var(--text-muted)">(leave blank to keep current)</span></div>
+        <input class="edit-input" id="modalEditPw" type="password" placeholder="Min 6 characters" />
+        <p class="pw-hint">Password reset will be queued for your backend to process.</p>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn-admin-cancel" onclick="closeUserModal()">Cancel</button>
@@ -623,9 +652,10 @@
   let modalPhotoB64 = null;
   let drawerUser    = null;
 
-  // sort state for users
-  let userSortBy  = 'name';
-  let userSortDir = { name: 1, date: -1 };
+  // sort/filter state for users
+  let userSortBy     = 'name';
+  let userSortDir    = { name: 1, date: -1 };
+  let userTypeFilter = 'all'; // 'all' | 'email' | 'google'
 
   // ── Auth ──
   onAuthChange(async user => {
@@ -849,14 +879,25 @@
       const users = [];
       snap.forEach(d => {
         const u = { id:d.id, ...d.data() };
-        const isGoogleUser   = u.provider==='google' || u.googleOnly===true;
         const isAdminAccount = ADMIN_EMAILS.includes((u.email||'').toLowerCase());
-        if (!isGoogleUser && !isAdminAccount) users.push(u);
+        if (isAdminAccount) return; // admins never show in the user-management list
+        u._provider = (u.provider === 'google' || u.googleOnly === true) ? 'google' : 'email';
+        users.push(u);
       });
       allUsers = users;
       applyUserSort();
     } catch(e) { document.getElementById('userList').innerHTML=`<div class="empty"><p style="color:#e53e3e">Could not load users: ${e.message}</p></div>`; }
   }
+
+  // ── Filter by account type (Email / Google / All) ──
+  window.filterUserType = function(type) {
+    userTypeFilter = type;
+    document.getElementById('uftype-all').classList.remove('active');
+    document.getElementById('uftype-email').classList.remove('active');
+    document.getElementById('uftype-google').classList.remove('active');
+    document.getElementById(`uftype-${type}`)?.classList.add('active');
+    applyUserSort();
+  };
 
   // ── Sort users ──
   window.sortUsers = function(by) {
@@ -865,7 +906,7 @@
     } else {
       userSortBy = by;
     }
-    document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('#usort-name, #usort-date').forEach(b=>b.classList.remove('active'));
     document.getElementById(`usort-${by}`)?.classList.add('active');
     document.getElementById('usort-name-dir').textContent = userSortDir.name > 0 ? '↑' : '↓';
     document.getElementById('usort-date-dir').textContent = userSortDir.date > 0 ? '↑' : '↓';
@@ -875,8 +916,9 @@
   function applyUserSort() {
     const q = (document.getElementById('userSearchInput')?.value || '').toLowerCase();
     let filtered = allUsers.filter(u =>
-      (u.displayName||'').toLowerCase().includes(q) ||
-      (u.email||'').toLowerCase().includes(q)
+      (userTypeFilter === 'all' || u._provider === userTypeFilter) &&
+      ((u.displayName||'').toLowerCase().includes(q) ||
+       (u.email||'').toLowerCase().includes(q))
     );
     filtered.sort((a, b) => {
       if (userSortBy === 'name') {
@@ -887,6 +929,8 @@
         return (ta - tb) * userSortDir.date;
       }
     });
+    const countEl = document.getElementById('usersResultCount');
+    if (countEl) countEl.textContent = `${filtered.length} user${filtered.length!==1?'s':''} found`;
     renderUsers(filtered);
   }
 
@@ -895,7 +939,7 @@
   function renderUsers(users) {
     const wrap = document.getElementById('userList');
     if (!users.length) {
-      wrap.innerHTML=`<div class="empty"><div class="empty-icon">👥</div><h3>No email users found</h3><p>Email-registered users will appear here.</p></div>`;
+      wrap.innerHTML=`<div class="empty"><div class="empty-icon">👥</div><h3>No users found</h3><p>Try a different search or filter.</p></div>`;
       return;
     }
     wrap.innerHTML = `<div class="user-list">${users.map(u=>{
@@ -903,6 +947,9 @@
         ? `<img src="${u.photoURL}" referrerpolicy="no-referrer">`
         : (u.displayName||u.email||'U')[0].toUpperCase();
       const since = u.createdAt?.toDate?.()?.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'})||'';
+      const providerBadge = u._provider === 'google'
+        ? `<span class="provider-badge provider-google" style="margin-top:5px;font-size:10px;padding:2px 8px"><i class="ti ti-brand-google"></i> Google</span>`
+        : `<span class="provider-badge provider-email" style="margin-top:5px;font-size:10px;padding:2px 8px"><i class="ti ti-mail"></i> Email</span>`;
       return `
         <div class="user-row" onclick="openDrawer('${u.id}')" id="urow-${u.id}">
           <div class="user-row-avatar">${av}</div>
@@ -910,6 +957,7 @@
             <div class="user-row-name">${escHTML(u.displayName||'No name')}</div>
             <div class="user-row-email">${escHTML(u.email||'')}</div>
             ${since?`<div class="user-row-date"><i class="ti ti-calendar" style="font-size:10px"></i> Joined ${since}</div>`:''}
+            <div class="user-row-badge">${providerBadge}</div>
           </div>
           <div class="user-row-menu" onclick="event.stopPropagation()">
             <button class="user-dots-btn" onclick="toggleUserMenu('${u.id}',event)" title="Options">
@@ -1045,6 +1093,9 @@
     document.getElementById('drawerEmail').textContent = u.email || '';
     const since = u.createdAt?.toDate?.()?.toLocaleDateString('en-PH',{month:'long',day:'numeric',year:'numeric'})||'';
     document.getElementById('drawerSince').innerHTML = since ? `<i class="ti ti-calendar"></i> Member since ${since}` : '';
+    document.getElementById('drawerBadge').innerHTML = u._provider === 'google'
+      ? `<span class="provider-badge provider-google"><i class="ti ti-brand-google"></i> Google Account</span>`
+      : `<span class="provider-badge provider-email"><i class="ti ti-mail"></i> Email Account</span>`;
     document.getElementById('drawerStatScans').textContent = '…';
     document.getElementById('drawerStatPosts').textContent = '…';
     document.getElementById('drawerStatLikes').textContent = '…';
@@ -1130,6 +1181,12 @@
     document.getElementById('modalUserEmail').textContent   = u.email||'';
     document.getElementById('modalEditName').value          = u.displayName||'';
     document.getElementById('modalEditPw').value            = '';
+
+    // Google accounts: hide photo/password editing, show a notice instead
+    const isGoogleUser = u._provider === 'google';
+    document.getElementById('modalGoogleNotice').style.display = isGoogleUser ? '' : 'none';
+    document.getElementById('modalEmailFields').style.display  = isGoogleUser ? 'none' : '';
+
     document.getElementById('editUserModal').classList.add('open');
     document.body.style.overflow = 'hidden';
   };
@@ -1157,12 +1214,22 @@
 
   window.saveUserEdits = async function() {
     if (!editingUser) return;
-    const name = document.getElementById('modalEditName').value.trim();
-    const pw   = document.getElementById('modalEditPw').value;
-    if (!name) { showToast('Name cannot be empty','warn'); return; }
+    const isGoogleUser = editingUser._provider === 'google';
     const btn = document.getElementById('modalSaveBtn');
     btn.disabled=true; btn.innerHTML='<i class="ti ti-loader"></i> Saving…';
+
     try {
+      if (isGoogleUser) {
+        // Google accounts: nothing editable here (name/photo come from Google).
+        showToast('Google account details are managed by Google — nothing to save here.','warn');
+        closeUserModal();
+        return;
+      }
+
+      const name = document.getElementById('modalEditName').value.trim();
+      const pw   = document.getElementById('modalEditPw').value;
+      if (!name) { showToast('Name cannot be empty','warn'); return; }
+
       const updates = { displayName:name, updatedAt:serverTimestamp(), updatedBy:currentUser.uid };
       if (modalPhotoB64) updates.photoURL = modalPhotoB64;
       await setDoc(doc(db,'users',editingUser.id), updates, { merge:true });
