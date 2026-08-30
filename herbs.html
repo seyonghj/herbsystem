@@ -100,7 +100,20 @@
     .drawer-hero {
       background: var(--green-dark); padding: 2rem 1.5rem 1.5rem;
       display: flex; flex-direction: column; align-items: center; text-align: center;
-      position: relative;
+      position: relative; overflow: hidden;
+      min-height: 260px; justify-content: flex-end;
+    }
+    .drawer-hero-bg {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; z-index: 0;
+    }
+    .drawer-hero-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, var(--green-dark) 95%);
+      z-index: 1;
+    }
+    .drawer-hero > *:not(.drawer-hero-bg):not(.drawer-hero-overlay):not(.drawer-close) {
+      position: relative; z-index: 2;
     }
     .drawer-close {
       position: absolute; top: 12px; right: 12px;
@@ -158,7 +171,7 @@
       }
       .drawer.open { right: 0; }
       .drawer-overlay.open { display: block; }
-      .drawer-hero { padding: 1.5rem 1.25rem 1.25rem; }
+      .drawer-hero { padding: 1.5rem 1.25rem 1.25rem; min-height: 200px; }
       .drawer-emoji { font-size: 44px; margin-bottom: 6px; }
       .drawer-local { font-size: 18px; }
       .drawer-body { padding: 1.25rem; }
@@ -195,7 +208,7 @@
 <div class="page-hero">
   <div class="page-hero-badge"><i class="ti ti-database"></i> Herb Database</div>
   <h1>Medicinal Herbs of Iloilo</h1>
-  <p>18 documented species with local names, scientific data, uses, and preparation methods</p>
+  <p>20 documented species with local names, scientific data, uses, and preparation methods</p>
 </div>
 
 <!-- TOOLBAR -->
@@ -244,6 +257,8 @@
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
 <aside class="drawer" id="drawer" role="dialog" aria-label="Herb detail">
   <div class="drawer-hero">
+    <img class="drawer-hero-bg" id="d-photo" alt="" style="display:none;">
+    <div class="drawer-hero-overlay" id="d-photo-overlay" style="display:none;"></div>
     <button class="drawer-close" onclick="closeDrawer()"><i class="ti ti-x"></i></button>
     <div class="drawer-emoji" id="d-emoji"></div>
     <div class="drawer-local" id="d-local"></div>
@@ -416,7 +431,22 @@
 
     const usesTags = toArray(h.usesTags);
 
-    document.getElementById('d-emoji').textContent   = h.emoji || '🌿';
+    const photoEl = document.getElementById('d-photo');
+    const overlayEl = document.getElementById('d-photo-overlay');
+    const emojiEl = document.getElementById('d-emoji');
+    if (h.imageUrl) {
+      photoEl.src = h.imageUrl;
+      photoEl.alt = h.localName || '';
+      photoEl.style.display = '';
+      overlayEl.style.display = '';
+      emojiEl.style.display = 'none';
+    } else {
+      photoEl.style.display = 'none';
+      overlayEl.style.display = 'none';
+      emojiEl.style.display = '';
+      emojiEl.textContent = h.emoji || '🌿';
+    }
+
     document.getElementById('d-local').textContent   = h.localName || '—';
     document.getElementById('d-english').textContent = h.englishName || '';
     document.getElementById('d-sci').textContent     = h.scientificName || '';
