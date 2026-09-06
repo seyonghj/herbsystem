@@ -306,12 +306,13 @@
       .legend-row { gap: 6px; margin-bottom: 3px; }
       .legend-dot { width: 10px; height: 10px; }
 
-      /* Route panel: full-width and lifted above the fixed bottom buttons
-         so it never overlaps "Show herb list" / the GPS button. */
-      .route-panel {
-        left: 0.75rem; right: 0.75rem; width: auto;
-        bottom: 4.75rem; max-height: 30vh;
-      }
+      /* Route panel (turn-by-turn text) is hidden on mobile entirely, via
+         CSS !important rather than relying on JS's mobile detection — a
+         CSS media query is evaluated by the browser purely on real screen
+         width and can't be fooled by any UA-sniffing edge case. The blue
+         route line itself is a separate Leaflet map layer, not this DOM
+         panel, so it's completely unaffected and still shows on mobile. */
+      .route-panel { display: none !important; }
 
       /* When the herb list is a full-screen sheet, hide the floating map
          chrome underneath it — legend/pin-banner/route-panel would otherwise
@@ -582,9 +583,15 @@
     return [];
   }
 
-  // Matches the 768px CSS breakpoint used throughout this page.
+  // Matches the 768px CSS breakpoint used throughout this page — but a
+  // narrow-viewport check alone is fooled by browser "Desktop site" mode,
+  // which reports a fake wide viewport (~980px) even on a real phone. Also
+  // check the user agent (which that mode doesn't hide) so phones still get
+  // the mobile-only clutter fixes (no turn-by-turn panel, etc.) regardless.
   function isMobileViewport() {
-    return window.innerWidth <= 768;
+    const narrowViewport = window.innerWidth <= 768;
+    const mobileUserAgent = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    return narrowViewport || mobileUserAgent;
   }
 
   function escapeHtml(s) {
@@ -1206,7 +1213,11 @@
   function renderRoutePanel(steps) {
     const panel = document.getElementById('routePanel');
     const body = document.getElementById('routeSteps');
-    if (!steps || !steps.length) {
+    // Only the turn-by-turn text panel is skipped on mobile — the blue
+    // route line on the map (drawn in showRouteToHerb, before this runs)
+    // still shows there. This just keeps the step-list card from eating
+    // screen space on a small phone.
+    if (!steps || !steps.length || isMobileViewport()) {
       panel.classList.remove('active');
       body.innerHTML = '';
       return;
