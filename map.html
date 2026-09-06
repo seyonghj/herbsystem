@@ -171,6 +171,11 @@
     .popup-sci { font-size: 11px; color: rgba(255,255,255,0.55); font-style: italic; margin-top: 2px; }
     .popup-body { padding: 12px 14px; }
     .popup-row { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; display: flex; gap: 6px; }
+    .popup-row-clickable { cursor: pointer; border-radius: 6px; margin: -3px -4px 6px; padding: 3px 4px; transition: background 0.15s; }
+    .popup-row-clickable:hover { background: var(--green-pale); }
+    .popup-row-clickable:hover span { color: var(--green-dark); text-decoration: underline; }
+    .popup-pin-label-clickable { cursor: pointer; border-radius: 6px; padding: 2px 4px; margin: -2px -4px; transition: background 0.15s; }
+    .popup-pin-label-clickable:hover { background: var(--green-pale); color: var(--green-dark); text-decoration: underline; }
     .popup-row i { color: var(--green-main); font-size: 13px; flex-shrink: 0; margin-top: 1px; }
     .popup-row span { color: var(--text-primary); }
     .popup-coords { font-size: 10px; color: var(--text-light); font-family: monospace; margin-bottom: 8px; }
@@ -190,6 +195,15 @@
       font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s;
     }
     .popup-btn-remove:hover { background: #fecaca; }
+    .popup-btn-rename {
+      padding: 6px 8px; background: var(--green-pale); color: var(--green-dark); border: none;
+      border-radius: var(--radius-sm); cursor: pointer; transition: background 0.15s;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .popup-btn-rename:hover { background: var(--green-light); }
+    .popup-row-inline-action { margin-left: auto; }
+    .popup-row-inline-action .popup-btn-rename { padding: 3px 6px; }
+    .popup-pin-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
     .popup-admin-badge {
       display: inline-flex; align-items: center; gap: 4px;
       font-size: 10px; background: #fef3c7; color: #92400e;
@@ -562,6 +576,15 @@
     return [];
   }
 
+  // Matches the 768px CSS breakpoint used throughout this page.
+  function isMobileViewport() {
+    return window.innerWidth <= 768;
+  }
+
+  function escapeHtml(s) {
+    return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
   // ── Icon factory ──
   function makeIcon(emoji, selected = false, admin = false) {
     return L.divIcon({
@@ -610,34 +633,58 @@
   function getPinLabel(h) {
     const pins = getHerbPins(h);
     if (!pins.length) return 'No location yet';
-    if (pins.length === 1) return `${pins[0].lat.toFixed(4)}, ${pins[0].lng.toFixed(4)}`;
+    if (pins.length === 1) return pins[0].name || `${pins[0].lat.toFixed(4)}, ${pins[0].lng.toFixed(4)}`;
     return `${pins.length} locations`;
   }
 
-  // ── Popup HTML — different for admin vs user ──
+  // ── Popup HTML — different for admin vs user, and coordinates are
+  // hidden on mobile to keep the popup readable on a small screen ──
   function popupHTML(h, pin) {
+    const mobile = isMobileViewport();
     const tags   = (h.usesTags || h.useTags || []).slice(0, 3)
       .map(t => `<span class="popup-tag">${t}</span>`).join('');
-    const coords = pin && pin.lat != null && pin.lng != null
+    const coords = (!mobile && pin && pin.lat != null && pin.lng != null)
       ? `<div class="popup-coords">📍 ${pin.lat.toFixed(5)}, ${pin.lng.toFixed(5)}</div>` : '';
     const pins = getHerbPins(h);
+    const singlePin = pins.length === 1 ? pins[0] : null;
+    // Prefer the admin-given pin name over the herb's general written
+    // address once a single pin exists — it's more specific.
     const locationText = pins.length > 1
       ? `${pins.length} pinned locations`
-      : (h.location || 'Lemery, Iloilo');
+      : (singlePin?.name || h.location || 'Lemery, Iloilo');
     const adminBadge = isAdmin
       ? `<div class="popup-admin-badge"><i class="ti ti-shield-check" style="font-size:10px"></i> Admin view</div>` : '';
     const removeBtn  = isAdmin && pin
       ? `<button class="popup-btn-remove" onclick="window._removePin('${h.id}','${pin.id}')" title="Remove this pin">
            <i class="ti ti-trash" style="font-size:13px"></i>
          </button>` : '';
+    const renameBtn = (pinObj) => isAdmin
+      ? `<button class="popup-btn-rename" onclick="event.stopPropagation(); window._renamePin('${h.id}','${pinObj.id}')" title="${pinObj.name ? 'Rename this location' : 'Name this location'}">
+           <i class="ti ti-edit" style="font-size:13px"></i>
+         </button>` : '';
     const pinList = pins.length > 1
       ? `<div class="popup-pin-list">
-           ${pins.map(p => `<div class="popup-pin-item">
-             <div class="popup-pin-label"><i class="ti ti-map-pin"></i>${p.lat.toFixed(4)}, ${p.lng.toFixed(4)}</div>
-             ${isAdmin ? `<button class="popup-btn-remove" onclick="window._removePin('${h.id}','${p.id}')" title="Remove this pin"><i class="ti ti-trash" style="font-size:13px"></i></button>` : ''}
-           </div>`).join('')}
+           ${pins.map((p, i) => {
+             const label = p.name || (mobile ? `Location ${i + 1}` : `${p.lat.toFixed(4)}, ${p.lng.toFixed(4)}`);
+             return `<div class="popup-pin-item">
+               <div class="popup-pin-label popup-pin-label-clickable" onclick="window._focusPin('${h.id}','${p.id}')" title="Center map on this location">
+                 <i class="ti ti-map-pin"></i>${escapeHtml(label)}
+               </div>
+               <div class="popup-pin-actions">
+                 ${renameBtn(p)}
+                 ${isAdmin ? `<button class="popup-btn-remove" onclick="window._removePin('${h.id}','${p.id}')" title="Remove this pin"><i class="ti ti-trash" style="font-size:13px"></i></button>` : ''}
+               </div>
+             </div>`;
+           }).join('')}
          </div>`
       : '';
+
+    // Single-pin herbs: the location row itself can be clicked to
+    // re-center/zoom the map on it. Multi-pin herbs skip this (ambiguous
+    // which pin) and rely on the per-pin rows in pinList above instead.
+    const locationRowClass = singlePin ? 'popup-row popup-row-clickable' : 'popup-row';
+    const locationRowClick = singlePin ? `onclick="window._focusPin('${h.id}','${singlePin.id}')" title="Center map on this location"` : '';
+    const singleRenameBtn = singlePin ? renameBtn(singlePin) : '';
 
     return `
       <div class="popup-header">
@@ -650,7 +697,7 @@
       <div class="popup-body">
         ${adminBadge}
         <div class="popup-row"><i class="ti ti-tag"></i><span>${h.englishName || '—'}</span></div>
-        <div class="popup-row"><i class="ti ti-map-pin"></i><span>${locationText}</span></div>
+        <div class="${locationRowClass}" ${locationRowClick}><i class="ti ti-map-pin"></i><span>${escapeHtml(locationText)}</span>${singleRenameBtn ? `<span class="popup-row-inline-action">${singleRenameBtn}</span>` : ''}</div>
         ${coords}
         ${pinList}
         <div class="popup-tags">${tags}</div>
@@ -755,7 +802,9 @@
     const herb = allHerbs.find(h => h.id === herbId);
     if (!herb) return;
     const signedInEmail = currentUser?.email || 'unknown-admin';
-    const pin = { id: createPinId(), lat, lng, createdBy: signedInEmail };
+    const nameInput = prompt(`Name this location for "${herb.localName}" (optional — you can also rename it later):`, '');
+    const pinName = nameInput ? nameInput.trim() || null : null;
+    const pin = { id: createPinId(), lat, lng, name: pinName, createdBy: signedInEmail };
     herb.pins = [...getHerbPins(herb), pin];
     placeMarker(herb, pin);
     selectHerb(herbId, makeMarkerKey(herb, pin));
@@ -771,10 +820,58 @@
       await updateDoc(doc(db, 'herbs', herbId), {
         pins: arrayUnion(pin), pinnedAt: serverTimestamp(), pinnedBy: signedInEmail
       });
-      showToast(`📍 ${herb.localName} pinned!`);
+      showToast(pinName ? `📍 "${pinName}" pinned for ${herb.localName}!` : `📍 ${herb.localName} pinned!`);
     } catch(err) { showToast('Could not save: ' + err.message, 'error'); }
     showSaving(false);
   });
+
+  // Re-center/zoom our own map on a specific pin — used by the clickable
+  // location row(s) in the popup.
+  window._focusPin = function(herbId, pinId) {
+    const herb = allHerbs.find(h => h.id === herbId);
+    if (!herb) return;
+    const pin = getHerbPins(herb).find(p => p.id === pinId);
+    if (!pin) return;
+    selectHerb(herbId, makeMarkerKey(herb, pin));
+  };
+
+  // ── RENAME PIN (admin only) ──
+  // Firestore's `pins` field is a plain array of objects, so renaming one
+  // entry means rewriting the whole array rather than arrayUnion/arrayRemove
+  // (those only work with exact-value matches, not partial field updates).
+  window._renamePin = async function(herbId, pinId) {
+    if (!isAdmin) return;
+    const herb = allHerbs.find(h => h.id === herbId);
+    if (!herb) return;
+    const pin = getHerbPins(herb).find(p => p.id === pinId);
+    if (!pin) return;
+
+    const input = prompt(
+      `Name this location for "${herb.localName}" (e.g. "Backyard, Purok 3"):`,
+      pin.name || ''
+    );
+    if (input === null) return; // cancelled
+    const name = input.trim() || null;
+
+    const updatedPins = getHerbPins(herb).map(p => p.id === pinId ? { ...p, name } : p);
+    herb.pins = updatedPins;
+
+    // Reflect immediately in the open popup, marker cache, and sidebar list
+    const oldKey = makeMarkerKey(herb, pin);
+    if (markers[oldKey]) {
+      markers[oldKey].pin = { ...pin, name };
+      markers[oldKey].marker.setPopupContent(popupHTML(herb, markers[oldKey].pin));
+    }
+    const locEl = document.querySelector(`.herb-list-item[data-id="${herbId}"] .herb-list-loc`);
+    if (locEl) locEl.innerHTML = `<i class="ti ti-map-pin"></i>${getPinLabel(herb)}`;
+
+    showSaving(true);
+    try {
+      await updateDoc(doc(db, 'herbs', herbId), { pins: updatedPins });
+      showToast(name ? `📍 Location named "${name}"` : 'Location name cleared');
+    } catch(err) { showToast('Could not save: ' + err.message, 'error'); }
+    showSaving(false);
+  };
 
   // ── REMOVE PIN (admin only) ──
   window._removePin = async function(herbId, pinId) {
