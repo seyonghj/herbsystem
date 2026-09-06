@@ -65,6 +65,43 @@
     .loc-map-text strong { display: block; font-size: 13px; color: #fff; }
     .loc-map-text span { font-size: 11px; color: rgba(255,255,255,0.5); }
 
+    /* ── Community-verified photo gallery ─────────────────── */
+    .gallery-note {
+      font-size: 12px; color: var(--text-light); margin: -0.25rem 0 0.9rem;
+    }
+    .gallery-status {
+      font-size: 13px; color: var(--text-muted); padding: 0.5rem 0;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .photo-gallery {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    }
+    .gallery-item { display: flex; flex-direction: column; gap: 5px; }
+    .gallery-thumb {
+      position: relative; aspect-ratio: 1; border-radius: var(--radius-md);
+      overflow: hidden; border: 1px solid var(--border); padding: 0; cursor: pointer;
+      background: var(--green-pale);
+    }
+    .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .gallery-thumb-badge {
+      position: absolute; bottom: 5px; right: 5px;
+      background: rgba(10,74,53,0.85); color: #fff; font-size: 10px; font-weight: 600;
+      padding: 2px 7px; border-radius: 99px; letter-spacing: 0.02em;
+    }
+    .gallery-thumb:hover { opacity: 0.9; }
+    .gallery-caption {
+      font-size: 11px; color: var(--text-light); text-align: center;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    .lightbox {
+      display: none; position: fixed; inset: 0; background: rgba(6,20,15,0.9);
+      z-index: 600; align-items: center; justify-content: center; padding: 1.5rem;
+      cursor: zoom-out;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img { max-width: 100%; max-height: 90vh; border-radius: var(--radius-md); }
+
     @media (max-width: 768px) {
       .detail-layout { grid-template-columns: 1fr; gap: 1.5rem; }
       .detail-left { position: static; }
@@ -84,6 +121,7 @@
       .loc-map-preview i:first-child { font-size: 20px; }
       .loc-map-text strong { font-size: 12px; }
       .loc-map-text span { font-size: 10px; }
+      .photo-gallery { grid-template-columns: repeat(3, 1fr); gap: 8px; }
     }
   </style>
 </head>
@@ -161,6 +199,16 @@
         </table>
       </div>
 
+      <!-- Community-verified photo gallery: scanned photos with high CNN+Gemini confidence -->
+      <div class="info-section" id="gallerySection">
+        <div class="info-section-title"><i class="ti ti-photo"></i> Community-verified photos</div>
+        <p class="gallery-note">Admin-approved community scans of this herb</p>
+        <div class="gallery-status" id="galleryStatus">
+          <div class="spinner" style="width:16px;height:16px"></div> Loading photos…
+        </div>
+        <div class="photo-gallery" id="photoGallery" style="display:none"></div>
+      </div>
+
       <div class="info-section">
         <div class="info-section-title"><i class="ti ti-map-pin"></i> Location</div>
         <div class="info-val" id="location" style="margin-bottom:10px"></div>
@@ -186,16 +234,24 @@
   </div>
 </div>
 
+<!-- Lightbox for full-size gallery photos -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightboxImg" src="" alt="Scanned herb photo" />
+</div>
+
 <footer class="footer">
   <p><strong>HerbID Iloilo</strong> — BSIT Capstone Project · NISU Lemery Campus · 2024–2025</p>
 </footer>
 
 <script type="module">
-  import { db, doc, getDoc } from './js/firebase-config.js';
+  import { db, doc, getDoc, collection, getDocs, query, where } from './js/firebase-config.js';
   import { initNavAuth } from './js/nav-auth.js';
   initNavAuth();
   const params = new URLSearchParams(location.search);
   const id = params.get('id');
+
+  // Photos here come only from the "public_gallery" collection — populated
+  // solely by admin approval, see loadGallery() below.
 
   const tagClass = {
     fever:'tag-fever', wound:'tag-wound', pain:'tag-pain',
@@ -233,14 +289,105 @@
       }
 
       document.getElementById('usesTags').innerHTML =
-        (h.usesTags || []).map(t => `<span class="tag tag-anti-inflammatory">${t}</span>`).join('');
+        (h.usesTags || []).map(t => `<span class="tag ${tagClass[t] || 'tag-anti-inflammatory'}">${t}</span>`).join('');
 
       document.getElementById('loadingState').style.display = 'none';
       document.getElementById('detailLayout').style.display = 'grid';
+
+      loadGallery(h.localName);
     } catch(e) {
       document.getElementById('loadingState').innerHTML = '<p style="color:var(--text-muted)">Error loading herb data.</p>';
     }
   }
+
+  // Photos come from a separate "public_gallery" collection — a stripped-down
+  // copy written only when an admin approves a scan (see profile.html's
+  // Admin → Gallery Review panel). This collection never contains uid/email,
+  // only what's meant to be public: the photo, herb name, confidence, and a
+  // name-safe attribution string (e.g. "Juan D." or "Juan"), so herb-detail
+  // never needs read access to the private "scans" collection.
+  async function loadGallery(localName) {
+    const statusEl  = document.getElementById('galleryStatus');
+    const galleryEl = document.getElementById('photoGallery');
+
+    if (!localName) {
+      statusEl.textContent = 'No photos available.';
+      return;
+    }
+
+    try {
+      const q = query(collection(db, 'public_gallery'), where('herbName', '==', localName));
+      const snap = await getDocs(q);
+
+      const photos = [];
+      snap.forEach(d => {
+        const p = d.data();
+        if (p.imageBase64) photos.push(p);
+      });
+
+      // Newest first
+      photos.sort((a, b) => {
+        const ta = a.approvedAt?.toMillis ? a.approvedAt.toMillis() : 0;
+        const tb = b.approvedAt?.toMillis ? b.approvedAt.toMillis() : 0;
+        return tb - ta;
+      });
+
+      if (!photos.length) {
+        statusEl.innerHTML = '<i class="ti ti-photo-off" style="font-size:16px;color:var(--text-light)"></i> No approved photos yet for this herb.';
+        return;
+      }
+
+      statusEl.style.display = 'none';
+      galleryEl.style.display = 'grid';
+      galleryEl.innerHTML = '';
+
+      photos.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'gallery-item';
+
+        const btn = document.createElement('button');
+        btn.className = 'gallery-thumb';
+        btn.type = 'button';
+
+        const img = document.createElement('img');
+        img.src = p.imageBase64;
+        img.alt = `Community scan of ${localName}`;
+        img.loading = 'lazy';
+        btn.appendChild(img);
+
+        if (p.confidencePercent) {
+          const badge = document.createElement('span');
+          badge.className = 'gallery-thumb-badge';
+          badge.textContent = `${Math.round(p.confidencePercent)}%`;
+          btn.appendChild(badge);
+        }
+
+        btn.addEventListener('click', () => openLightbox(p.imageBase64));
+        item.appendChild(btn);
+
+        if (p.scannerName) {
+          const caption = document.createElement('span');
+          caption.className = 'gallery-caption';
+          caption.textContent = `Scanned by ${p.scannerName}`;
+          item.appendChild(caption);
+        }
+
+        galleryEl.appendChild(item);
+      });
+    } catch(e) {
+      statusEl.innerHTML = '<i class="ti ti-alert-triangle" style="font-size:16px;color:#e53e3e"></i> Could not load photos.';
+      console.warn('Gallery load failed:', e.message);
+    }
+  }
+
+  window.openLightbox = function(src) {
+    document.getElementById('lightboxImg').src = src;
+    document.getElementById('lightbox').classList.add('open');
+  };
+  window.closeLightbox = function() {
+    document.getElementById('lightbox').classList.remove('open');
+  };
+
   load();
 </script>
 </body>

@@ -8,44 +8,71 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
+    /* Supplementary tokens not defined in the shared stylesheet.
+       Everything else (--green-dark, --green-main, --green-pale, --border,
+       --radius-md, --radius-lg, --nav-h, --white, --text-primary,
+       --text-muted, --text-light) comes from css/style.css, same as
+       herb-detail.html, so this page matches the rest of the site. */
     :root {
-      --green-dark:  #0a4a35;
       --green-mid:   #1a7a55;
-      --green-main:  #22a06b;
       --green-light: #d4f0e4;
-      --green-pale:  #f0faf5;
-      --border:      #dde5e0;
-      --radius-md:   12px;
-      --radius-lg:   20px;
-      --nav-h:       64px;
     }
+
     .upload-section { max-width: 680px; margin: 0 auto; padding: 2.5rem 1.5rem 0; }
-    .drop-zone { border: 2px dashed var(--border); border-radius: var(--radius-lg); background: var(--green-pale); min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; cursor: pointer; transition: border-color 0.2s, background 0.2s; position: relative; overflow: hidden; text-align: center; padding: 2rem; }
-    .drop-zone.drag-over { border-color: var(--green-main); background: #e0f5ec; }
-    .drop-zone.has-image { border-style: solid; padding: 0; }
-    .drop-zone-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--green-light); display: flex; align-items: center; justify-content: center; font-size: 28px; color: var(--green-main); margin-bottom: 4px; }
-    .drop-zone h3 { font-size: 16px; font-weight: 600; color: var(--green-dark); }
-    .drop-zone p  { font-size: 13px; color: #5a6472; }
-    .drop-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
-    .preview-img { width: 100%; height: 100%; object-fit: cover; border-radius: calc(var(--radius-lg) - 2px); display: none; max-height: 360px; }
-    .preview-overlay { display: none; position: absolute; inset: 0; background: linear-gradient(to top, rgba(10,74,53,0.7) 0%, transparent 50%); border-radius: calc(var(--radius-lg) - 2px); align-items: flex-end; padding: 1rem 1.25rem; }
-    .preview-overlay span { color: #fff; font-size: 13px; font-weight: 500; }
-    .drop-zone.has-image .preview-img, .drop-zone.has-image .preview-overlay { display: flex; }
-    .drop-zone.has-image .drop-zone-content { display: none; }
-    .action-bar { max-width: 680px; margin: 1rem auto 0; padding: 0 1.5rem; display: flex; gap: 10px; flex-wrap: wrap; }
-    .btn-identify { flex: 1; padding: 13px 20px; background: var(--green-main); color: #fff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+    /* ── Start card (shown before a photo is chosen) ─────────────── */
+    .start-card {
+      background: var(--white); border: 1.5px dashed var(--border);
+      border-radius: var(--radius-lg); padding: 3rem 2rem;
+      display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px;
+    }
+    .start-card-icon {
+      width: 64px; height: 64px; border-radius: 50%; background: var(--green-pale);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; color: var(--green-main); margin-bottom: 4px;
+    }
+    .start-card h3 { font-size: 16px; font-weight: 600; color: var(--green-dark); }
+    .start-card p  { font-size: 13px; color: var(--text-muted); max-width: 340px; }
+
+    /* ── Preview card (shown after a photo is chosen) ────────────── */
+    .preview-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1rem; overflow: hidden;
+    }
+    .preview-box { position: relative; border-radius: var(--radius-md); overflow: hidden; }
+    .preview-img { width: 100%; max-height: 380px; object-fit: cover; display: block; }
+    .preview-change {
+      position: absolute; bottom: 10px; right: 10px;
+      background: rgba(10,74,53,0.75); color: #fff; border: none;
+      font-size: 12px; font-weight: 500; padding: 7px 14px; border-radius: 99px;
+      cursor: pointer; display: flex; align-items: center; gap: 6px;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .preview-change:hover { background: rgba(10,74,53,0.9); }
+
+    .action-bar { max-width: 680px; margin: 1rem auto 0; padding: 0 1.5rem; display: none; gap: 10px; flex-wrap: wrap; }
+    .action-bar.visible { display: flex; }
+    .btn-identify {
+      flex: 1; padding: 13px 20px; background: var(--green-main); color: #fff; border: none;
+      border-radius: var(--radius-md); font-size: 15px; font-weight: 600;
+      font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
     .btn-identify:hover:not(:disabled) { background: var(--green-mid); }
     .btn-identify:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-camera { padding: 13px 18px; background: #fff; color: var(--green-dark); border: 1.5px solid var(--border); border-radius: var(--radius-md); font-size: 15px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; gap: 8px; font-weight: 500; }
-    .btn-camera:hover { background: var(--green-pale); }
-    .btn-clear { padding: 13px 14px; background: #fff; color: #e53e3e; border: 1.5px solid #fecaca; border-radius: var(--radius-md); font-size: 15px; cursor: pointer; transition: background 0.15s; display: none; align-items: center; gap: 6px; font-family: 'DM Sans', sans-serif; font-weight: 500; }
+    .btn-clear {
+      padding: 13px 14px; background: var(--white); color: #e53e3e; border: 1.5px solid #fecaca;
+      border-radius: var(--radius-md); font-size: 15px; cursor: pointer; transition: background 0.15s;
+      display: flex; align-items: center; gap: 6px; font-family: 'DM Sans', sans-serif; font-weight: 500;
+    }
     .btn-clear:hover { background: #fff5f5; }
-    .btn-clear.visible { display: flex; }
+
     .tips { max-width: 680px; margin: 1.5rem auto 0; padding: 0 1.5rem; display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
-    .tip { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; display: flex; gap: 10px; align-items: flex-start; }
+    .tip { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; display: flex; gap: 10px; align-items: flex-start; }
     .tip i { font-size: 18px; color: var(--green-main); flex-shrink: 0; margin-top: 1px; }
-    .tip p { font-size: 12px; color: #5a6472; line-height: 1.5; margin: 0; }
+    .tip p { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin: 0; }
     .tip strong { display: block; font-size: 12px; font-weight: 600; color: var(--green-dark); margin-bottom: 2px; }
+
     .loading-panel { display: none; max-width: 680px; margin: 2rem auto 0; padding: 0 1.5rem; }
     .loading-panel.active { display: block; }
     .loading-card { background: var(--green-dark); border-radius: var(--radius-lg); padding: 2rem; text-align: center; color: #fff; }
@@ -61,6 +88,7 @@
     .step-done    { background: #7eebb5; }
     .step-failed  { background: #f87171; }
     @keyframes blink { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
     .result-panel { display: none; max-width: 680px; margin: 2rem auto 3rem; padding: 0 1.5rem; }
     .result-panel.active { display: block; }
     .verification-banner { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--radius-md); font-size: 13px; font-weight: 500; margin-bottom: 10px; }
@@ -68,7 +96,8 @@
     .verification-banner.rejected  { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
     .verification-banner.uncertain { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
     .verification-banner i { font-size: 18px; flex-shrink: 0; }
-    .match-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 1rem; }
+
+    .match-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 1rem; }
     .match-header { background: var(--green-dark); padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 14px; }
     .match-confidence { background: var(--green-main); color: #fff; font-size: 13px; font-weight: 700; padding: 4px 12px; border-radius: 99px; margin-left: auto; white-space: nowrap; }
     .match-emoji { font-size: 42px; }
@@ -77,21 +106,23 @@
     .match-english { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 2px; font-style: normal !important; }
     .match-body { padding: 1.25rem 1.5rem; }
     .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
-    .info-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #8c96a0; margin-bottom: 4px; }
-    .info-val { font-size: 13px; color: #1a1a1a; line-height: 1.6; }
+    .info-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 4px; }
+    .info-val { font-size: 13px; color: var(--text-primary); line-height: 1.6; }
     .use-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
-    .use-tag { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 99px; background: var(--green-light); color: var(--green-dark); }
-    .loc-row { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #5a6472; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .use-tags span { font-size: 12px; padding: 4px 12px; border-radius: 99px; }
+    .loc-row { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
     .loc-row i { color: var(--green-main); font-size: 15px; }
     .match-actions { display: flex; gap: 8px; margin-top: 1rem; }
     .match-actions a { flex: 1; padding: 10px; border-radius: var(--radius-md); text-align: center; font-size: 13px; font-weight: 500; text-decoration: none; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
     .btn-detail { background: var(--green-main); color: #fff; }
     .btn-detail:hover { background: var(--green-mid); }
-    .btn-map { background: #fff; color: var(--green-dark); border: 1px solid var(--border); }
+    .btn-map { background: var(--white); color: var(--green-dark); border: 1px solid var(--border); }
     .btn-map:hover { background: var(--green-pale); }
+
     .gemini-box { background: #f8fffe; border: 1px solid #b8e8d8; border-radius: var(--radius-md); padding: 1rem 1.25rem; margin-top: 10px; }
     .gemini-box-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--green-mid); margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
-    .gemini-box p { font-size: 13px; color: #1a1a1a; line-height: 1.7; margin: 0; }
+    .gemini-box p { font-size: 13px; color: var(--text-primary); line-height: 1.7; margin: 0; }
+
     .top3-box { background: var(--green-pale); border: 1px solid var(--green-light); border-radius: var(--radius-md); padding: 1rem 1.25rem; margin-top: 10px; }
     .top3-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--green-mid); margin-bottom: 8px; }
     .top3-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--green-light); font-size: 13px; }
@@ -99,28 +130,67 @@
     .top3-bar-wrap { flex: 1; margin: 0 12px; height: 5px; background: var(--green-light); border-radius: 3px; overflow: hidden; }
     .top3-bar { height: 100%; background: var(--green-main); border-radius: 3px; }
     .top3-pct { font-size: 12px; color: var(--green-mid); font-weight: 600; min-width: 38px; text-align: right; }
-    .not-found { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2.5rem; text-align: center; }
+
+    .not-found { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2.5rem; text-align: center; }
     .not-found-icon { font-size: 48px; margin-bottom: 1rem; }
-    .not-found h3 { font-size: 17px; font-weight: 600; color: #1a1a1a; margin-bottom: 8px; }
-    .not-found p { font-size: 13px; color: #5a6472; line-height: 1.7; max-width: 400px; margin: 0 auto; }
-    .cam-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 500; align-items: center; justify-content: center; padding: 1rem; }
+    .not-found h3 { font-size: 17px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+    .not-found p { font-size: 13px; color: var(--text-muted); line-height: 1.7; max-width: 400px; margin: 0 auto; }
+
+    /* ── Source-selection modal: Use Camera / Add Photo ──────────── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(6,20,15,0.6);
+      z-index: 500; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--white); border-radius: var(--radius-lg); width: 100%; max-width: 400px;
+      padding: 1.5rem; box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .modal-head h3 { font-size: 17px; font-weight: 700; color: var(--green-dark); }
+    .modal-close {
+      background: var(--green-pale); border: none; cursor: pointer; color: var(--green-dark);
+      width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; font-size: 16px;
+    }
+    .modal-options { display: flex; flex-direction: column; gap: 10px; }
+    .modal-option {
+      display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+      border: 1.5px solid var(--border); border-radius: var(--radius-md);
+      background: var(--white); cursor: pointer; text-align: left;
+      font-family: 'DM Sans', sans-serif; transition: border-color 0.15s, background 0.15s;
+    }
+    .modal-option:hover { border-color: var(--green-main); background: var(--green-pale); }
+    .modal-option-icon {
+      width: 44px; height: 44px; border-radius: 50%; background: var(--green-pale);
+      display: flex; align-items: center; justify-content: center; font-size: 20px;
+      color: var(--green-main); flex-shrink: 0;
+    }
+    .modal-option strong { display: block; font-size: 14px; color: var(--green-dark); }
+    .modal-option span { font-size: 12px; color: var(--text-muted); }
+
+    /* ── Camera capture modal ─────────────────────────────────────── */
+    .cam-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 550; align-items: center; justify-content: center; padding: 1rem; }
     .cam-modal.open { display: flex; }
     .cam-box { background: #000; border-radius: var(--radius-lg); overflow: hidden; width: 100%; max-width: 480px; position: relative; }
     video { width: 100%; display: block; }
     .cam-controls { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to top, rgba(0,0,0,0.7), transparent); }
-    .cam-capture { width: 60px; height: 60px; border-radius: 50%; background: #fff; border: 4px solid rgba(255,255,255,0.4); cursor: pointer; transition: transform 0.1s; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #1a1a1a; }
+    .cam-capture { width: 60px; height: 60px; border-radius: 50%; background: #fff; border: 4px solid rgba(255,255,255,0.4); cursor: pointer; transition: transform 0.1s; display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--text-primary); }
     .cam-capture:active { transform: scale(0.93); }
     .cam-close { background: rgba(255,255,255,0.15); border: none; cursor: pointer; color: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
     canvas { display: none; }
+
     .disclaimer { max-width: 680px; margin: 0 auto 3rem; padding: 0 1.5rem; }
     .disclaimer-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius-md); padding: 10px 14px; display: flex; gap: 8px; align-items: flex-start; }
     .disclaimer-box i { color: #92400e; font-size: 15px; flex-shrink: 0; margin-top: 2px; }
     .disclaimer-box p { font-size: 12px; color: #78350f; line-height: 1.6; margin: 0; }
+
     @media (max-width: 580px) {
       .tips { grid-template-columns: 1fr; }
       .info-grid { grid-template-columns: 1fr; }
       .action-bar { flex-direction: column; }
-      .btn-identify, .btn-camera, .btn-clear.visible { width: 100%; justify-content: center; min-height: 48px; }
+      .btn-identify, .btn-clear { width: 100%; justify-content: center; min-height: 48px; }
+      .start-card { padding: 2.25rem 1.25rem; }
     }
   </style>
 </head>
@@ -147,30 +217,34 @@
 <div class="page-hero">
   <div class="page-hero-badge"><i class="ti ti-camera"></i> CNN + Gemini AI</div>
   <h1>Identify a Medicinal Herb</h1>
-  <p>Upload a photo — CNN model identifies it, then Gemini AI confirms the result</p>
+  <p>Add a photo — CNN model identifies it, then Gemini AI confirms the result</p>
 </div>
 
 <div class="upload-section">
-  <div class="drop-zone" id="dropZone"
-    ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
-    <input type="file" id="fileInput" accept="image/*" onchange="onFileSelect(event)" />
-    <div class="drop-zone-content" style="display:flex;flex-direction:column;align-items:center;gap:12px;pointer-events:none">
-      <div class="drop-zone-icon"><i class="ti ti-photo-up"></i></div>
-      <h3>Drop a herb photo here</h3>
-      <p>or click to browse from your device</p>
-      <span style="font-size:12px;color:#8c96a0">JPG, PNG, WEBP, HEIC</span>
-    </div>
-    <img class="preview-img" id="previewImg" alt="Herb preview" />
-    <div class="preview-overlay"><span><i class="ti ti-photo" style="margin-right:5px"></i>Click to change photo</span></div>
+  <!-- Shown before a photo is chosen -->
+  <div class="start-card" id="startCard">
+    <div class="start-card-icon"><i class="ti ti-photo-plus"></i></div>
+    <h3>Add a photo to get started</h3>
+    <p>Take a clear photo of the leaves, stem, and flowers, or upload one from your device</p>
+    <button class="btn-identify" style="margin-top:6px;padding:12px 24px" onclick="openSourceModal()">
+      <i class="ti ti-plus"></i> Add Photo
+    </button>
   </div>
+
+  <!-- Shown after a photo is chosen -->
+  <div class="preview-card" id="previewCard" style="display:none">
+    <div class="preview-box">
+      <img class="preview-img" id="previewImg" alt="Herb preview" />
+      <button class="preview-change" onclick="openSourceModal()"><i class="ti ti-refresh"></i> Change photo</button>
+    </div>
+  </div>
+
+  <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="onFileSelect(event)" />
 </div>
 
-<div class="action-bar">
+<div class="action-bar" id="actionBar">
   <button class="btn-identify" id="identifyBtn" onclick="identifyHerb()" disabled>
     <i class="ti ti-plant-2"></i> Identify this herb
-  </button>
-  <button class="btn-camera" onclick="openCamera()">
-    <i class="ti ti-camera"></i> Camera
   </button>
   <button class="btn-clear" id="clearBtn" onclick="clearImage()">
     <i class="ti ti-trash"></i> Clear
@@ -205,6 +279,27 @@
   </div>
 </div>
 
+<!-- Source-selection modal: Use Camera / Add Photo -->
+<div class="modal-overlay" id="sourceModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Add a photo</h3>
+      <button class="modal-close" onclick="closeSourceModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-options">
+      <button class="modal-option" onclick="chooseCamera()">
+        <div class="modal-option-icon"><i class="ti ti-camera"></i></div>
+        <div><strong>Use Camera</strong><span>Take a photo right now</span></div>
+      </button>
+      <button class="modal-option" onclick="chooseUpload()">
+        <div class="modal-option-icon"><i class="ti ti-upload"></i></div>
+        <div><strong>Add Photo</strong><span>Choose one from your device</span></div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Live camera capture modal -->
 <div class="cam-modal" id="camModal">
   <div class="cam-box">
     <video id="camVideo" autoplay playsinline></video>
@@ -233,7 +328,26 @@
   // ── CONFIG ──────────────────────────────────
   const CNN_API_URL   = "https://herbid-api-production.up.railway.app";
   const CNN_THRESHOLD = 0.60;
+  // A scan is only eligible for the public herb gallery if it's "High"
+  // confidence AND an admin has manually approved it (see profile.html).
+  const HIGH_CONFIDENCE_THRESHOLD = 75; // percent
+  const MED_CONFIDENCE_THRESHOLD  = 50; // percent
   // ────────────────────────────────────────────
+
+  // Recompute the confidence label ourselves so the 75% "High" threshold
+  // is enforced consistently, regardless of what any external API returns.
+  function computeConfidenceLabel(percent) {
+    if (percent == null || isNaN(percent)) return null;
+    if (percent >= HIGH_CONFIDENCE_THRESHOLD) return 'High';
+    if (percent >= MED_CONFIDENCE_THRESHOLD)  return 'Medium';
+    return 'Low';
+  }
+
+  const tagClass = {
+    fever:'tag-fever', wound:'tag-wound', pain:'tag-pain',
+    digestive:'tag-digestive', respiratory:'tag-respiratory',
+    skin:'tag-skin', urinary:'tag-urinary', 'anti-inflammatory':'tag-anti-inflammatory'
+  };
 
   let currentUser  = null;
   let currentFile  = null;
@@ -249,6 +363,12 @@
     } catch(e) { console.warn('Could not load herbs:', e.message); }
   }
   loadHerbs();
+
+  // ── SOURCE MODAL (Use Camera / Add Photo) ───
+  window.openSourceModal  = () => document.getElementById('sourceModal').classList.add('open');
+  window.closeSourceModal = () => document.getElementById('sourceModal').classList.remove('open');
+  window.chooseCamera = function() { closeSourceModal(); openCamera(); };
+  window.chooseUpload = function() { closeSourceModal(); document.getElementById('fileInput').click(); };
 
   // ── STEP UI HELPERS ─────────────────────────
   function setStep(num, state, text) {
@@ -327,6 +447,7 @@
       );
       if (namesMatch) {
         finalHerb = { ...cnnResult, geminiVerified: true, geminiAnalysis: geminiResult.analysis };
+        finalHerb.confidenceLabel = computeConfidenceLabel(finalHerb.confidencePercent);
         setStep(3,'done','Step 3 — ✅ CNN and Gemini both confirmed the same herb!');
       } else {
         noMatch = true;
@@ -340,7 +461,7 @@
       if (herb) {
         finalHerb = {
           matched: true, localName: herb.localName, scientificName: herb.scientificName,
-          confidence: 0.65, confidencePercent: 65, confidenceLabel: 'Medium',
+          confidence: 0.65, confidencePercent: 65, confidenceLabel: computeConfidenceLabel(65),
           top3: [], geminiVerified: true, geminiOnly: true, geminiAnalysis: geminiResult.analysis,
         };
         setStep(3,'done',`Step 3 — Gemini identified: ${herb.localName}`);
@@ -365,8 +486,6 @@
   };
 
   // ── GEMINI VERIFICATION via Railway proxy ───
-  // The proxy keeps your API key safe on the server.
-  // Make sure your Flask app.py has the /gemini-verify route.
   async function runGeminiVerification(cnnResult) {
     const base64   = await fileToBase64(currentFile);
     const mimeType = currentFile.type || 'image/jpeg';
@@ -423,6 +542,9 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
       ? `<div class="verification-banner uncertain"><i class="ti ti-sparkles"></i><span><strong>Gemini AI identified</strong> — CNN was uncertain, but Gemini found a match</span></div>`
       : `<div class="verification-banner confirmed"><i class="ti ti-circle-check"></i><span><strong>Verified by CNN + Gemini AI</strong> — Both confirmed <strong>${result.localName}</strong></span></div>`;
 
+    const useTagsHtml = (herb?.usesTags || herb?.useTags || [])
+      .map(t => `<span class="tag ${tagClass[t] || 'tag-anti-inflammatory'}">${t}</span>`).join('');
+
     panel.innerHTML = `
       ${verBadge}
       <div class="match-card">
@@ -443,7 +565,7 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
             <div><div class="info-label">Plant family</div><div class="info-val">${herb.family||'—'}</div></div>
             <div><div class="info-label">Parts used</div><div class="info-val">${herb.parts||'—'}</div></div>
             <div><div class="info-label">Medicinal uses</div>
-              <div class="use-tags">${(herb.usesTags||herb.useTags||[]).map(t=>`<span class="use-tag">${t}</span>`).join('')}</div>
+              <div class="use-tags">${useTagsHtml}</div>
             </div>
             <div><div class="info-label">Preparation</div><div class="info-val">${herb.preparation||'—'}</div></div>
           </div>
@@ -462,7 +584,7 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
         </div>
       </div>
       <div style="text-align:center;margin-top:0.75rem">
-        <button onclick="clearImage()" style="background:none;border:none;cursor:pointer;font-size:13px;color:#5a6472;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:5px">
+        <button onclick="clearImage()" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--text-muted);font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:5px">
           <i class="ti ti-refresh"></i> Identify another herb
         </button>
       </div>`;
@@ -540,20 +662,30 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
           console.warn('Image compression failed:', e.message);
         }
       }
+      const matched         = !noMatch && result.matched;
+      const confidenceLabel = result.confidenceLabel || null;
+      // Eligible for the public herb gallery once High confidence — but still
+      // needs an admin to confirm it in the Admin → Gallery Review panel.
+      const galleryEligible = matched && confidenceLabel === 'High';
+
       await addDoc(collection(db, 'scans'), {
         uid:               user.uid,
         userEmail:         user.email,
-        matched:           !noMatch && result.matched,
+        matched,
         identifiedHerb:    (!noMatch && result.localName) || null,
         confidence:        result.confidence        || null,
         confidencePercent: result.confidencePercent || null,
-        confidenceLabel:   result.confidenceLabel   || null,
+        confidenceLabel,
         top3:              result.top3              || [],
         geminiVerified:    result.geminiVerified    || false,
         imageBase64,
+        galleryEligible,      // true once High-confidence, regardless of review state
+        galleryApproved:   false, // admin must confirm before it appears in herb-detail gallery
         scannedAt:         serverTimestamp(),
       });
-      showToast('📋 Scan saved to your history');
+      showToast(galleryEligible
+        ? '📋 Scan saved — high-confidence match sent for gallery review'
+        : '📋 Scan saved to your history');
     } catch(e) { console.warn('Save scan failed:', e.message); }
   }
 
@@ -569,9 +701,10 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
 
   function showPreview(dataUrl) {
     document.getElementById('previewImg').src = dataUrl;
-    document.getElementById('dropZone').classList.add('has-image');
+    document.getElementById('startCard').style.display = 'none';
+    document.getElementById('previewCard').style.display = 'block';
+    document.getElementById('actionBar').classList.add('visible');
     document.getElementById('identifyBtn').disabled = false;
-    document.getElementById('clearBtn').classList.add('visible');
     document.getElementById('resultPanel').classList.remove('active');
     document.getElementById('loadingPanel').classList.remove('active');
   }
@@ -579,21 +712,13 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
   window.clearImage = function() {
     currentFile = null;
     document.getElementById('previewImg').src = '';
-    document.getElementById('dropZone').classList.remove('has-image');
+    document.getElementById('startCard').style.display = 'flex';
+    document.getElementById('previewCard').style.display = 'none';
+    document.getElementById('actionBar').classList.remove('visible');
     document.getElementById('identifyBtn').disabled = true;
-    document.getElementById('clearBtn').classList.remove('visible');
     document.getElementById('fileInput').value = '';
     document.getElementById('resultPanel').classList.remove('active');
     document.getElementById('loadingPanel').classList.remove('active');
-  };
-
-  window.onDragOver  = e => { e.preventDefault(); document.getElementById('dropZone').classList.add('drag-over'); };
-  window.onDragLeave = () => document.getElementById('dropZone').classList.remove('drag-over');
-  window.onDrop = function(e) {
-    e.preventDefault();
-    document.getElementById('dropZone').classList.remove('drag-over');
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) loadFile(file);
   };
 
   // ── CAMERA ───────────────────────────────────
