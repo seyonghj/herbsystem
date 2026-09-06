@@ -155,42 +155,6 @@
     }
     .section-sub { font-size: 14px; color: var(--text-muted); margin-top: 0.5rem; }
 
-    /* ── HERB STRIP: all herbs ── */
-    .herb-strip { padding: 3rem 0 4rem; background: var(--white); border-top: 1px solid var(--border); }
-    .herb-strip-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
-      gap: 12px; margin-top: 2rem;
-    }
-    .strip-card {
-      border: 1px solid var(--border); border-radius: var(--radius-md);
-      overflow: hidden; text-align: center;
-      transition: box-shadow 0.2s, transform 0.2s;
-      text-decoration: none; color: inherit; display: block;
-    }
-    .strip-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
-    .strip-card-img {
-      height: 76px; background: var(--green-pale);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 34px; overflow: hidden;
-    }
-    .strip-card-img img { width: 100%; height: 100%; object-fit: cover; }
-    .strip-card-body { padding: 8px 10px 10px; }
-    .strip-card-num {
-      display: inline-flex; align-items: center; justify-content: center;
-      width: 16px; height: 16px; border-radius: 50%;
-      background: var(--green-main); color: #fff;
-      font-size: 9px; font-weight: 600; margin-bottom: 3px;
-    }
-    .strip-card-local { font-size: 12px; font-weight: 600; color: var(--green-dark); }
-    .strip-card-sci { font-size: 10px; color: var(--text-muted); font-style: italic; margin-top: 2px; }
-
-    /* strip skeleton */
-    .strip-skel { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
-    .strip-skel-img { height: 76px; background: linear-gradient(90deg,#e8f0ec 25%,#f0f6f2 50%,#e8f0ec 75%); background-size: 200%; animation: shimmerStrip 1.4s infinite; }
-    .strip-skel-body { padding: 8px 10px 10px; }
-    .strip-skel-line { height: 9px; border-radius: 5px; background: #e8f0ec; animation: shimmerStrip 1.4s infinite; margin-bottom: 5px; }
-    @keyframes shimmerStrip { 0%{background-position:200%} 100%{background-position:-200%} }
-
     /* ── RESPONSIVE ── */
     @media (max-width: 768px) {
       .hero-inner { grid-template-columns: 1fr; gap: 2rem; }
@@ -209,13 +173,6 @@
       .features { padding: 2.5rem 0; }
       .features-grid { grid-template-columns: 1fr; gap: 10px; margin-top: 1.5rem; }
       .feature-card { padding: 1.25rem; }
-
-      .herb-strip { padding: 2rem 0 2.5rem; }
-      .herb-strip-grid { grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap: 8px; margin-top: 1.25rem; }
-      .strip-card-img { height: 60px; font-size: 26px; }
-      .strip-skel-img { height: 60px; }
-      .strip-card-local { font-size: 11px; }
-      .strip-card-sci { font-size: 9px; }
     }
   </style>
 </head>
@@ -345,31 +302,6 @@
   </div>
 </section>
 
-<!-- HERB STRIP: all herbs from Firebase -->
-<section class="herb-strip">
-  <div class="container">
-    <div class="section-header">
-      <div class="section-eyebrow">All herbs in the database</div>
-      <h2 class="section-title">Commonly found in Lemery, Iloilo</h2>
-      <p class="section-sub" id="stripSub">Click any herb to view full details</p>
-    </div>
-    <div class="herb-strip-grid" id="herbStrip">
-      <!-- skeletons -->
-      <div class="strip-skel"><div class="strip-skel-img"></div><div class="strip-skel-body"><div class="strip-skel-line" style="width:65%"></div><div class="strip-skel-line" style="width:85%"></div></div></div>
-      <div class="strip-skel"><div class="strip-skel-img"></div><div class="strip-skel-body"><div class="strip-skel-line" style="width:70%"></div><div class="strip-skel-line" style="width:80%"></div></div></div>
-      <div class="strip-skel"><div class="strip-skel-img"></div><div class="strip-skel-body"><div class="strip-skel-line" style="width:60%"></div><div class="strip-skel-line" style="width:90%"></div></div></div>
-      <div class="strip-skel"><div class="strip-skel-img"></div><div class="strip-skel-body"><div class="strip-skel-line" style="width:75%"></div><div class="strip-skel-line" style="width:78%"></div></div></div>
-      <div class="strip-skel"><div class="strip-skel-img"></div><div class="strip-skel-body"><div class="strip-skel-line" style="width:68%"></div><div class="strip-skel-line" style="width:82%"></div></div></div>
-      <div class="strip-skel"><div class="strip-skel-img"></div><div class="strip-skel-body"><div class="strip-skel-line" style="width:72%"></div><div class="strip-skel-line" style="width:88%"></div></div></div>
-    </div>
-    <div style="text-align:center;margin-top:2rem">
-      <a href="herbs.html" class="btn btn-outline">
-        View full database <i class="ti ti-arrow-right"></i>
-      </a>
-    </div>
-  </div>
-</section>
-
 <!-- FOOTER -->
 <footer class="footer">
   <p>
@@ -418,39 +350,15 @@
       if (!herbs.length) {
         document.getElementById('statHerbs').textContent = '0';
         document.getElementById('heroVisual').innerHTML = '';
-        document.getElementById('herbStrip').innerHTML =
-          `<p style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:2rem;font-size:13px">
-            No herbs in database yet.
-          </p>`;
         return;
       }
 
-      // 1. Update hero stat
+      // Update hero stat
       document.getElementById('statHerbs').textContent = herbs.length;
-      document.getElementById('stripSub').textContent =
-        `${herbs.length} herb${herbs.length !== 1 ? 's' : ''} — click any to view full details`;
 
-      // 2. Hero visual: 4 random herbs
+      // Hero visual: 4 random herbs
       const heroFour = pickRandom(herbs, Math.min(4, herbs.length));
       document.getElementById('heroVisual').innerHTML = heroFour.map(heroCardHTML).join('');
-
-      // ── FIX: strip cards use a JS-built img element to avoid quote conflicts ──
-      const sorted = [...herbs].sort((a, b) => (a.no || 0) - (b.no || 0));
-      document.getElementById('herbStrip').innerHTML = sorted.map(h => {
-        const emoji = h.emoji || '🌿';
-        const imgHTML = h.imageUrl
-          ? `<img src="${h.imageUrl}" alt="${h.localName}" loading="lazy">`
-          : emoji;
-        return `
-          <a class="strip-card" href="herbs.html">
-            <div class="strip-card-img">${imgHTML}</div>
-            <div class="strip-card-body">
-              <div class="strip-card-num">${h.no || ''}</div>
-              <div class="strip-card-local">${h.localName}</div>
-              <div class="strip-card-sci">${h.scientificName}</div>
-            </div>
-          </a>`;
-      }).join('');
 
     } catch(e) {
       console.error('Firebase error:', e);
@@ -480,10 +388,6 @@
           <div class="herb-preview-sci">Peperomia pellucida</div>
           <span class="herb-preview-tag">Pain relief</span>
         </a>`;
-      document.getElementById('herbStrip').innerHTML =
-        `<p style="grid-column:1/-1;text-align:center;color:var(--text-muted);font-size:13px;padding:2rem 0">
-          Could not connect to Firebase. Check your config.
-        </p>`;
     }
   }
 
