@@ -207,6 +207,45 @@
     .conf-med  { background: #fef3c7; color: #92400e; }
     .conf-low  { background: #fee2e2; color: #991b1b; }
 
+    /* ── REPOST (share-to-feed) styling ── */
+    .repost-flag {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: #5a6472; font-weight: 600;
+      padding: 0.75rem 1.25rem 0;
+    }
+    .repost-flag i { color: var(--green-main); font-size: 15px; }
+    .shared-embed {
+      border: 1px solid var(--border); border-radius: var(--radius-md);
+      margin: 0 1.25rem 0.75rem; overflow: hidden; background: #fbfcfb;
+    }
+    .shared-embed-header {
+      display: flex; align-items: center; gap: 8px; padding: 10px 12px 6px;
+    }
+    .shared-embed-avatar {
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      background: var(--green-main); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; overflow: hidden;
+    }
+    .shared-embed-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .shared-embed-name { font-size: 12px; font-weight: 700; color: #1a1a1a; }
+    .shared-embed-time { font-size: 10px; color: #8c96a0; }
+    .shared-embed-herb {
+      margin-left: auto; font-size: 10px; font-weight: 600;
+      background: var(--green-pale); color: var(--green-dark);
+      border: 1px solid var(--green-light); padding: 2px 8px; border-radius: 99px;
+      white-space: nowrap;
+    }
+    .shared-embed-caption { font-size: 13px; color: #1a1a1a; line-height: 1.55; padding: 0 12px 8px; }
+    .shared-embed-img { width: 100%; max-height: 300px; object-fit: cover; display: block; }
+    .shared-embed-img-placeholder {
+      height: 120px; background: var(--green-pale);
+      display: flex; align-items: center; justify-content: center; font-size: 40px;
+    }
+    .shared-embed-deleted {
+      padding: 1rem 12px; font-size: 12px; color: #8c96a0; text-align: center;
+    }
+
     /* REACTIONS ROW */
     .feed-reactions {
       display: flex; align-items: center; gap: 0;
@@ -223,6 +262,7 @@
     .reaction-btn:hover { background: var(--green-pale); color: var(--green-dark); }
     .reaction-btn.liked  { color: #e53e3e; }
     .reaction-btn.liked i { color: #e53e3e; }
+    .reaction-btn.shared { color: var(--green-main); }
     .reaction-btn i { font-size: 17px; }
     .reaction-divider { width: 1px; height: 24px; background: var(--border); }
 
@@ -254,6 +294,42 @@
     .feed-empty { text-align: center; padding: 3rem 1rem; color: #5a6472; }
     .feed-empty-icon { font-size: 48px; margin-bottom: 1rem; }
     .feed-empty h3 { font-size: 17px; color: #1a1a1a; margin-bottom: 0.5rem; }
+
+    /* ══════════════════════════════════════
+       SHARE MODAL (Facebook-style repost)
+    ══════════════════════════════════════ */
+    #shareModal .modal-sheet { max-width: 520px; }
+    .share-compose {
+      display: flex; align-items: flex-start; gap: 10px; margin-bottom: 1rem;
+    }
+    .share-caption {
+      flex: 1; border: none; outline: none; resize: none;
+      font-size: 15px; font-family: 'DM Sans', sans-serif; color: #1a1a1a;
+      height: 70px; padding: 0;
+    }
+    .share-embed-preview {
+      border: 1px solid var(--border); border-radius: var(--radius-md);
+      overflow: hidden; background: #fbfcfb;
+    }
+    .share-actions {
+      display: flex; flex-direction: column; gap: 8px; margin-top: 1.1rem;
+    }
+    .share-btn-primary {
+      width: 100%; padding: 11px; background: var(--green-main); color: #fff;
+      border: none; border-radius: var(--radius-md); font-size: 14px; font-weight: 600;
+      font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .share-btn-primary:hover:not(:disabled) { background: var(--green-mid); }
+    .share-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .share-btn-secondary {
+      width: 100%; padding: 10px; background: #fff; color: #5a6472;
+      border: 1.5px solid var(--border); border-radius: var(--radius-md);
+      font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+      cursor: pointer; transition: background 0.15s, border-color 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .share-btn-secondary:hover { background: var(--green-pale); border-color: var(--green-main); color: var(--green-dark); }
 
     /* ══════════════════════════════════════
        POST DETAIL MODAL
@@ -528,6 +604,31 @@
   </div>
 </div>
 
+<!-- ══ SHARE-TO-FEED MODAL (Facebook-style repost) ══ -->
+<div class="modal-overlay" id="shareModal" onclick="onShareOverlayClick(event)">
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <span class="modal-title">Share to your feed</span>
+      <button class="modal-close" onclick="closeShareModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="share-compose">
+        <div class="create-avatar" id="shareAvatar">?</div>
+        <textarea class="share-caption" id="shareCaption" placeholder="Say something about this…"></textarea>
+      </div>
+      <div class="share-embed-preview" id="sharePreviewEmbed"></div>
+      <div class="share-actions">
+        <button class="share-btn-primary" id="shareConfirmBtn" onclick="confirmShareToFeed()">
+          <i class="ti ti-share"></i> Share to Feed
+        </button>
+        <button class="share-btn-secondary" onclick="copyShareLink()">
+          <i class="ti ti-link"></i> Copy link instead
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ══ POST DETAIL MODAL ══ -->
 <div class="modal-overlay" id="postDetailModal" onclick="onDetailOverlayClick(event)">
   <div class="modal-sheet" style="max-height:92vh;display:flex;flex-direction:column;padding-bottom:0">
@@ -547,6 +648,9 @@
 
       <!-- post meta -->
       <div class="detail-body" id="detailBody"></div>
+
+      <!-- shared-post embed (only present when this post is a repost) -->
+      <div id="detailSharedEmbed"></div>
 
       <!-- reactions -->
       <div style="padding:0 1.25rem">
@@ -601,6 +705,7 @@
   let unsubFeed     = null;
   let detailPostId  = null;   // which post is open in detail modal
   let detailPostData = null;  // cached post data
+  let shareSourcePost = null; // the post snapshot currently being shared/reposted
 
   // ════════════════════════════════════════
   //  CREATE POST MODAL
@@ -618,6 +723,131 @@
   };
 
   // ════════════════════════════════════════
+  //  SHARED-POST EMBED RENDERING (used by feed cards, detail modal, and
+  //  the share compose preview — one function, one look everywhere)
+  // ════════════════════════════════════════
+  function renderSharedEmbedHTML(shared) {
+    if (!shared) {
+      return `<div class="shared-embed-deleted"><i class="ti ti-mood-empty" style="font-size:20px;display:block;margin-bottom:4px"></i>This post is no longer available.</div>`;
+    }
+    const avatarHTML = shared.userPhoto
+      ? `<img src="${shared.userPhoto}" referrerpolicy="no-referrer">`
+      : (shared.userName || 'U')[0].toUpperCase();
+    const timeStr = shared.createdAt?.toDate?.()?.toLocaleDateString('en-PH', {
+      month:'short', day:'numeric', year:'numeric'
+    }) || '';
+    const herbBadge = shared.herbName
+      ? `<span class="shared-embed-herb"><i class="ti ti-leaf" style="font-size:10px"></i> ${escapeHTML(shared.herbName)}</span>` : '';
+    const imgHTML = shared.imageBase64
+      ? `<img class="shared-embed-img" src="${shared.imageBase64}" alt="herb photo" loading="lazy" decoding="async">`
+      : shared.herbName ? `<div class="shared-embed-img-placeholder">🌿</div>` : '';
+
+    return `
+      <div class="shared-embed-header">
+        <div class="shared-embed-avatar">${avatarHTML}</div>
+        <div>
+          <div class="shared-embed-name">${escapeHTML(shared.userName || 'User')}</div>
+          <div class="shared-embed-time">${timeStr}</div>
+        </div>
+        ${herbBadge}
+      </div>
+      ${shared.caption ? `<div class="shared-embed-caption">${escapeHTML(shared.caption)}</div>` : ''}
+      ${imgHTML}`;
+  }
+
+  // ════════════════════════════════════════
+  //  SHARE-TO-FEED MODAL (repost, Facebook-style)
+  // ════════════════════════════════════════
+  window.openShareModal = function(postId) {
+    if (!currentUser) { showToast('Sign in to share posts', 'warn'); return; }
+    const allPosts = window._allPosts || [];
+    const p = allPosts.find(x => x.id === postId);
+    if (!p) return;
+
+    // Re-sharing a repost shares the ROOT original — keeps the chain flat,
+    // like Facebook does, instead of nesting shares inside shares.
+    const original = p.sharedPost
+      ? { ...p.sharedPost }
+      : {
+          id: p.id, uid: p.uid, userName: p.userName, userPhoto: p.userPhoto,
+          caption: p.caption || null, imageBase64: p.imageBase64 || null,
+          herbName: p.herbName || null, confidence: p.confidence || null,
+          confidenceLabel: p.confidenceLabel || null, createdAt: p.createdAt,
+        };
+    shareSourcePost = original;
+
+    document.getElementById('shareCaption').value = '';
+    document.getElementById('sharePreviewEmbed').innerHTML = renderSharedEmbedHTML(original);
+
+    const av = document.getElementById('shareAvatar');
+    if (currentUser.photoURL) av.innerHTML = `<img src="${currentUser.photoURL}" referrerpolicy="no-referrer">`;
+    else av.textContent = (currentUser.displayName || currentUser.email || 'U')[0].toUpperCase();
+
+    document.getElementById('shareModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closeShareModal = function() {
+    document.getElementById('shareModal').classList.remove('open');
+    document.body.style.overflow = '';
+    shareSourcePost = null;
+  };
+  window.onShareOverlayClick = function(e) {
+    if (e.target === document.getElementById('shareModal')) closeShareModal();
+  };
+
+  window.confirmShareToFeed = async function() {
+    if (!currentUser || !shareSourcePost) return;
+    const btn = document.getElementById('shareConfirmBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ti ti-loader"></i> Sharing…';
+    try {
+      const myCaption = document.getElementById('shareCaption').value.trim();
+      await addDoc(collection(db, 'posts'), {
+        uid: currentUser.uid,
+        userName: currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
+        userPhoto: currentUser.photoURL || null,
+        userEmail: currentUser.email,
+        caption: myCaption || null,
+        imageBase64: null,
+        herbName: null, confidence: null, confidenceLabel: null,
+        likes: [], likeCount: 0, commentCount: 0,
+        sharedPost: shareSourcePost,
+        createdAt: serverTimestamp(),
+      });
+      // Best-effort: bump a share counter on the original post, if it
+      // still exists — purely informational, never blocks the repost.
+      if (shareSourcePost.id) {
+        updateDoc(doc(db, 'posts', shareSourcePost.id), { shareCount: increment(1) }).catch(() => {});
+      }
+      closeShareModal();
+      showToast('🔁 Shared to your feed!');
+    } catch(e) {
+      showToast('Could not share: ' + e.message, 'error');
+    }
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-share"></i> Share to Feed';
+  };
+
+  window.copyShareLink = function() {
+    const herbName = shareSourcePost?.herbName || '';
+    const text = herbName ? `Check out this ${herbName} post on HerbID Iloilo!` : 'Check out this post on HerbID Iloilo!';
+    if (navigator.share) {
+      navigator.share({ title: 'HerbID Iloilo', text, url: location.href });
+    } else {
+      navigator.clipboard.writeText(location.href);
+      showToast('Link copied to clipboard!');
+    }
+    closeShareModal();
+  };
+
+  // Kept for any old inline onclick references — routes into the same
+  // share-to-feed flow instead of jumping straight to a plain link share.
+  window.sharePost = function(postId) {
+    openShareModal(postId);
+  };
+
+  // ════════════════════════════════════════
   //  POST DETAIL MODAL
   // ════════════════════════════════════════
   window.openDetailModal = function(postId, focusComment = false) {
@@ -631,13 +861,13 @@
 
     // title
     document.getElementById('detailModalTitle').textContent =
-      p.herbName ? `🌿 ${p.herbName}` : '🌿 Post';
+      p.sharedPost ? '🔁 Shared post' : p.herbName ? `🌿 ${p.herbName}` : '🌿 Post';
 
-    // image
+    // image (reposts show no top-level image of their own — the embed below has it)
     const imgEl = document.getElementById('detailImage');
-    imgEl.innerHTML = p.imageBase64
+    imgEl.innerHTML = (!p.sharedPost && p.imageBase64)
       ? `<img class="detail-image" src="${p.imageBase64}" alt="herb photo" loading="lazy" decoding="async" onerror="this.style.display='none'">`
-      : p.herbName ? `<div class="detail-image-placeholder">🌿</div>` : '';
+      : (!p.sharedPost && p.herbName) ? `<div class="detail-image-placeholder">🌿</div>` : '';
 
     // meta (author + caption + confidence)
     const isOwner  = currentUser && currentUser.uid === p.uid;
@@ -647,14 +877,16 @@
     const timeStr = p.createdAt?.toDate?.()?.toLocaleDateString('en-PH', {
       month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit'
     }) || 'just now';
-    const confBadge = p.confidence
+    const confBadge = (!p.sharedPost && p.confidence)
       ? `<span class="conf-badge ${p.confidenceLabel==='High'?'conf-high':p.confidenceLabel==='Medium'?'conf-med':'conf-low'}">${p.confidence.toFixed(0)}% ${p.confidenceLabel||''}</span>` : '';
+    const repostFlag = p.sharedPost
+      ? `<div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#5a6472;font-weight:600;margin-bottom:10px"><i class="ti ti-repeat" style="color:var(--green-main);font-size:15px"></i> shared a post</div>` : '';
 
     document.getElementById('detailBody').innerHTML = `
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
         <div class="feed-avatar">${avatarHTML}</div>
         <div>
-          <div class="feed-user-name">${p.userName || 'User'}</div>
+          <div class="feed-user-name">${escapeHTML(p.userName || 'User')}</div>
           <div class="feed-time">${timeStr}</div>
         </div>
         ${isOwner ? `<div class="feed-card-menu" style="margin-left:auto">
@@ -664,9 +896,15 @@
           </div>
         </div>` : ''}
       </div>
+      ${repostFlag}
       ${p.caption ? `<div class="feed-caption">${escapeHTML(p.caption)}</div>` : ''}
       ${confBadge ? `<div class="feed-conf-row">${confBadge}<span style="font-size:12px;color:#5a6472">Identification confidence</span></div>` : ''}
     `;
+
+    // embedded original post, if this is a repost
+    document.getElementById('detailSharedEmbed').innerHTML = p.sharedPost
+      ? `<div class="shared-embed" style="margin:0 1.25rem 0.75rem">${renderSharedEmbedHTML(p.sharedPost)}</div>`
+      : '';
 
     // reactions
     renderDetailReactions(p);
@@ -716,7 +954,7 @@
         <span id="detail-cmt-count">${cmtCount} ${cmtCount===1?'Comment':'Comments'}</span>
       </button>
       <div class="reaction-divider"></div>
-      <button class="reaction-btn" onclick="sharePost('${p.id}','${escapeHTML(p.herbName||'')}')">
+      <button class="reaction-btn" onclick="openShareModal('${p.id}')">
         <i class="ti ti-share"></i> Share
       </button>`;
   }
@@ -897,15 +1135,23 @@
       ? `<img src="${p.userPhoto}" referrerpolicy="no-referrer">`
       : (p.userName || 'U')[0].toUpperCase();
 
-    const imageHTML = p.imageBase64
+    // Reposts don't carry their own top-level image/herb badge — that
+    // content belongs to the embedded original shown further down.
+    const imageHTML = (!p.sharedPost && p.imageBase64)
       ? `<img class="feed-image" src="${p.imageBase64}" alt="herb photo" loading="lazy" decoding="async" onerror="this.style.display='none'">`
-      : p.herbName ? `<div class="feed-image-placeholder">🌿</div>` : '';
+      : (!p.sharedPost && p.herbName) ? `<div class="feed-image-placeholder">🌿</div>` : '';
 
-    const herbBadge = p.herbName
-      ? `<span class="feed-herb-badge"><i class="ti ti-leaf" style="font-size:11px"></i> ${p.herbName}</span>` : '';
+    const herbBadge = (!p.sharedPost && p.herbName)
+      ? `<span class="feed-herb-badge"><i class="ti ti-leaf" style="font-size:11px"></i> ${escapeHTML(p.herbName)}</span>` : '';
 
-    const confBadge = p.confidence
+    const confBadge = (!p.sharedPost && p.confidence)
       ? `<span class="conf-badge ${p.confidenceLabel==='High'?'conf-high':p.confidenceLabel==='Medium'?'conf-med':'conf-low'}">${p.confidence.toFixed(0)}% ${p.confidenceLabel||''}</span>` : '';
+
+    const repostFlag = p.sharedPost
+      ? `<div class="repost-flag"><i class="ti ti-repeat"></i> shared a post</div>` : '';
+
+    const sharedEmbedHTML = p.sharedPost
+      ? `<div class="shared-embed">${renderSharedEmbedHTML(p.sharedPost)}</div>` : '';
 
     const menuHTML = isOwner
       ? `<div class="feed-card-menu">
@@ -924,15 +1170,17 @@
         <div class="feed-card-header">
           <div class="feed-avatar">${avatarHTML}</div>
           <div>
-            <div class="feed-user-name">${p.userName || 'User'}</div>
+            <div class="feed-user-name">${escapeHTML(p.userName || 'User')}</div>
             <div class="feed-time">${timeStr}</div>
           </div>
           ${herbBadge}
           ${menuHTML}
         </div>
+        ${repostFlag}
+        ${p.caption ? `<div class="feed-card-body" style="padding-bottom:0"><div class="feed-caption" style="margin-bottom:0">${escapeHTML(p.caption)}</div></div>` : ''}
+        ${sharedEmbedHTML}
         ${imageHTML}
         <div class="feed-card-body">
-          ${p.caption ? `<div class="feed-caption">${escapeHTML(p.caption)}</div>` : ''}
           ${confBadge ? `<div class="feed-conf-row">${confBadge}<span style="font-size:12px;color:#5a6472">Identification confidence</span></div>` : ''}
           <div class="feed-reactions">
             <button class="reaction-btn ${isLiked?'liked':''}"
@@ -948,7 +1196,7 @@
             </button>
             <div class="reaction-divider"></div>
             <button class="reaction-btn"
-              onclick="event.stopPropagation();sharePost('${p.id}','${escapeHTML(p.herbName||'')}')">
+              onclick="event.stopPropagation();openShareModal('${p.id}')">
               <i class="ti ti-share"></i> Share
             </button>
           </div>
@@ -1171,19 +1419,6 @@
   document.addEventListener('click', () => {
     document.querySelectorAll('.feed-dropdown.open').forEach(m => m.classList.remove('open'));
   });
-
-  // ════════════════════════════════════════
-  //  SHARE
-  // ════════════════════════════════════════
-  window.sharePost = function(postId, herbName) {
-    const text = herbName ? `Check out this ${herbName} post on HerbID Iloilo!` : 'Check out this post on HerbID Iloilo!';
-    if (navigator.share) {
-      navigator.share({ title: 'HerbID Iloilo', text, url: location.href });
-    } else {
-      navigator.clipboard.writeText(location.href);
-      showToast('Link copied to clipboard!');
-    }
-  };
 
   // ════════════════════════════════════════
   //  HELPERS
