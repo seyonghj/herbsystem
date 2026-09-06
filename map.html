@@ -751,15 +751,7 @@
       map.setView(marker.getLatLng(), 15, { animate: true });
       marker.setPopupContent(popupHTML(herb, pin));
       marker.openPopup();
-      // On mobile, tapping a pin should just show its popup — the route
-      // panel is one more thing competing for a small screen right when
-      // the user only wanted to see what this pin is. Desktop keeps the
-      // route auto-showing since there's room for it alongside everything else.
-      if (isMobileViewport()) {
-        clearRoute();
-      } else {
-        showRouteToHerb({ ...herb, lat: pin.lat, lng: pin.lng });
-      }
+      showRouteToHerb({ ...herb, lat: pin.lat, lng: pin.lng });
     } else {
       clearRoute();
     }
@@ -1147,9 +1139,8 @@
         // via the `pins` array those are undefined and the route silently
         // failed. Use the actually-selected pin's coordinates instead.
         // Also throttled so every GPS tick while walking doesn't refetch
-        // the whole route from the routing API. Skipped on mobile, matching
-        // the no-auto-route rule for tapping a pin there.
-        if (!isMobileViewport() && activeMarkerKey && markers[activeMarkerKey]) {
+        // the whole route from the routing API.
+        if (activeMarkerKey && markers[activeMarkerKey]) {
           const movedEnough = !_lastRouteCalcLatLng ||
             _userLocationLatLng.distanceTo(_lastRouteCalcLatLng) >= ROUTE_RECALC_MIN_METERS;
           if (movedEnough) {
