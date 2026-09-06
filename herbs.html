@@ -79,6 +79,7 @@
       margin-top: 8px; font-size: 11px; color: var(--text-muted);
     }
     .herb-loc i { color: var(--green-main); font-size: 12px; }
+    .herb-loc.is-pin-only { color: var(--text-light); font-style: italic; }
 
     /* tag colors for use labels */
     .tag { font-size: 11px; padding: 3px 8px; border-radius: 99px; background: var(--green-pale); color: var(--green-dark); }
@@ -143,6 +144,7 @@
       background: var(--green-pale); color: var(--green-dark);
       padding: 6px 12px; border-radius: 99px; font-size: 13px; font-weight: 500;
     }
+    .loc-chip.is-pin-only { background: #fef3c7; color: #92400e; }
     .drawer-actions { display: flex; gap: 10px; padding: 0 1.5rem 1.5rem; }
     .drawer-actions .btn { flex: 1; justify-content: center; }
 
@@ -283,7 +285,7 @@
     </div>
     <div class="detail-row">
       <div class="detail-label">Location in Iloilo</div>
-      <div><span class="loc-chip"><i class="ti ti-map-pin"></i><span id="d-loc"></span></span></div>
+      <div><span class="loc-chip" id="d-loc-chip"><i class="ti ti-map-pin"></i><span id="d-loc"></span></span></div>
     </div>
   </div>
   <div class="drawer-actions">
@@ -314,6 +316,44 @@
     if (Array.isArray(val)) return val;
     if (typeof val === 'string') return val.split(',').map(s => s.trim()).filter(Boolean);
     return [];
+  }
+
+  // ── Location handling ──────────────────────────────────────
+  // The herb doc's own `location` field is a free-text description
+  // (e.g. "Barangay Tacas, Lemery, Iloilo") and is filled in manually.
+  // Separately, map.html lets admins drop map pins (lat/lng) on a herb,
+  // stored in `pins` (or legacy `lat`/`lng` fields) — that's a different,
+  // independently-maintained source of location data. A herb can have
+  // pins on the map with no `location` text ever having been typed in,
+  // which is why some cards showed a bare "—" even though the herb is
+  // correctly placed on the Map page. Bug fix: fall back to a pin-aware
+  // message instead of a plain dash when that happens.
+  function getPinCount(h) {
+    if (Array.isArray(h.pins)) return h.pins.length;
+    if (h.lat != null && h.lng != null) return 1;
+    return 0;
+  }
+
+  function hasLocationText(h) {
+    return typeof h.location === 'string' && h.location.trim().length > 0;
+  }
+
+  // Short label for the grid card
+  function getLocationCardText(h) {
+    if (hasLocationText(h)) return h.location.split(',')[0].trim();
+    const pins = getPinCount(h);
+    if (pins === 1) return 'Pinned on map';
+    if (pins > 1)   return `${pins} locations pinned`;
+    return '—';
+  }
+
+  // Full text for the detail drawer
+  function getLocationDrawerText(h) {
+    if (hasLocationText(h)) return h.location.trim();
+    const pins = getPinCount(h);
+    if (pins === 1) return 'Pinned on map';
+    if (pins > 1)   return `${pins} locations pinned`;
+    return '—';
   }
 
   // ── Fetch herbs from Firestore ──
@@ -371,6 +411,8 @@
       // Safely get uses/usesTags as arrays
       const usesTags = toArray(h.usesTags);
       const displayTags = usesTags.slice(0, 2);
+      const locText   = getLocationCardText(h);
+      const pinOnly   = !hasLocationText(h) && getPinCount(h) > 0;
 
       return `
         <div class="herb-card" onclick="openDrawer('${h.id}')" tabindex="0" role="button" aria-label="${h.localName || ''}">
@@ -387,9 +429,9 @@
             <div class="herb-tags">
               ${displayTags.map(t => `<span class="tag">${t}</span>`).join('')}
             </div>
-            <div class="herb-loc">
+            <div class="herb-loc${pinOnly ? ' is-pin-only' : ''}">
               <i class="ti ti-map-pin"></i>
-              ${(h.location || '').split(',')[0] || '—'}
+              ${locText}
             </div>
           </div>
         </div>`;
@@ -452,7 +494,10 @@
     document.getElementById('d-family').textContent  = h.family || '—';
     document.getElementById('d-parts').textContent   = h.parts || '—';
     document.getElementById('d-prep').textContent    = h.preparation || '—';
-    document.getElementById('d-loc').textContent     = h.location || '—';
+    document.getElementById('d-loc').textContent     = getLocationDrawerText(h);
+    document.getElementById('d-loc-chip').classList.toggle(
+      'is-pin-only', !hasLocationText(h) && getPinCount(h) > 0
+    );
     document.getElementById('d-usesTags').innerHTML   =
       usesTags.map(t => `<span>${t}</span>`).join('');
     document.getElementById('d-mapLink').href    = `map.html?herb=${id}`;

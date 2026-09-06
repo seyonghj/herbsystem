@@ -24,6 +24,21 @@
     .mode-banner.user  { background: #f0faf5; color: #065f46; }
     .mode-banner i { font-size: 14px; }
 
+    /* Seasonal-availability notice */
+    .seasonal-notice {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 9px 1.25rem; font-size: 11.5px; line-height: 1.5;
+      background: #fffbeb; color: #92400e; border-bottom: 1px solid #fde68a;
+      flex-shrink: 0;
+    }
+    .seasonal-notice i.ti-alert-triangle { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+    .seasonal-notice-text { flex: 1; }
+    .seasonal-notice-close {
+      background: none; border: none; cursor: pointer; color: #92400e;
+      opacity: 0.6; font-size: 14px; padding: 0; flex-shrink: 0; line-height: 1;
+    }
+    .seasonal-notice-close:hover { opacity: 1; }
+
     /* ── SIDEBAR ── */
     .map-sidebar {
       background: var(--white); border-right: 1px solid var(--border);
@@ -226,6 +241,9 @@
     .legend-row { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; color: var(--text-muted); flex-wrap: wrap; }
     .legend-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.2); flex-shrink: 0; }
 
+    /* Toast used for "no pin yet" / route feedback etc. */
+    #toastWrap { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+
     /* MOBILE */
     @media (max-width: 768px) {
       .map-layout { grid-template-columns: 1fr; position: relative; }
@@ -235,7 +253,6 @@
         border-radius: 20px 20px 0 0; box-shadow: 0 -4px 24px rgba(0,0,0,0.12);
         transform: translateY(100%); transition: transform 0.3s cubic-bezier(.4,0,.2,1);
       }
-      .filter-pills { display: none; }
       .map-sidebar.open {
         transform: translateY(0);
         top: 0;
@@ -248,6 +265,14 @@
         content: ''; display: block; width: 36px; height: 4px;
         background: var(--border); border-radius: 2px; margin: 8px auto 4px; flex-shrink: 0;
       }
+
+      /* Filter pills stay usable on mobile — horizontal scroll instead of vanishing */
+      .filter-pills {
+        flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch;
+        padding: 0.6rem 1rem;
+      }
+      .filter-pills::-webkit-scrollbar { display: none; }
+
       .map-legend {
         top: 12px;
         right: 12px;
@@ -260,6 +285,23 @@
       .legend-title { font-size: 10px; margin-bottom: 5px; }
       .legend-row { gap: 6px; margin-bottom: 3px; }
       .legend-dot { width: 10px; height: 10px; }
+
+      /* Route panel: full-width and lifted above the fixed bottom buttons
+         so it never overlaps "Show herb list" / the GPS button. */
+      .route-panel {
+        left: 0.75rem; right: 0.75rem; width: auto;
+        bottom: 4.75rem; max-height: 30vh;
+      }
+
+      /* When the herb list is a full-screen sheet, hide the floating map
+         chrome underneath it — legend/pin-banner/route-panel would otherwise
+         render on top of the list (higher z-index) and look like broken,
+         floating clutter over the list the user is trying to read. */
+      #mapLayout.sidebar-open .map-legend,
+      #mapLayout.sidebar-open .route-panel,
+      #mapLayout.sidebar-open .pin-mode-banner {
+        display: none !important;
+      }
     }
     .map-toggle-btn {
       display: none !important; position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
@@ -278,6 +320,11 @@
       cursor: pointer; font-size: 18px; color: var(--green-dark);
     }
     .map-gps-btn.active { background: var(--green-main); color: #fff; }
+    /* Hide the GPS button while the full-screen mobile list is open —
+       it would otherwise float on top of the list the user is reading. */
+    @media (max-width: 768px) {
+      body.mobile-sidebar-open .map-gps-btn { display: none; }
+    }
     .user-gps-marker { width: 14px; height: 14px; border-radius: 50%; background: #2563eb; box-shadow: 0 2px 10px rgba(37,99,235,0.35); border: 3px solid #fff; }
     .route-panel {
       position: absolute; left: 1.25rem; bottom: 1.25rem; z-index: 500;
@@ -323,7 +370,7 @@
     <li><a href="identify.html">Identify Herb</a></li>
     <li><a href="map.html" class="active">Map</a></li>
     <li><a href="about.html">About</a></li>
-    
+
   </ul>
   <button class="nav-hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Menu">
     <i class="ti ti-menu-2"></i>
@@ -339,6 +386,13 @@
     <div class="mode-banner user" id="modeBanner">
       <i class="ti ti-map-2"></i>
       <span id="modeBannerText">Viewing herb locations in Lemery, Iloilo</span>
+    </div>
+
+    <!-- Seasonal-availability notice -->
+    <div class="seasonal-notice" id="seasonalNotice">
+      <i class="ti ti-alert-triangle"></i>
+      <span class="seasonal-notice-text">Some herbs are seasonal and may only grow or be found under specific weather conditions. A pinned location doesn't guarantee the herb is currently there.</span>
+      <button class="seasonal-notice-close" onclick="dismissSeasonalNotice()" title="Dismiss"><i class="ti ti-x"></i></button>
     </div>
 
     <div class="sidebar-header">
@@ -405,7 +459,7 @@
 </button>
 
 <!-- GPS button -->
-<button id="gpsBtn" class="map-gps-btn" title="Center map on my location" onclick="locateMe()">
+<button id="gpsBtn" class="map-gps-btn" title="Start live location tracking" onclick="locateMe()">
   <i class="ti ti-compass"></i>
 </button>
 
@@ -421,6 +475,16 @@
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   initNavAuth();
+
+  // Seasonal-availability notice: dismiss for this browser tab session only
+  // (sessionStorage), so it reappears on a fresh visit but not every click.
+  if (sessionStorage.getItem('seasonalNoticeDismissed') === '1') {
+    document.getElementById('seasonalNotice')?.remove();
+  }
+  window.dismissSeasonalNotice = function() {
+    document.getElementById('seasonalNotice')?.remove();
+    sessionStorage.setItem('seasonalNoticeDismissed', '1');
+  };
 
   // ── ADMIN EMAILS ──
   // Add more admin emails here to allow additional accounts to manage pins.
@@ -461,6 +525,9 @@
   let _userLocationMarker = null;
   let _userLocationCircle = null;
   let _routeLayer = null;
+  let _gpsWatchId = null;
+  let _lastRouteCalcLatLng = null;
+  const ROUTE_RECALC_MIN_METERS = 30; // don't refetch the route for tiny movements
 
   // ── Watch auth — check if admin ──
   onAuthChange(user => {
@@ -487,6 +554,14 @@
     }
   }
 
+  // ── Safely normalize any field to an array (same helper used on herbs.html) ──
+  function toArray(val) {
+    if (!val) return [];
+    if (Array.isArray(val)) return val;
+    if (typeof val === 'string') return val.split(',').map(s => s.trim()).filter(Boolean);
+    return [];
+  }
+
   // ── Icon factory ──
   function makeIcon(emoji, selected = false, admin = false) {
     return L.divIcon({
@@ -506,6 +581,24 @@
 
   function makeMarkerKey(herb, pin) {
     return `${herb.id}::${pin.id || `${pin.lat.toFixed(6)}:${pin.lng.toFixed(6)}`}`;
+  }
+
+  // Bug fix: clicking a herb in the sidebar list previously called
+  // selectHerb(id) with no marker key, so nothing was ever focused or
+  // routed to. This picks the pin closest to the user's current GPS
+  // location when a herb has more than one, falling back to the first
+  // pin if location isn't available yet.
+  function getClosestMarkerKeyForHerb(herb) {
+    const pins = getHerbPins(herb);
+    if (!pins.length) return null;
+    if (pins.length === 1 || !_userLocationLatLng) return makeMarkerKey(herb, pins[0]);
+    let best = pins[0];
+    let bestDist = Infinity;
+    pins.forEach(p => {
+      const d = _userLocationLatLng.distanceTo(L.latLng(p.lat, p.lng));
+      if (d < bestDist) { bestDist = d; best = p; }
+    });
+    return makeMarkerKey(herb, best);
   }
 
   function createPinId() {
@@ -613,6 +706,25 @@
     activeHerbId = null;
     activeMarkerKey = null;
     document.querySelectorAll('.herb-list-item').forEach(el => el.classList.remove('active'));
+  }
+
+  // Shared entry point for "select this herb" from the sidebar list or a
+  // ?herb= URL param — picks the closest pin automatically and shows the
+  // route to it, and gives clear feedback if the herb has no pin at all
+  // instead of silently doing nothing.
+  function focusHerbById(id, { closeMobileList = false } = {}) {
+    const herb = allHerbs.find(h => h.id === id);
+    if (!herb) return;
+    const key = getClosestMarkerKeyForHerb(herb);
+    if (!key) {
+      showToast(`${herb.localName} has no pinned location on the map yet`, 'warn');
+      selectHerb(id, null);
+    } else {
+      selectHerb(id, key);
+    }
+    if (closeMobileList && window.innerWidth <= 768) {
+      setMobileSidebarOpen(false);
+    }
   }
 
   // ── PIN MODE (admin only) ──
@@ -752,7 +864,11 @@
         (h.localName || '').toLowerCase().includes(q) ||
         (h.englishName || '').toLowerCase().includes(q) ||
         (h.scientificName || '').toLowerCase().includes(q);
-      const matchF = !activeFilter || (h.uses || []).includes(activeFilter);
+      // Bug fix: herb docs store categories in `usesTags`, not `uses` —
+      // filtering on `uses` meant every pill except "All" returned zero
+      // results. Match case-insensitively against usesTags.
+      const matchF = !activeFilter ||
+        toArray(h.usesTags).some(t => t.toLowerCase().includes(activeFilter));
       return matchQ && matchF;
     });
     Object.entries(markers).forEach(([key, { marker, herb }]) => {
@@ -765,11 +881,7 @@
   }
 
   window._selectHerb = function(id) {
-    selectHerb(id);
-    if (window.innerWidth <= 768) {
-      document.getElementById('mapSidebar').classList.remove('open');
-      document.getElementById('toggleLabel').textContent = 'Show herb list';
-    }
+    focusHerbById(id, { closeMobileList: true });
   };
 
   // ── Load herbs ──
@@ -783,8 +895,6 @@
       });
       renderList(allHerbs);
       document.getElementById('countBadge').textContent = allHerbs.length;
-      const herbId = new URLSearchParams(location.search).get('herb');
-      if (herbId) setTimeout(() => selectHerb(herbId), 400);
     } catch(e) {
       document.getElementById('herbList').innerHTML =
         `<div style="padding:1.5rem;text-align:center;font-size:13px;color:var(--text-muted)">
@@ -792,9 +902,16 @@
         </div>`;
     }
   }
-  loadMap().then(() => {
-    locateMe();
-  });
+
+  // Init order: load herbs → try to get GPS → THEN honor a ?herb= link.
+  // Getting location first means the closest-pin logic actually has
+  // coordinates to compare against on first load, not just on later clicks.
+  (async function init() {
+    await loadMap();
+    await locateMe();
+    const herbId = new URLSearchParams(location.search).get('herb');
+    if (herbId) focusHerbById(herbId);
+  })();
 
   // ── Helpers ──
   function showSaving(on) {
@@ -805,7 +922,6 @@
     if (!wrap) {
       wrap = document.createElement('div');
       wrap.id = 'toastWrap';
-      wrap.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:8px';
       document.body.appendChild(wrap);
     }
     const colors = { ok:'#0a4a35', error:'#7f1d1d', warn:'#92400e' };
@@ -815,43 +931,109 @@
     wrap.appendChild(t);
     setTimeout(() => t.remove(), 3500);
   }
+
+  // Single source of truth for opening/closing the mobile bottom-sheet list.
+  // Also toggles classes that hide the floating legend/GPS/route-panel
+  // chrome so it doesn't render on top of the full-screen list.
+  function setMobileSidebarOpen(open) {
+    document.getElementById('mapSidebar').classList.toggle('open', open);
+    document.getElementById('mapLayout').classList.toggle('sidebar-open', open);
+    document.body.classList.toggle('mobile-sidebar-open', open);
+    document.getElementById('toggleLabel').textContent = open ? 'Hide list' : 'Show herb list';
+  }
   window.toggleSidebar = function() {
-    const sidebar = document.getElementById('mapSidebar');
-    const label   = document.getElementById('toggleLabel');
-    const isOpen  = sidebar.classList.toggle('open');
-    label.textContent = isOpen ? 'Hide list' : 'Show herb list';
+    const isOpen = document.getElementById('mapSidebar').classList.contains('open');
+    setMobileSidebarOpen(!isOpen);
   };
 
-  // ── GPS / locate me ──
+  // ── GPS / live location tracking ──
+  // Tapping the button toggles continuous tracking on/off via
+  // watchPosition() — the blue dot (and its accuracy circle) update every
+  // time the browser reports a new fix, instead of freezing at wherever
+  // the user was standing when they tapped the button. While a route is
+  // showing, it also gets recalculated as the user moves — throttled to
+  // ROUTE_RECALC_MIN_METERS so small GPS jitter doesn't spam the routing
+  // API. Returns a Promise that resolves once the FIRST fix arrives (or
+  // fails), so the init flow can still await it once on page load.
   window.locateMe = function() {
-    const btn = document.getElementById('gpsBtn');
-    if (!navigator.geolocation) { showToast('Geolocation is not supported by your browser', 'warn'); return; }
-    btn.disabled = true; btn.classList.add('active');
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      const lat = pos.coords.latitude; const lng = pos.coords.longitude; const acc = pos.coords.accuracy || 0;
-      _userLocationLatLng = L.latLng(lat, lng);
-      // Remove previous location layers
-      if (_userLocationMarker) { map.removeLayer(_userLocationMarker); _userLocationMarker = null; }
-      if (_userLocationCircle) { map.removeLayer(_userLocationCircle); _userLocationCircle = null; }
-
-      _userLocationMarker = L.marker([lat, lng], {
-        icon: L.divIcon({ className: '', html: '<div class="user-gps-marker"></div>', iconSize: [20,20], iconAnchor: [10,10] }),
-        interactive: false
-      }).addTo(map);
-
-      _userLocationCircle = L.circle([lat, lng], { radius: acc, color: '#3b82f6', fillColor: 'rgba(59,130,246,0.08)', weight: 2 }).addTo(map);
-
-      if (activeMarkerKey && markers[activeMarkerKey]) {
-        showRouteToHerb(markers[activeMarkerKey].herb);
+    return new Promise((resolve) => {
+      const btn = document.getElementById('gpsBtn');
+      if (!navigator.geolocation) {
+        showToast('Geolocation is not supported by your browser', 'warn');
+        resolve(false);
+        return;
       }
-      map.setView([lat, lng], Math.max(15, map.getZoom()), { animate: true });
-      showToast('Centered to your location');
-      btn.disabled = false; btn.classList.remove('active');
-    }, (err) => {
-      btn.disabled = false; btn.classList.remove('active');
-      const msg = err.code === 1 ? 'Location permission denied' : 'Could not get your location';
-      showToast(msg, 'error');
-    }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+
+      // Tapped again while already tracking → stop.
+      if (_gpsWatchId !== null) {
+        navigator.geolocation.clearWatch(_gpsWatchId);
+        _gpsWatchId = null;
+        btn.classList.remove('active');
+        btn.title = 'Center map on my location';
+        if (_userLocationMarker) { map.removeLayer(_userLocationMarker); _userLocationMarker = null; }
+        if (_userLocationCircle) { map.removeLayer(_userLocationCircle); _userLocationCircle = null; }
+        _userLocationLatLng = null;
+        _lastRouteCalcLatLng = null;
+        showToast('Stopped live location tracking');
+        resolve(true);
+        return;
+      }
+
+      btn.disabled = true; btn.classList.add('active');
+      let gotFirstFix = false;
+
+      _gpsWatchId = navigator.geolocation.watchPosition((pos) => {
+        const lat = pos.coords.latitude; const lng = pos.coords.longitude; const acc = pos.coords.accuracy || 0;
+        _userLocationLatLng = L.latLng(lat, lng);
+
+        if (_userLocationMarker) {
+          _userLocationMarker.setLatLng([lat, lng]);
+        } else {
+          _userLocationMarker = L.marker([lat, lng], {
+            icon: L.divIcon({ className: '', html: '<div class="user-gps-marker"></div>', iconSize: [20,20], iconAnchor: [10,10] }),
+            interactive: false
+          }).addTo(map);
+        }
+
+        if (_userLocationCircle) {
+          _userLocationCircle.setLatLng([lat, lng]);
+          _userLocationCircle.setRadius(acc);
+        } else {
+          _userLocationCircle = L.circle([lat, lng], { radius: acc, color: '#3b82f6', fillColor: 'rgba(59,130,246,0.08)', weight: 2 }).addTo(map);
+        }
+
+        if (!gotFirstFix) {
+          gotFirstFix = true;
+          map.setView([lat, lng], Math.max(15, map.getZoom()), { animate: true });
+          btn.title = 'Live-tracking your location — tap to stop';
+          showToast('Live-tracking your location');
+          btn.disabled = false;
+          resolve(true);
+        }
+
+        // Bug fix: this used to pass the raw herb object, whose .lat/.lng
+        // only exist for the legacy single-pin format — for herbs stored
+        // via the `pins` array those are undefined and the route silently
+        // failed. Use the actually-selected pin's coordinates instead.
+        // Also throttled so every GPS tick while walking doesn't refetch
+        // the whole route from the routing API.
+        if (activeMarkerKey && markers[activeMarkerKey]) {
+          const movedEnough = !_lastRouteCalcLatLng ||
+            _userLocationLatLng.distanceTo(_lastRouteCalcLatLng) >= ROUTE_RECALC_MIN_METERS;
+          if (movedEnough) {
+            _lastRouteCalcLatLng = _userLocationLatLng;
+            const { herb, pin } = markers[activeMarkerKey];
+            showRouteToHerb({ ...herb, lat: pin.lat, lng: pin.lng });
+          }
+        }
+      }, (err) => {
+        btn.disabled = false; btn.classList.remove('active');
+        _gpsWatchId = null;
+        const msg = err.code === 1 ? 'Location permission denied' : 'Could not get your location';
+        showToast(msg, 'error');
+        resolve(false);
+      }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+    });
   };
 
   window.clearRoute = function clearRoute() {
