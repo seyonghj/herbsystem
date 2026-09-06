@@ -540,6 +540,7 @@
   let activeFilter  = '';
   let activeHerbId  = null;
   let activeMarkerKey = null;
+  let isolatedHerbId = null; // when set, only this herb's markers show on the map
   let pinningHerbId = null;
   let isAdmin       = false;
   let _userLocationLatLng = null;
@@ -759,8 +760,13 @@
       marker.setPopupContent(popupHTML(herb, pin));
       marker.openPopup();
       showRouteToHerb({ ...herb, lat: pin.lat, lng: pin.lng });
+      // Hide every other herb's pins so the map isn't cluttered while one
+      // herb is selected — works the same on mobile and desktop since it's
+      // driven from here regardless of how the selection was made.
+      isolateHerbMarkers(herb.id);
     } else {
       clearRoute();
+      clearHerbIsolation();
     }
     document.querySelectorAll('.herb-list-item').forEach(el =>
       el.classList.toggle('active', el.dataset.id === id));
@@ -785,6 +791,7 @@
     }
     activeHerbId = null;
     activeMarkerKey = null;
+    clearHerbIsolation();
     document.querySelectorAll('.herb-list-item').forEach(el => el.classList.remove('active'));
   }
 
@@ -1001,13 +1008,40 @@
         toArray(h.usesTags).some(t => t.toLowerCase().includes(activeFilter));
       return matchQ && matchF;
     });
-    Object.entries(markers).forEach(([key, { marker, herb }]) => {
-      const vis = filtered.find(h => h.id === herb.id);
-      if (vis) { if (!map.hasLayer(marker)) marker.addTo(map); }
-      else      { if (map.hasLayer(marker))  map.removeLayer(marker); }
-    });
+
+    if (isolatedHerbId) {
+      // A pin is currently selected — show only that herb's own pins on
+      // the map (hide every other herb's markers), regardless of the
+      // search/category filters, until it's deselected. The sidebar list
+      // still reflects the normal filters below.
+      Object.values(markers).forEach(({ marker, herb }) => {
+        const vis = herb.id === isolatedHerbId;
+        if (vis) { if (!map.hasLayer(marker)) marker.addTo(map); }
+        else      { if (map.hasLayer(marker))  map.removeLayer(marker); }
+      });
+    } else {
+      Object.entries(markers).forEach(([key, { marker, herb }]) => {
+        const vis = filtered.find(h => h.id === herb.id);
+        if (vis) { if (!map.hasLayer(marker)) marker.addTo(map); }
+        else      { if (map.hasLayer(marker))  map.removeLayer(marker); }
+      });
+    }
+
     renderList(filtered);
     document.getElementById('countBadge').textContent = filtered.length;
+  }
+
+  // Selecting a pin isolates it — every other herb's markers hide from the
+  // map until it's deselected. Works identically whether the selection
+  // came from a marker tap or the sidebar list, on mobile and desktop.
+  function isolateHerbMarkers(herbId) {
+    isolatedHerbId = herbId;
+    applyFilters();
+  }
+  function clearHerbIsolation() {
+    if (!isolatedHerbId) return;
+    isolatedHerbId = null;
+    applyFilters();
   }
 
   window._selectHerb = function(id) {
