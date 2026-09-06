@@ -725,7 +725,17 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
   window.openCamera = async function() {
     try {
       camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-      document.getElementById('camVideo').srcObject = camStream;
+      const video = document.getElementById('camVideo');
+      const captureBtn = document.querySelector('.cam-capture');
+      video.srcObject = camStream;
+      // Disable capture until the stream actually has a frame ready —
+      // tapping too early is what produced the 0×0 broken-image bug.
+      captureBtn.disabled = true;
+      captureBtn.style.opacity = '0.4';
+      video.onloadedmetadata = () => {
+        captureBtn.disabled = false;
+        captureBtn.style.opacity = '1';
+      };
       document.getElementById('camModal').classList.add('open');
     } catch(e) { alert('Camera not available. Please upload a photo instead.'); }
   };
@@ -735,15 +745,36 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
   };
   window.capturePhoto = function() {
     const video = document.getElementById('camVideo');
+    // Bug fix: tapping capture before the camera stream delivered its first
+    // frame left video.videoWidth/videoHeight at 0, sizing the canvas 0×0
+    // and producing an unusable image — the preview then showed a broken-
+    // image icon with just the "Change photo" pill floating over it.
+    if (!video.videoWidth || !video.videoHeight) {
+      showToast('Camera is still starting up — try again in a second', 'warn');
+      return;
+    }
     const canvas = document.getElementById('camCanvas');
-    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0);
-    canvas.toBlob(blob => {
-      currentFile = new File([blob], 'capture.jpg', { type: 'image/jpeg' });
-      showPreview(URL.createObjectURL(blob));
-    }, 'image/jpeg', 0.9);
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    // toDataURL() is synchronous and produces the same data-URL format the
+    // gallery-upload path already uses (via FileReader.readAsDataURL) — one
+    // consistent format for both paths, with no async blob-URL timing to
+    // get wrong.
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    currentFile = dataURLToFile(dataUrl, 'capture.jpg');
+    showPreview(dataUrl);
     closeCamera();
   };
+
+  function dataURLToFile(dataUrl, filename) {
+    const [header, base64] = dataUrl.split(',');
+    const mime = header.match(/:(.*?);/)?.[1] || 'image/jpeg';
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new File([bytes], filename, { type: mime });
+  }
 
   // ── HELPERS ──────────────────────────────────
   function fileToBase64(file) {
