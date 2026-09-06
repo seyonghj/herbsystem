@@ -221,6 +221,12 @@
       border-bottom: 1px solid rgba(0,0,0,0.05);
     }
     .popup-pin-item:last-child { border-bottom: none; }
+    .popup-pin-item-active { background: var(--green-pale); margin: 0 -14px; padding: 8px 14px; border-radius: 6px; }
+    .popup-pin-here {
+      display: inline-block; margin-left: 6px; font-size: 9px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.04em; color: var(--green-dark);
+      background: var(--green-light); padding: 1px 6px; border-radius: 99px;
+    }
     .popup-pin-label { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); }
     .popup-pin-label i { font-size: 11px; color: var(--green-main); }
     .popup-pin-meta { color: var(--text-light); font-size: 10px; }
@@ -260,7 +266,7 @@
 
     /* MOBILE */
     @media (max-width: 768px) {
-      .map-layout { grid-template-columns: 1fr; position: relative; }
+      .map-layout { grid-template-columns: 1fr; position: relative; overflow: hidden; }
       .map-sidebar {
         position: absolute; bottom: 0; left: 0; right: 0; z-index: 400;
         height: 45vh; border-right: none; border-top: 1px solid var(--border);
@@ -643,10 +649,19 @@
     const mobile = isMobileViewport();
     const tags   = (h.usesTags || h.useTags || []).slice(0, 3)
       .map(t => `<span class="popup-tag">${t}</span>`).join('');
-    const coords = (!mobile && pin && pin.lat != null && pin.lng != null)
-      ? `<div class="popup-coords">📍 ${pin.lat.toFixed(5)}, ${pin.lng.toFixed(5)}</div>` : '';
     const pins = getHerbPins(h);
     const singlePin = pins.length === 1 ? pins[0] : null;
+    // Bug fix: for a herb with multiple pins, this used to show a single
+    // "📍 lat, lng" line (the specific marker that was clicked) at 5 decimal
+    // places right next to a "N pinned locations" summary, while the list
+    // below showed every pin rounded to 4 decimals. The clicked pin and its
+    // matching list row were actually the same location, but the different
+    // rounding made them look like two different coordinates that didn't
+    // match. Fix: only show that single-coordinate line when there's
+    // exactly one pin (no ambiguity); for multiple pins, rely solely on the
+    // list below and highlight the one that was actually clicked instead.
+    const coords = (!mobile && singlePin && singlePin.lat != null && singlePin.lng != null)
+      ? `<div class="popup-coords">📍 ${singlePin.lat.toFixed(4)}, ${singlePin.lng.toFixed(4)}</div>` : '';
     // Prefer the admin-given pin name over the herb's general written
     // address once a single pin exists — it's more specific.
     const locationText = pins.length > 1
@@ -666,9 +681,10 @@
       ? `<div class="popup-pin-list">
            ${pins.map((p, i) => {
              const label = p.name || (mobile ? `Location ${i + 1}` : `${p.lat.toFixed(4)}, ${p.lng.toFixed(4)}`);
-             return `<div class="popup-pin-item">
+             const isClicked = pin && p.id === pin.id;
+             return `<div class="popup-pin-item${isClicked ? ' popup-pin-item-active' : ''}">
                <div class="popup-pin-label popup-pin-label-clickable" onclick="window._focusPin('${h.id}','${p.id}')" title="Center map on this location">
-                 <i class="ti ti-map-pin"></i>${escapeHtml(label)}
+                 <i class="ti ti-map-pin"></i>${escapeHtml(label)}${isClicked ? '<span class="popup-pin-here">this pin</span>' : ''}
                </div>
                <div class="popup-pin-actions">
                  ${renameBtn(p)}
@@ -735,14 +751,32 @@
       map.setView(marker.getLatLng(), 15, { animate: true });
       marker.setPopupContent(popupHTML(herb, pin));
       marker.openPopup();
-      showRouteToHerb({ ...herb, lat: pin.lat, lng: pin.lng });
+      // On mobile, tapping a pin should just show its popup — the route
+      // panel is one more thing competing for a small screen right when
+      // the user only wanted to see what this pin is. Desktop keeps the
+      // route auto-showing since there's room for it alongside everything else.
+      if (isMobileViewport()) {
+        clearRoute();
+      } else {
+        showRouteToHerb({ ...herb, lat: pin.lat, lng: pin.lng });
+      }
     } else {
       clearRoute();
     }
     document.querySelectorAll('.herb-list-item').forEach(el =>
       el.classList.toggle('active', el.dataset.id === id));
-    document.querySelector(`.herb-list-item[data-id="${id}"]`)
-      ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    // Bug fix: this used to scroll the matching sidebar row into view
+    // unconditionally. On mobile the sidebar is a closed, off-screen bottom
+    // sheet by default — scrolling its (hidden) content into view dragged
+    // the whole page down and made the closed sheet appear to pop open on
+    // its own just from tapping a pin on the map. Only do this when the
+    // list is actually visible: always on desktop, or on mobile only while
+    // the sheet is already open.
+    const mobileListOpen = document.getElementById('mapSidebar').classList.contains('open');
+    if (!isMobileViewport() || mobileListOpen) {
+      document.querySelector(`.herb-list-item[data-id="${id}"]`)
+        ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
   }
 
   function deselectHerb() {
@@ -1113,8 +1147,9 @@
         // via the `pins` array those are undefined and the route silently
         // failed. Use the actually-selected pin's coordinates instead.
         // Also throttled so every GPS tick while walking doesn't refetch
-        // the whole route from the routing API.
-        if (activeMarkerKey && markers[activeMarkerKey]) {
+        // the whole route from the routing API. Skipped on mobile, matching
+        // the no-auto-route rule for tapping a pin there.
+        if (!isMobileViewport() && activeMarkerKey && markers[activeMarkerKey]) {
           const movedEnough = !_lastRouteCalcLatLng ||
             _userLocationLatLng.distanceTo(_lastRouteCalcLatLng) >= ROUTE_RECALC_MIN_METERS;
           if (movedEnough) {
