@@ -58,15 +58,25 @@
       color: var(--text-muted); font-size: 15px; pointer-events: none;
     }
     .sidebar-search input {
-      width: 100%; padding: 8px 10px 8px 30px;
+      width: 100%; padding: 8px 30px 8px 30px;
       border: 1px solid var(--border); border-radius: var(--radius-sm);
       font-size: 13px; font-family: 'DM Sans', sans-serif;
       color: var(--text-primary); background: var(--bg);
+      box-sizing: border-box;
     }
     .sidebar-search input:focus {
       outline: none; border-color: var(--green-main);
       box-shadow: 0 0 0 3px rgba(34,160,107,0.1);
     }
+    .sidebar-search-clear {
+      display: none; position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+      width: 22px; height: 22px; border-radius: 50%; border: none;
+      background: var(--border); color: var(--text-muted);
+      align-items: center; justify-content: center; cursor: pointer;
+      font-size: 13px; padding: 0; transition: background 0.15s, color 0.15s;
+    }
+    .sidebar-search-clear:hover { background: var(--green-main); color: #fff; }
+    .sidebar-search-clear.visible { display: flex; }
     .filter-pills {
       padding: 0.75rem 1.25rem; display: flex; gap: 6px; flex-wrap: wrap;
       border-bottom: 1px solid var(--border); flex-shrink: 0;
@@ -161,6 +171,9 @@
       padding: 0 !important; overflow: hidden; font-family: 'DM Sans', sans-serif !important;
     }
     .leaflet-popup-content { margin: 0 !important; width: 250px !important; }
+    @media (max-width: 380px) {
+      .leaflet-popup-content { width: 210px !important; }
+    }
     .leaflet-popup-tip-container { margin-top: -1px; }
     .popup-header {
       background: var(--green-dark); padding: 12px 14px;
@@ -210,11 +223,31 @@
       padding: 2px 7px; border-radius: 99px; margin-bottom: 8px;
     }
     .popup-pin-list {
-      margin: 0 -14px 10px;
+      margin: 0 -14px 0;
       padding: 0 14px;
       border-top: 1px solid rgba(0,0,0,0.05);
       border-bottom: 1px solid rgba(0,0,0,0.05);
+      max-height: 600px; overflow: hidden; position: relative;
+      transition: max-height 0.25s ease;
     }
+    .popup-pin-list.collapsed {
+      /* Roughly 3 rows worth of height — matches PIN_PREVIEW_COUNT in JS */
+      max-height: 132px;
+    }
+    .popup-pin-list.collapsed::after {
+      content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 26px;
+      background: linear-gradient(to bottom, rgba(251,252,251,0), #fff 85%);
+      pointer-events: none;
+    }
+    .popup-pinlist-toggle {
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+      width: 100%; background: none; border: none; cursor: pointer;
+      font-size: 11px; font-weight: 700; color: var(--green-main);
+      padding: 7px 0 10px; font-family: 'DM Sans', sans-serif;
+      margin: 0 -14px; width: calc(100% + 28px);
+    }
+    .popup-pinlist-toggle:hover { color: var(--green-mid); }
+    .popup-pinlist-toggle i { font-size: 14px; }
     .popup-pin-item {
       display: flex; align-items: center; justify-content: space-between;
       gap: 8px; padding: 8px 0; font-size: 11px; color: var(--text-primary);
@@ -250,7 +283,10 @@
 
     /* LEGEND */
     .map-legend {
-      position: absolute; top: 24px; right: 12px; z-index: 600;
+      /* Fixed beside the GPS button at bottom-right, matching its bottom
+         offset, instead of top-right where it overlapped the account
+         dropdown menu in the nav. */
+      position: fixed; bottom: 1.5rem; right: calc(1.5rem + 48px + 10px); z-index: 600;
       max-width: 220px;
       background: rgba(255,255,255,0.95); border: 1px solid var(--border);
       border-radius: var(--radius-md); padding: 10px 14px;
@@ -261,8 +297,15 @@
     .legend-row { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; color: var(--text-muted); flex-wrap: wrap; }
     .legend-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.2); flex-shrink: 0; }
 
-    /* Toast used for "no pin yet" / route feedback etc. */
-    #toastWrap { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+    /* Toast used for "no pin yet" / route feedback etc. — placed top-right
+       below the nav rather than bottom-right, where it used to render
+       directly on top of the GPS button (same corner, same offsets) every
+       single time a toast appeared. */
+    #toastWrap {
+      position: fixed; top: calc(var(--nav-h) + 1rem); right: 1rem; z-index: 9999;
+      display: flex; flex-direction: column; gap: 8px; align-items: flex-end;
+      max-width: calc(100vw - 2rem);
+    }
 
     /* MOBILE */
     @media (max-width: 768px) {
@@ -294,13 +337,15 @@
       .filter-pills::-webkit-scrollbar { display: none; }
 
       .map-legend {
-        top: 12px;
-        right: 12px;
+        /* Stacked above the GPS button on mobile (not beside it) — narrow
+           screens don't have room to fit both side by side. */
+        position: fixed;
+        bottom: calc(1.5rem + 48px + 10px);
+        right: 1.5rem;
         left: auto;
-        bottom: auto;
         width: auto;
-        max-width: 220px;
-        padding: 10px 12px;
+        max-width: 170px;
+        padding: 8px 10px;
       }
       .legend-title { font-size: 10px; margin-bottom: 5px; }
       .legend-row { gap: 6px; margin-bottom: 3px; }
@@ -425,6 +470,9 @@
       <div class="sidebar-search">
         <i class="ti ti-search"></i>
         <input type="text" id="sidebarSearch" placeholder="Search herbs…" oninput="filterList()" />
+        <button class="sidebar-search-clear" id="sidebarSearchClear" onclick="clearHerbSearch()" title="Clear search" aria-label="Clear search">
+          <i class="ti ti-x"></i>
+        </button>
       </div>
     </div>
 
@@ -529,9 +577,12 @@
     maxBoundsViscosity: 0.85,
   });
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    maxZoom: 19,
+  // Satellite + labels combined in a single tile source (Google's "hybrid"
+  // layer — lyrs=y), so there's no separate overlay layer to manage.
+  L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+    attribution: '&copy; Google',
+    maxZoom: 20,
   }).addTo(map);
 
   // ── State ──
@@ -685,12 +736,23 @@
       ? `<button class="popup-btn-rename" onclick="event.stopPropagation(); window._renamePin('${h.id}','${pinObj.id}')" title="${pinObj.name ? 'Rename this location' : 'Name this location'}">
            <i class="ti ti-edit" style="font-size:13px"></i>
          </button>` : '';
-    const pinList = pins.length > 1
-      ? `<div class="popup-pin-list">
-           ${pins.map((p, i) => {
-             const label = p.name || (mobile ? `Location ${i + 1}` : `${p.lat.toFixed(4)}, ${p.lng.toFixed(4)}`);
-             const isClicked = pin && p.id === pin.id;
-             return `<div class="popup-pin-item${isClicked ? ' popup-pin-item-active' : ''}">
+
+    // Collapse the pin list to a short preview once a herb has more than a
+    // few locations — a fully-expanded list of 6+ rows (with rename/remove
+    // buttons each) made the popup very tall, especially on mobile where
+    // screen space is already tight. The currently-selected pin is always
+    // kept visible: if it would fall inside the collapsed-away portion,
+    // the list opens already expanded instead of hiding it.
+    const PIN_PREVIEW_COUNT = 3;
+    let pinList = '';
+    if (pins.length > 1) {
+      const activeIndex = pin ? pins.findIndex(p => p.id === pin.id) : -1;
+      const hasMore = pins.length > PIN_PREVIEW_COUNT;
+      const startCollapsed = hasMore && activeIndex < PIN_PREVIEW_COUNT;
+      const rows = pins.map((p, i) => {
+        const label = p.name || (mobile ? `Location ${i + 1}` : `${p.lat.toFixed(4)}, ${p.lng.toFixed(4)}`);
+        const isClicked = pin && p.id === pin.id;
+        return `<div class="popup-pin-item${isClicked ? ' popup-pin-item-active' : ''}">
                <div class="popup-pin-label popup-pin-label-clickable" onclick="window._focusPin('${h.id}','${p.id}')" title="Center map on this location">
                  <i class="ti ti-map-pin"></i>${escapeHtml(label)}${isClicked ? '<span class="popup-pin-here">this pin</span>' : ''}
                </div>
@@ -699,9 +761,15 @@
                  ${isAdmin ? `<button class="popup-btn-remove" onclick="window._removePin('${h.id}','${p.id}')" title="Remove this pin"><i class="ti ti-trash" style="font-size:13px"></i></button>` : ''}
                </div>
              </div>`;
-           }).join('')}
-         </div>`
-      : '';
+      }).join('');
+      const toggleBtn = hasMore
+        ? `<button class="popup-pinlist-toggle" onclick="event.stopPropagation(); window._togglePinList('${h.id}', this)">
+             <i class="ti ti-chevron-${startCollapsed ? 'down' : 'up'}"></i>
+             <span>${startCollapsed ? `Show all ${pins.length} locations` : 'Show less'}</span>
+           </button>`
+        : '';
+      pinList = `<div style="margin-bottom:10px"><div class="popup-pin-list${startCollapsed ? ' collapsed' : ''}" id="pinlist-${h.id}">${rows}</div>${toggleBtn}</div>`;
+    }
 
     // Single-pin herbs: the location row itself can be clicked to
     // re-center/zoom the map on it. Multi-pin herbs skip this (ambiguous
@@ -875,6 +943,20 @@
     selectHerb(herbId, makeMarkerKey(herb, pin));
   };
 
+  // Expand/collapse the pin list inside a popup for herbs with many
+  // locations — keeps the popup short by default (especially useful on
+  // mobile) with a tap to reveal the rest.
+  window._togglePinList = function(herbId, btn) {
+    const list = document.getElementById(`pinlist-${herbId}`);
+    if (!list) return;
+    const nowCollapsed = list.classList.toggle('collapsed');
+    const herb = allHerbs.find(h => h.id === herbId);
+    const total = herb ? getHerbPins(herb).length : '';
+    btn.innerHTML = nowCollapsed
+      ? `<i class="ti ti-chevron-down"></i><span>Show all ${total} locations</span>`
+      : `<i class="ti ti-chevron-up"></i><span>Show less</span>`;
+  };
+
   // ── RENAME PIN (admin only) ──
   // Firestore's `pins` field is a plain array of objects, so renaming one
   // entry means rewriting the whole array rather than arrayUnion/arrayRemove
@@ -992,7 +1074,20 @@
       p.classList.toggle('active', p.textContent.toLowerCase() === (use || 'all')));
     applyFilters();
   };
-  window.filterList = function() { applyFilters(); };
+  window.filterList = function() {
+    document.getElementById('sidebarSearchClear').classList.toggle(
+      'visible', document.getElementById('sidebarSearch').value.length > 0
+    );
+    applyFilters();
+  };
+
+  window.clearHerbSearch = function() {
+    const input = document.getElementById('sidebarSearch');
+    input.value = '';
+    document.getElementById('sidebarSearchClear').classList.remove('visible');
+    applyFilters();
+    input.focus();
+  };
 
   function applyFilters() {
     const q        = document.getElementById('sidebarSearch').value.toLowerCase();

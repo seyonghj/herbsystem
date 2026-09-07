@@ -10,6 +10,12 @@ import {
   resetPassword,
 } from "./auth.js";
 
+// Inline SVGs so the eye icon works even on pages that haven't loaded the
+// Tabler icon webfont (this modal gets injected into any page that imports
+// it, so it can't assume that CSS is present).
+const EYE_OPEN_SVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+const EYE_OFF_SVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.5 18.5 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+
 // ── Inject modal HTML + styles once ──
 function injectModal() {
   if (document.getElementById("authModal")) return;
@@ -17,22 +23,23 @@ function injectModal() {
   const style = document.createElement("style");
   style.textContent = `
     .auth-overlay {
-      display: none; position: fixed; inset: 0;
+      display: flex; position: fixed; inset: 0;
       background: rgba(0,0,0,0.45); z-index: 1000;
       align-items: center; justify-content: center;
       padding: 1rem; font-family: 'DM Sans', sans-serif;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.12s ease;
     }
-    .auth-overlay.open { display: flex; }
+    .auth-overlay.open { opacity: 1; pointer-events: auto; }
     .auth-box {
       background: #fff; border-radius: 20px;
       width: 100%; max-width: 420px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-      overflow: hidden; animation: authSlideUp 0.25s ease;
+      overflow: hidden;
+      transform: translateY(8px) scale(0.98); opacity: 0;
+      transition: transform 0.15s cubic-bezier(0.2,0,0.2,1), opacity 0.15s ease;
     }
-    @keyframes authSlideUp {
-      from { opacity:0; transform:translateY(16px); }
-      to   { opacity:1; transform:translateY(0); }
-    }
+    .auth-overlay.open .auth-box { transform: translateY(0) scale(1); opacity: 1; }
     .auth-header {
       background: #0a4a35; padding: 1.5rem 1.5rem 1.25rem;
       text-align: center;
@@ -62,8 +69,19 @@ function injectModal() {
       padding: 10px 13px; border: 1px solid #dde5e0; border-radius: 10px;
       font-size: 14px; font-family: 'DM Sans', sans-serif;
       color: #1a1a1a; transition: border 0.15s, box-shadow 0.15s;
+      width: 100%; box-sizing: border-box;
     }
     .auth-input:focus { outline: none; border-color: #22a06b; box-shadow: 0 0 0 3px rgba(34,160,107,0.12); }
+    .auth-password-wrap { position: relative; }
+    .auth-password-wrap .auth-input { padding-right: 42px; }
+    .auth-toggle-pw {
+      position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+      width: 30px; height: 30px; background: none; border: none; cursor: pointer;
+      color: #8c96a0; display: flex; align-items: center; justify-content: center;
+      border-radius: 6px; transition: color 0.15s, background 0.15s; padding: 0;
+    }
+    .auth-toggle-pw:hover { color: #22a06b; background: #f0faf5; }
+    .auth-toggle-pw svg { display: block; }
     .auth-btn-primary {
       padding: 11px; background: #22a06b; color: #fff; border: none;
       border-radius: 10px; font-size: 14px; font-weight: 600;
@@ -147,7 +165,12 @@ function injectModal() {
           </div>
           <div class="auth-form-group">
             <label>Password</label>
-            <input class="auth-input" type="password" id="loginPassword" placeholder="••••••••" />
+            <div class="auth-password-wrap">
+              <input class="auth-input" type="password" id="loginPassword" placeholder="••••••••" />
+              <button type="button" class="auth-toggle-pw" id="loginPasswordToggle"
+                onclick="window._toggleAuthPw('loginPassword','loginPasswordToggle')"
+                aria-label="Show password" title="Show password">${EYE_OPEN_SVG}</button>
+            </div>
             <button class="auth-forgot" onclick="window._authForgot()">Forgot password?</button>
           </div>
           <button class="auth-btn-primary" id="loginBtn" onclick="window._doLogin()">Sign in</button>
@@ -170,7 +193,12 @@ function injectModal() {
           </div>
           <div class="auth-form-group">
             <label>Password <span style="font-weight:400;text-transform:none;letter-spacing:0">(min 6 characters)</span></label>
-            <input class="auth-input" type="password" id="signupPassword" placeholder="••••••••" />
+            <div class="auth-password-wrap">
+              <input class="auth-input" type="password" id="signupPassword" placeholder="••••••••" />
+              <button type="button" class="auth-toggle-pw" id="signupPasswordToggle"
+                onclick="window._toggleAuthPw('signupPassword','signupPasswordToggle')"
+                aria-label="Show password" title="Show password">${EYE_OPEN_SVG}</button>
+            </div>
           </div>
           <button class="auth-btn-primary" id="signupBtn" onclick="window._doSignup()">Create account</button>
           <div class="auth-divider">or</div>
@@ -190,6 +218,22 @@ function injectModal() {
   document.body.appendChild(modal);
   modal.addEventListener("click", e => { if (e.target === modal) window._closeAuthModal(); });
 }
+
+// ── Show/hide password toggle ──
+// Swaps the input's type between "password" and "text" and updates the
+// icon/aria-label/title to match, so screen readers and hover tooltips
+// always reflect the current state, not just the visual icon.
+window._toggleAuthPw = function(inputId, btnId) {
+  const input = document.getElementById(inputId);
+  const btn   = document.getElementById(btnId);
+  if (!input || !btn) return;
+  const willShow = input.type === "password";
+  input.type = willShow ? "text" : "password";
+  btn.innerHTML = willShow ? EYE_OFF_SVG : EYE_OPEN_SVG;
+  const label = willShow ? "Hide password" : "Show password";
+  btn.setAttribute("aria-label", label);
+  btn.setAttribute("title", label);
+};
 
 // ── Tab switch ──
 window._authTab = function(tab) {
