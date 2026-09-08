@@ -353,6 +353,7 @@
   let currentFile  = null;
   let herbDatabase = [];
   let camStream    = null;
+  let lastResultForShare = null; // set by showResult(), used by shareMatchToCommunity()
 
   onAuthChange(user => { currentUser = user; });
 
@@ -530,6 +531,7 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
 
   // ── SHOW MATCH RESULT ────────────────────────
   function showResult(result) {
+    lastResultForShare = result;
     const panel = document.getElementById('resultPanel');
     panel.classList.add('active');
     const herb = herbDatabase.find(h =>
@@ -581,6 +583,11 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
             <a href="herb-detail.html?id=${herb.id}" class="btn-detail"><i class="ti ti-info-circle"></i> Full herb details</a>
             <a href="map.html?herb=${herb.id}" class="btn-map"><i class="ti ti-map-pin"></i> View on map</a>
           </div>` : ''}
+          <div class="match-actions" style="margin-top:8px">
+            <button class="btn-detail" style="border:none;cursor:pointer;font-family:'DM Sans',sans-serif" onclick="shareMatchToCommunity()">
+              <i class="ti ti-share"></i> Share to Community
+            </button>
+          </div>
         </div>
       </div>
       <div style="text-align:center;margin-top:0.75rem">
@@ -627,6 +634,9 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
           <a href="herbs.html" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:6px">
             <i class="ti ti-database"></i> Browse herb database
           </a>
+          <button onclick="shareNoMatchToCommunity()" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:6px">
+            <i class="ti ti-share"></i> Share to Community
+          </button>
         </div>
       </div>`;
   }
@@ -737,7 +747,7 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
         captureBtn.style.opacity = '1';
       };
       document.getElementById('camModal').classList.add('open');
-    } catch(e) { alert('Camera not available. Please upload a photo instead.'); }
+    } catch(e) { showToast('Camera not available. Please upload a photo instead.', 'error'); }
   };
   window.closeCamera = function() {
     if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
@@ -774,6 +784,75 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
     return new File([bytes], filename, { type: mime });
+  }
+
+  // ── SHARE TO COMMUNITY ───────────────────────
+  // Hands the photo + a suggested caption off to feed.html via
+  // sessionStorage (same pattern as history.html's share button) — the
+  // actual post only happens once the person confirms (and can edit the
+  // caption) in the Community page's compose modal.
+  window.shareMatchToCommunity = async function() {
+    if (!lastResultForShare) return;
+    const r = lastResultForShare;
+    const pct   = r.confidencePercent || 0;
+    const label = r.confidenceLabel || '';
+    const caption = `🌿 Identified as ${r.localName} — ${pct.toFixed(0)}% ${label} confidence (verified via CNN + Gemini AI on HerbID Iloilo).`;
+    await handOffToFeed({
+      herbName: r.localName,
+      confidencePercent: pct,
+      confidenceLabel: label,
+      caption,
+    });
+  };
+
+  window.shareNoMatchToCommunity = async function() {
+    const caption = `🌿 Tried to identify this plant with HerbID Iloilo, but couldn't get a confident match — does anyone recognize it?`;
+    await handOffToFeed({
+      herbName: null,
+      confidencePercent: null,
+      confidenceLabel: null,
+      caption,
+    });
+  };
+
+  async function handOffToFeed({ herbName, confidencePercent, confidenceLabel, caption }) {
+    if (!currentUser) { showToast('Sign in to share to the community', 'warn'); return; }
+    if (!currentFile) { showToast('No photo to share', 'warn'); return; }
+    try {
+      const imageBase64 = await compressForSharing(currentFile);
+      sessionStorage.setItem('herbid_pending_post', JSON.stringify({
+        imageBase64, herbName, confidencePercent, confidenceLabel, caption,
+      }));
+      window.location.href = 'feed.html';
+    } catch(e) {
+      showToast('Could not prepare photo for sharing', 'error');
+    }
+  }
+
+  // Larger/higher-quality than the scan-storage compressor above (which
+  // shrinks to 300px for Firestore size limits) — matches the quality
+  // feed.html itself uses when a photo is uploaded directly to a post.
+  function compressForSharing(file, maxPx = 800, quality = 0.72) {
+    return new Promise((resolve, reject) => {
+      const img = new Image(), reader = new FileReader();
+      reader.onload = e => {
+        img.onload = () => {
+          let w = img.width, h = img.height;
+          if (w > maxPx || h > maxPx) {
+            if (w > h) { h = Math.round(h * maxPx / w); w = maxPx; }
+            else        { w = Math.round(w * maxPx / h); h = maxPx; }
+          }
+          const c = document.createElement('canvas');
+          c.width = w; c.height = h;
+          c.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(c.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = () => reject(new Error('Could not read image'));
+        img.src = e.target.result;
+      };
+      reader.onerror = () => reject(new Error('Could not read file'));
+      reader.readAsDataURL(file);
+    });
   }
 
   // ── HELPERS ──────────────────────────────────

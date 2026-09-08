@@ -21,6 +21,14 @@
 
     body { background: #f4f6f5; }
 
+    /* Small top-left page label — replaces the old full-width hero banner */
+    .feed-page-label {
+      max-width: 680px; margin: 1.25rem auto 0; padding: 0 1rem;
+      display: flex; align-items: center; gap: 7px;
+      font-size: 13px; font-weight: 700; color: var(--green-dark);
+    }
+    .feed-page-label i { color: var(--green-main); font-size: 16px; }
+
     .feed-layout {
       max-width: 680px; margin: 0 auto; padding: 1.5rem 1rem 5rem;
     }
@@ -116,6 +124,15 @@
     .post-upload-area p { font-size: 13px; color: #5a6472; margin: 0; }
     .post-preview-img { width: 100%; max-height: 300px; object-fit: cover; border-radius: calc(var(--radius-md) - 2px); display: none; }
     .post-upload-area.has-img .post-preview-img { display: block; }
+    /* Bug fix: the placeholder previously had layout styles set via an
+       inline style="" attribute, which always overrides stylesheet rules
+       regardless of specificity — meaning this hide-on-has-img rule below
+       could never actually win, and the "Add a photo" placeholder stayed
+       visible (overlapping the actual preview) even after a photo was
+       attached, for every upload, not just pre-filled ones. */
+    .upload-placeholder {
+      display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none;
+    }
     .post-upload-area.has-img .upload-placeholder { display: none; }
     .post-img-overlay {
       display: none; position: absolute; inset: 0;
@@ -153,6 +170,36 @@
       display: flex; align-items: center; gap: 5px; font-weight: 500;
       background: none; border: none; font-family: 'DM Sans', sans-serif;
     }
+
+    /* ── Camera capture modal (create-post flow) ── */
+    .post-cam-modal {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+      z-index: 700; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .post-cam-modal.open { display: flex; }
+    .post-cam-box {
+      background: #000; border-radius: var(--radius-lg); overflow: hidden;
+      width: 100%; max-width: 480px; position: relative;
+    }
+    .post-cam-box video { width: 100%; display: block; }
+    .post-cam-controls {
+      position: absolute; bottom: 0; left: 0; right: 0; padding: 1.25rem;
+      display: flex; justify-content: space-between; align-items: center;
+      background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    }
+    .post-cam-capture {
+      width: 60px; height: 60px; border-radius: 50%; background: #fff;
+      border: 4px solid rgba(255,255,255,0.4); cursor: pointer; transition: transform 0.1s, opacity 0.15s;
+      display: flex; align-items: center; justify-content: center; font-size: 24px; color: #1a1a1a;
+    }
+    .post-cam-capture:active { transform: scale(0.93); }
+    .post-cam-capture:disabled { opacity: 0.4; cursor: not-allowed; }
+    .post-cam-close {
+      background: rgba(255,255,255,0.15); border: none; cursor: pointer; color: #fff;
+      width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; font-size: 20px;
+    }
+
     .post-submit {
       padding: 10px 22px; background: var(--green-main); color: #fff;
       border: none; border-radius: var(--radius-md);
@@ -183,16 +230,27 @@
       font-size: 14px; font-weight: 700; overflow: hidden; flex-shrink: 0;
     }
     .feed-avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .feed-user-name { font-size: 13px; font-weight: 600; color: #1a1a1a; }
+    .feed-user-name-row { display: flex; align-items: center; gap: 5px; min-width: 0; }
+    .feed-user-name {
+      font-size: 13px; font-weight: 600; color: #1a1a1a;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+    }
+    .repost-inline {
+      flex-shrink: 0; font-size: 11px; font-weight: 500; color: #5a6472;
+      display: inline-flex; align-items: center; gap: 3px; white-space: nowrap;
+    }
+    .repost-inline i { color: var(--green-main); font-size: 13px; }
+    .feed-header-info { flex: 1; min-width: 0; }
     .feed-time { font-size: 11px; color: #8c96a0; margin-top: 1px; }
     .feed-herb-badge {
       margin-left: auto; display: inline-flex; align-items: center; gap: 4px;
       background: var(--green-pale); border: 1px solid var(--green-light);
       color: var(--green-dark); font-size: 11px; font-weight: 600;
       padding: 3px 10px; border-radius: 99px; white-space: nowrap;
+      max-width: 40vw; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0;
     }
 
-    .feed-image { width: 100%; max-height: 400px; object-fit: cover; display: block; }
+    .feed-image { width: 100%; max-height: 500px; object-fit: contain; background: #f1f3f2; display: block; }
     .feed-image-placeholder {
       height: 160px; background: var(--green-pale);
       display: flex; align-items: center; justify-content: center;
@@ -208,12 +266,8 @@
     .conf-low  { background: #fee2e2; color: #991b1b; }
 
     /* ── REPOST (share-to-feed) styling ── */
-    .repost-flag {
-      display: flex; align-items: center; gap: 6px;
-      font-size: 12px; color: #5a6472; font-weight: 600;
-      padding: 0.75rem 1.25rem 0;
-    }
-    .repost-flag i { color: var(--green-main); font-size: 15px; }
+    /* (repost label now shown inline next to the name — see .repost-inline) */
+    /* (repost label now shown inline next to the name — see .repost-inline) */
     .shared-embed {
       border: 1px solid var(--border); border-radius: var(--radius-md);
       margin: 0 1.25rem 0.75rem; overflow: hidden; background: #fbfcfb;
@@ -228,16 +282,21 @@
       font-size: 11px; font-weight: 700; overflow: hidden;
     }
     .shared-embed-avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .shared-embed-name { font-size: 12px; font-weight: 700; color: #1a1a1a; }
+    .shared-embed-name {
+      font-size: 12px; font-weight: 700; color: #1a1a1a;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .shared-embed-info { min-width: 0; flex-shrink: 1; }
     .shared-embed-time { font-size: 10px; color: #8c96a0; }
     .shared-embed-herb {
       margin-left: auto; font-size: 10px; font-weight: 600;
       background: var(--green-pale); color: var(--green-dark);
       border: 1px solid var(--green-light); padding: 2px 8px; border-radius: 99px;
-      white-space: nowrap;
+      white-space: nowrap; max-width: 35vw; overflow: hidden; text-overflow: ellipsis;
+      flex-shrink: 0;
     }
     .shared-embed-caption { font-size: 13px; color: #1a1a1a; line-height: 1.55; padding: 0 12px 8px; }
-    .shared-embed-img { width: 100%; max-height: 300px; object-fit: cover; display: block; }
+    .shared-embed-img { width: 100%; max-height: 350px; object-fit: contain; background: #f1f3f2; display: block; }
     .shared-embed-img-placeholder {
       height: 120px; background: var(--green-pale);
       display: flex; align-items: center; justify-content: center; font-size: 40px;
@@ -343,7 +402,7 @@
       display: flex; flex-direction: column;
     }
     .detail-image {
-      width: 100%; max-height: 340px; object-fit: cover; display: block;
+      width: 100%; max-height: 500px; object-fit: contain; background: #f1f3f2; display: block;
       flex-shrink: 0;
     }
     .detail-image-placeholder {
@@ -526,11 +585,9 @@
   </button>
 </nav>
 
-<!-- PAGE HERO -->
-<div class="page-hero">
-  <div class="page-hero-badge"><i class="ti ti-users"></i> Community</div>
-  <h1>Herb Community Feed</h1>
-  <p>Share your herb scans and discoveries with the HerbID Iloilo community</p>
+<!-- SMALL PAGE LABEL (replaces the old full-width hero banner) -->
+<div class="feed-page-label">
+  <i class="ti ti-users"></i> Community Feed
 </div>
 
 <!-- FEED LAYOUT -->
@@ -578,9 +635,9 @@
       </div>
       <div class="post-upload-area" id="postUploadArea">
         <input type="file" id="postImageInput" accept="image/*" onchange="onPostImageSelect(event)" />
-        <div class="upload-placeholder" style="display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none">
+        <div class="upload-placeholder">
           <i class="ti ti-photo-plus"></i>
-          <p>Add a herb photo</p>
+          <p>Add a photo</p>
           <span style="font-size:11px;color:#8c96a0">JPG, PNG, WEBP</span>
         </div>
         <img class="post-preview-img" id="postPreviewImg" alt="Post preview" />
@@ -594,12 +651,25 @@
       <textarea class="post-caption" id="postCaption" placeholder="Write something about this herb… (e.g. where you found it, how you use it)"></textarea>
     </div>
     <div class="modal-footer">
-      <button class="post-from-scan" onclick="useLastScan()">
-        <i class="ti ti-camera-bolt"></i> Use my last scan
+      <button class="post-from-scan" onclick="openPostCamera()">
+        <i class="ti ti-camera"></i> Use Camera
       </button>
       <button class="post-submit" id="postSubmitBtn" onclick="submitPost()">
         <i class="ti ti-send"></i> Share
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CAMERA CAPTURE MODAL (for creating a post) ══ -->
+<div class="post-cam-modal" id="postCamModal">
+  <div class="post-cam-box">
+    <video id="postCamVideo" autoplay playsinline></video>
+    <canvas id="postCamCanvas" style="display:none"></canvas>
+    <div class="post-cam-controls">
+      <button class="post-cam-close" onclick="closePostCamera()"><i class="ti ti-x"></i></button>
+      <button class="post-cam-capture" id="postCamCaptureBtn" onclick="capturePostPhoto()"><i class="ti ti-camera"></i></button>
+      <div style="width:40px"></div>
     </div>
   </div>
 </div>
@@ -717,6 +787,7 @@
   window.closePostModal = function() {
     document.getElementById('postModal').classList.remove('open');
     document.body.style.overflow = '';
+    window.closePostCamera?.();
   };
   window.onModalOverlayClick = function(e) {
     if (e.target === document.getElementById('postModal')) closePostModal();
@@ -745,7 +816,7 @@
     return `
       <div class="shared-embed-header">
         <div class="shared-embed-avatar">${avatarHTML}</div>
-        <div>
+        <div class="shared-embed-info">
           <div class="shared-embed-name">${escapeHTML(shared.userName || 'User')}</div>
           <div class="shared-embed-time">${timeStr}</div>
         </div>
@@ -879,14 +950,17 @@
     }) || 'just now';
     const confBadge = (!p.sharedPost && p.confidence)
       ? `<span class="conf-badge ${p.confidenceLabel==='High'?'conf-high':p.confidenceLabel==='Medium'?'conf-med':'conf-low'}">${p.confidence.toFixed(0)}% ${p.confidenceLabel||''}</span>` : '';
-    const repostFlag = p.sharedPost
-      ? `<div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#5a6472;font-weight:600;margin-bottom:10px"><i class="ti ti-repeat" style="color:var(--green-main);font-size:15px"></i> shared a post</div>` : '';
+    const repostInline = p.sharedPost
+      ? `<span class="repost-inline"><i class="ti ti-repeat"></i> shared a post</span>` : '';
 
     document.getElementById('detailBody').innerHTML = `
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
         <div class="feed-avatar">${avatarHTML}</div>
-        <div>
-          <div class="feed-user-name">${escapeHTML(p.userName || 'User')}</div>
+        <div class="feed-header-info">
+          <div class="feed-user-name-row">
+            <span class="feed-user-name">${escapeHTML(p.userName || 'User')}</span>
+            ${repostInline}
+          </div>
           <div class="feed-time">${timeStr}</div>
         </div>
         ${isOwner ? `<div class="feed-card-menu" style="margin-left:auto">
@@ -896,7 +970,6 @@
           </div>
         </div>` : ''}
       </div>
-      ${repostFlag}
       ${p.caption ? `<div class="feed-caption">${escapeHTML(p.caption)}</div>` : ''}
       ${confBadge ? `<div class="feed-conf-row">${confBadge}<span style="font-size:12px;color:#5a6472">Identification confidence</span></div>` : ''}
     `;
@@ -976,8 +1049,42 @@
       fab.style.display = 'flex';
       updateCreateHeader(user);
       listenFeed();
+      loadPendingScanShare();
     }
   });
+
+  // ── Pick up a scan handed off from history.html's "Share" button ──────
+  // history.html stores the scan's photo + a suggested caption in
+  // sessionStorage rather than posting directly, so the person can still
+  // edit the caption here before it actually goes out.
+  function loadPendingScanShare() {
+    let raw;
+    try { raw = sessionStorage.getItem('herbid_pending_post'); } catch(e) { return; }
+    if (!raw) return;
+    sessionStorage.removeItem('herbid_pending_post');
+    let data;
+    try { data = JSON.parse(raw); } catch(e) { return; }
+
+    openPostModal();
+
+    if (data.imageBase64) {
+      postImageB64 = data.imageBase64;
+      document.getElementById('postPreviewImg').src = data.imageBase64;
+      document.getElementById('postUploadArea').classList.add('has-img');
+    }
+    if (data.herbName) {
+      postHerbData = {
+        identifiedHerb: data.herbName,
+        confidencePercent: data.confidencePercent || null,
+        confidenceLabel: data.confidenceLabel || null,
+      };
+      document.getElementById('postHerbName').textContent = data.herbName;
+      document.getElementById('postHerbTag').style.display = '';
+    }
+    if (data.caption) {
+      document.getElementById('postCaption').value = data.caption;
+    }
+  }
 
   function updateCreateHeader(user) {
     const av   = document.getElementById('createAvatar');
@@ -1032,24 +1139,45 @@
     document.getElementById('postHerbTag').style.display = 'none';
   };
 
-  window.useLastScan = async function() {
-    if (!currentUser) return;
+  // ── CAMERA CAPTURE (create-post flow) ──────────────────
+  let postCamStream = null;
+
+  window.openPostCamera = async function() {
     try {
-      const q    = query(collection(db,'scans'), where('uid','==',currentUser.uid), orderBy('scannedAt','desc'), limit(1));
-      const snap = await getDocs(q);
-      if (snap.empty) { showToast('No scans found. Identify a herb first!','warn'); return; }
-      const scan = snap.docs[0].data();
-      if (!scan.matched) { showToast('Your last scan had no match.','warn'); return; }
-      postHerbData = scan;
-      if (scan.imageBase64) {
-        postImageB64 = scan.imageBase64;
-        document.getElementById('postPreviewImg').src = scan.imageBase64;
-        document.getElementById('postUploadArea').classList.add('has-img');
-      }
-      document.getElementById('postHerbName').textContent = scan.identifiedHerb;
-      document.getElementById('postHerbTag').style.display = '';
-      showToast(`✅ Loaded scan: ${scan.identifiedHerb}`);
-    } catch(e) { showToast('Could not load last scan: '+e.message,'error'); }
+      postCamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      const video = document.getElementById('postCamVideo');
+      const captureBtn = document.getElementById('postCamCaptureBtn');
+      video.srcObject = postCamStream;
+      // Disable capture until the stream actually has a frame ready, so a
+      // too-early tap can't produce a 0×0 (unusable) photo.
+      captureBtn.disabled = true;
+      video.onloadedmetadata = () => { captureBtn.disabled = false; };
+      document.getElementById('postCamModal').classList.add('open');
+    } catch(e) {
+      showToast('Camera not available. Please add a photo instead.', 'error');
+    }
+  };
+
+  window.closePostCamera = function() {
+    if (postCamStream) { postCamStream.getTracks().forEach(t => t.stop()); postCamStream = null; }
+    document.getElementById('postCamModal').classList.remove('open');
+  };
+
+  window.capturePostPhoto = function() {
+    const video = document.getElementById('postCamVideo');
+    if (!video.videoWidth || !video.videoHeight) {
+      showToast('Camera is still starting up — try again in a second', 'warn');
+      return;
+    }
+    const canvas = document.getElementById('postCamCanvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    postImageB64 = dataUrl;
+    document.getElementById('postPreviewImg').src = dataUrl;
+    document.getElementById('postUploadArea').classList.add('has-img');
+    closePostCamera();
   };
 
   window.submitPost = async function() {
@@ -1147,8 +1275,8 @@
     const confBadge = (!p.sharedPost && p.confidence)
       ? `<span class="conf-badge ${p.confidenceLabel==='High'?'conf-high':p.confidenceLabel==='Medium'?'conf-med':'conf-low'}">${p.confidence.toFixed(0)}% ${p.confidenceLabel||''}</span>` : '';
 
-    const repostFlag = p.sharedPost
-      ? `<div class="repost-flag"><i class="ti ti-repeat"></i> shared a post</div>` : '';
+    const repostInline = p.sharedPost
+      ? `<span class="repost-inline"><i class="ti ti-repeat"></i> shared a post</span>` : '';
 
     const sharedEmbedHTML = p.sharedPost
       ? `<div class="shared-embed">${renderSharedEmbedHTML(p.sharedPost)}</div>` : '';
@@ -1169,14 +1297,16 @@
       <div class="feed-card" id="post-${p.id}" onclick="openDetailModal('${p.id}')">
         <div class="feed-card-header">
           <div class="feed-avatar">${avatarHTML}</div>
-          <div>
-            <div class="feed-user-name">${escapeHTML(p.userName || 'User')}</div>
+          <div class="feed-header-info">
+            <div class="feed-user-name-row">
+              <span class="feed-user-name">${escapeHTML(p.userName || 'User')}</span>
+              ${repostInline}
+            </div>
             <div class="feed-time">${timeStr}</div>
           </div>
           ${herbBadge}
           ${menuHTML}
         </div>
-        ${repostFlag}
         ${p.caption ? `<div class="feed-card-body" style="padding-bottom:0"><div class="feed-caption" style="margin-bottom:0">${escapeHTML(p.caption)}</div></div>` : ''}
         ${sharedEmbedHTML}
         ${imageHTML}
@@ -1433,7 +1563,7 @@
     if (!wrap) {
       wrap = document.createElement('div');
       wrap.id = 'toastWrap';
-      wrap.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:8px';
+      wrap.style.cssText = 'position:fixed;top:calc(var(--nav-h) + 1rem);right:1rem;z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:flex-end;max-width:calc(100vw - 2rem)';
       document.body.appendChild(wrap);
     }
     const colors = { ok:'#0a4a35', error:'#7f1d1d', warn:'#92400e' };

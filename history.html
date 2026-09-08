@@ -57,8 +57,13 @@
     }
     .scan-actions a { background: var(--green-main); color: #fff; }
     .scan-actions a:hover { background: var(--green-mid); }
-    .scan-actions button { background: #fee2e2; color: #991b1b; }
-    .scan-actions button:hover { background: #fecaca; }
+    /* Delete stays red; Post-to-community gets its own green-outline style
+       so the two actions aren't visually confused with each other. */
+    .scan-delete-btn { background: #fee2e2; color: #991b1b; }
+    .scan-delete-btn:hover { background: #fecaca; }
+    .scan-post-btn { background: var(--green-pale); color: var(--green-dark); border: 1px solid var(--green-light) !important; }
+    .scan-post-btn:hover:not(:disabled) { background: var(--green-light); }
+    .scan-post-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
     /* stats bar */
     .stats-bar {
@@ -80,6 +85,16 @@
     .auth-gate-icon { font-size: 52px; margin-bottom: 1rem; }
     .auth-gate h3 { font-size: 18px; font-weight: 600; margin-bottom: 0.5rem; }
     .auth-gate p { font-size: 14px; color: var(--text-muted); margin-bottom: 1.5rem; }
+
+    #toastWrap { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+    .toast {
+      background: #0a4a35; color: #fff; padding: 10px 16px; border-radius: 10px;
+      font-size: 13px; font-family: 'DM Sans', sans-serif; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      animation: toastSlideUp 0.25s ease;
+    }
+    .toast.error { background: #7f1d1d; }
+    .toast.warn  { background: #92400e; }
+    @keyframes toastSlideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
 
     @media (max-width: 640px) {
       .history-grid { grid-template-columns: 1fr; }
@@ -177,6 +192,8 @@
   </div>
 </div>
 
+<div id="toastWrap"></div>
+
 <footer class="footer">
   <p><strong>HerbID Iloilo</strong> — BSIT Capstone Project · NISU Lemery Campus · 2024–2025</p>
 </footer>
@@ -185,15 +202,20 @@
   import { onAuthChange, getCurrentUser, db } from './js/auth.js';
   import { showAuthModal } from './js/auth-modal.js';
   import { initNavAuth } from './js/nav-auth.js';
-  import { collection, query, where, orderBy, getDocs, deleteDoc, doc, limit }
-    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import {
+    collection, query, where, orderBy, getDocs, deleteDoc, doc, limit
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   initNavAuth();
+
+  let currentUser = null;
+  let allScans    = []; // cached so shareScanToCommunity/deleteScan can look up full scan data by id
 
   window._openSignIn = () =>
     showAuthModal("Sign in to view your scan history", () => location.reload());
 
   onAuthChange(async user => {
+    currentUser = user;
     if (!user) {
       document.getElementById("authGate").style.display      = "";
       document.getElementById("historySection").style.display = "none";
@@ -218,6 +240,7 @@
       const snap = await getDocs(q);
       const scans = [];
       snap.forEach(d => scans.push({ id: d.id, ...d.data() }));
+      allScans = scans;
 
       // Stats
       const matched   = scans.filter(s => s.matched);
@@ -265,7 +288,7 @@
                   <span class="scan-date">${date}</span>
                 </div>
                 <div class="scan-actions">
-                  <button onclick="deleteScan('${s.id}', this)">
+                  <button class="scan-delete-btn" onclick="deleteScan('${s.id}', this)">
                     <i class="ti ti-trash"></i> Delete
                   </button>
                 </div>
@@ -286,7 +309,10 @@
                 <a href="herbs.html">
                   <i class="ti ti-info-circle"></i> View herb
                 </a>
-                <button onclick="deleteScan('${s.id}', this)">
+                <button class="scan-post-btn" id="postbtn-${s.id}" onclick="shareScanToCommunity('${s.id}', this)" title="Share to Community Feed — add a caption">
+                  <i class="ti ti-share"></i>
+                </button>
+                <button class="scan-delete-btn" onclick="deleteScan('${s.id}', this)">
                   <i class="ti ti-trash"></i>
                 </button>
               </div>
@@ -304,6 +330,7 @@
     if (!confirm("Delete this scan from your history?")) return;
     try {
       await deleteDoc(doc(db, "scans", scanId));
+      allScans = allScans.filter(s => s.id !== scanId);
       btn.closest(".scan-card").remove();
       const total = parseInt(document.getElementById("statTotal").textContent) - 1;
       document.getElementById("statTotal").textContent = total;
@@ -311,8 +338,57 @@
         document.getElementById("historyGrid").style.display  = "none";
         document.getElementById("emptyHistory").style.display = "";
       }
-    } catch(e) { alert("Could not delete: " + e.message); }
+    } catch(e) { showToast("Could not delete: " + e.message, "error"); }
   };
+
+  // ── POST A SCAN TO THE COMMUNITY FEED ──────────────────────
+  // Builds a suggested caption from the scan's identification details,
+  // hands the photo + caption off to feed.html via sessionStorage, and
+  // navigates there — the actual post only happens once the person
+  // confirms (and can edit the caption) on the Community page's compose
+  // modal, rather than posting immediately from here.
+  window.shareScanToCommunity = function(scanId, btn) {
+    const scan = allScans.find(s => s.id === scanId);
+    if (!scan || !scan.matched) return;
+
+    const confPct     = scan.confidencePercent || 0;
+    const confLabel   = scan.confidenceLabel || (confPct >= 85 ? "High" : confPct >= 70 ? "Medium" : "Low");
+    const methodLabel = scan.method === "gemini" ? "Gemini AI" : "CNN model";
+    const caption = `🌿 Identified as ${scan.identifiedHerb} — ${confPct.toFixed(0)}% ${confLabel} confidence (verified via ${methodLabel} on HerbID Iloilo).`;
+
+    const payload = {
+      imageBase64:       scan.imageBase64 || null,
+      herbName:          scan.identifiedHerb,
+      confidencePercent: confPct,
+      confidenceLabel:   confLabel,
+      caption,
+    };
+
+    try {
+      sessionStorage.setItem("herbid_pending_post", JSON.stringify(payload));
+    } catch(e) {
+      showToast("Could not prepare this scan for sharing (photo may be too large).", "error");
+      return;
+    }
+
+    btn.disabled  = true;
+    btn.innerHTML = '<i class="ti ti-loader"></i>';
+    window.location.href = "feed.html";
+  };
+
+  function showToast(msg, type = "ok") {
+    let wrap = document.getElementById("toastWrap");
+    if (!wrap) {
+      wrap = document.createElement("div");
+      wrap.id = "toastWrap";
+      document.body.appendChild(wrap);
+    }
+    const t = document.createElement("div");
+    t.className = `toast${type === "error" ? " error" : type === "warn" ? " warn" : ""}`;
+    t.textContent = msg;
+    wrap.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
 </script>
 </body>
 </html>
