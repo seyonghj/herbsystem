@@ -26,11 +26,13 @@
 export function initMentions(inputEl, userCache, onSelect) {
   let dropdown = null;
   let mentionStart = -1;
+  let mentionQueryEnd = -1; // end of the typed "@query", captured when it's typed
 
   function removeDropdown() {
     dropdown?.remove();
-    dropdown    = null;
-    mentionStart = -1;
+    dropdown        = null;
+    mentionStart    = -1;
+    mentionQueryEnd = -1;
   }
 
   function buildDropdown(matches, cursorPos) {
@@ -83,6 +85,14 @@ export function initMentions(inputEl, userCache, onSelect) {
         insertMention(user);
         if (onSelect) onSelect(user);
       };
+      // Touch devices: preventing default here also cancels the
+      // simulated mousedown/click that would otherwise follow, so this
+      // and the mousedown handler above never both fire for one tap.
+      item.ontouchend = e => {
+        e.preventDefault();
+        insertMention(user);
+        if (onSelect) onSelect(user);
+      };
 
       dropdown.appendChild(item);
     });
@@ -103,11 +113,20 @@ export function initMentions(inputEl, userCache, onSelect) {
   function insertMention(user) {
     const val    = inputEl.value;
     const before = val.slice(0, mentionStart);
-    const after  = val.slice(inputEl.selectionStart);
-    inputEl.value = `${before}@${user.displayName} ${after}`;
-    // Move cursor after the inserted mention
-    const pos = (before + '@' + user.displayName + ' ').length;
+    // Use the query-end position captured back when it was typed, not a
+    // fresh read of inputEl.selectionStart here — the dropdown item
+    // lives outside the input, and on some mobile browsers the
+    // reported selection can shift (or reset) between typing and the
+    // tap landing, which used to leave the typed "@query" in place
+    // instead of replacing it, so the picked name got appended right
+    // after it instead of swapping it in ("@Ju@Juan Dela Cruz ").
+    const cutAt    = mentionQueryEnd >= 0 ? mentionQueryEnd : inputEl.selectionStart;
+    const after    = val.slice(cutAt);
+    const inserted = `@${user.displayName} `;
+    inputEl.value  = `${before}${inserted}${after}`;
+    const pos = (before + inserted).length;
     inputEl.setSelectionRange(pos, pos);
+    inputEl.dispatchEvent(new Event('input', { bubbles: true }));
     removeDropdown();
     inputEl.focus();
   }
@@ -128,7 +147,8 @@ export function initMentions(inputEl, userCache, onSelect) {
     const query = val.slice(at + 1, cursor).toLowerCase();
     if (!query) { removeDropdown(); return; }
 
-    mentionStart = at;
+    mentionStart    = at;
+    mentionQueryEnd = cursor;
 
     // Search userCache (case-insensitive)
     const matches = [];
