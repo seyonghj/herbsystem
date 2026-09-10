@@ -240,11 +240,7 @@
 
 <div class="result-panel" id="resultPanel"></div>
 
-<div class="disclaimer">
-  <div class="disclaimer-box">
-    <i class="ti ti-alert-triangle"></i>
-      </div>
-</div>
+
 
 <div class="modal-overlay" id="sourceModal">
   <div class="modal-box">
@@ -508,7 +504,7 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
             </div>
             <div><div class="info-label">Preparation</div><div class="info-val">${herb.preparation||'—'}</div></div>
           </div>
-          <div class="loc-row"><i class="ti ti-map-pin"></i>Commonly found in: <strong style="margin-left:4px">${herb.location||'—'}</strong></div>` : ''}
+` : ''}
           ${result.geminiAnalysis ? `
           <div class="gemini-box">
             <div class="gemini-box-label"><i class="ti ti-sparkles" style="font-size:12px"></i> AI analysis</div>
@@ -521,7 +517,7 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
             <a href="map.html?herb=${herb.id}" class="btn-map"><i class="ti ti-map-pin"></i> View on map</a>
           </div>` : ''}
           <div class="match-actions" style="margin-top:8px">
-            <button class="btn-detail" style="border:none;cursor:pointer;font-family:'DM Sans',sans-serif" onclick="shareMatchToCommunity()">
+            <button class="btn-map" style="flex:1;border:1.5px solid var(--green-main);color:var(--green-main);background:var(--white);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:10px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;gap:6px;transition:background 0.15s" onmouseover="this.style.background='var(--green-pale)'" onmouseout="this.style.background='var(--white)'" onclick="shareMatchToCommunity()">
               <i class="ti ti-share"></i> Share to Community
             </button>
           </div>
