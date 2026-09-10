@@ -393,10 +393,29 @@
         (geminiResult.plantName||'').toLowerCase().includes((h.localName||'').toLowerCase())
       );
       if (herb) {
+        // Use real CNN confidence if available (it just missed the threshold),
+        // otherwise map Gemini's High/Medium/Low label to a realistic number.
+        // This fixes every Gemini-identified scan showing exactly 65%.
+        let confPct, confRaw;
+        if (cnnResult?.confidencePercent && cnnResult.confidencePercent > 0) {
+          confPct = Math.round(cnnResult.confidencePercent);
+          confRaw = cnnResult.confidence;
+        } else {
+          const geminiConfMap = { 'High': 82, 'Medium': 68, 'Low': 52 };
+          confPct = geminiConfMap[geminiResult.confidence] || 68;
+          confRaw = confPct / 100;
+        }
         finalHerb = {
-          matched: true, localName: herb.localName, scientificName: herb.scientificName,
-          confidence: 0.65, confidencePercent: 65, confidenceLabel: computeConfidenceLabel(65),
-          top3: [], geminiVerified: true, geminiOnly: true, geminiAnalysis: geminiResult.analysis,
+          matched: true,
+          localName: herb.localName,
+          scientificName: herb.scientificName || geminiResult.scientificName || '',
+          confidence: confRaw,
+          confidencePercent: confPct,
+          confidenceLabel: computeConfidenceLabel(confPct),
+          top3: cnnResult?.top3 || [],
+          geminiVerified: true,
+          geminiOnly: true,
+          geminiAnalysis: geminiResult.analysis,
         };
       } else {
         noMatch = true;
