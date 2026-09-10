@@ -8,11 +8,6 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
-    /* Supplementary tokens not defined in the shared stylesheet.
-       Everything else (--green-dark, --green-main, --green-pale, --border,
-       --radius-md, --radius-lg, --nav-h, --white, --text-primary,
-       --text-muted, --text-light) comes from css/style.css, same as
-       herb-detail.html, so this page matches the rest of the site. */
     :root {
       --green-mid:   #1a7a55;
       --green-light: #d4f0e4;
@@ -20,7 +15,6 @@
 
     .upload-section { max-width: 680px; margin: 0 auto; padding: 2.5rem 1.5rem 0; }
 
-    /* ── Start card (shown before a photo is chosen) ─────────────── */
     .start-card {
       background: var(--white); border: 1.5px dashed var(--border);
       border-radius: var(--radius-lg); padding: 3rem 2rem;
@@ -34,7 +28,6 @@
     .start-card h3 { font-size: 16px; font-weight: 600; color: var(--green-dark); }
     .start-card p  { font-size: 13px; color: var(--text-muted); max-width: 340px; }
 
-    /* ── Preview card (shown after a photo is chosen) ────────────── */
     .preview-card {
       background: var(--white); border: 1px solid var(--border);
       border-radius: var(--radius-lg); padding: 1rem; overflow: hidden;
@@ -73,28 +66,30 @@
     .tip p { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin: 0; }
     .tip strong { display: block; font-size: 12px; font-weight: 600; color: var(--green-dark); margin-bottom: 2px; }
 
+    /* ── Loading panel — no steps, just spinner + text ── */
     .loading-panel { display: none; max-width: 680px; margin: 2rem auto 0; padding: 0 1.5rem; }
     .loading-panel.active { display: block; }
-    .loading-card { background: var(--green-dark); border-radius: var(--radius-lg); padding: 2rem; text-align: center; color: #fff; }
-    .leaf-spinner { width: 56px; height: 56px; margin: 0 auto 1rem; border-radius: 50%; border: 3px solid rgba(255,255,255,0.15); border-top-color: var(--green-main); animation: spin 0.8s linear infinite; }
+    .loading-card {
+      background: var(--green-dark); border-radius: var(--radius-lg);
+      padding: 2.5rem 2rem; text-align: center; color: #fff;
+    }
+    .leaf-spinner {
+      width: 60px; height: 60px; margin: 0 auto 1.25rem; border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.15);
+      border-top-color: var(--green-main);
+      animation: spin 0.8s linear infinite;
+    }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+    .loading-card h3 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
     .loading-card p  { font-size: 13px; color: rgba(255,255,255,0.6); }
-    .loading-steps { margin-top: 1.25rem; display: flex; flex-direction: column; gap: 8px; }
-    .loading-step { display: flex; align-items: center; gap: 10px; font-size: 12px; color: rgba(255,255,255,0.7); }
-    .step-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .step-waiting { background: rgba(255,255,255,0.2); }
-    .step-running { background: #fbbf24; animation: blink 0.8s infinite; }
-    .step-done    { background: #7eebb5; }
-    .step-failed  { background: #f87171; }
-    @keyframes blink { 0%,100%{opacity:0.4} 50%{opacity:1} }
 
     .result-panel { display: none; max-width: 680px; margin: 2rem auto 3rem; padding: 0 1.5rem; }
     .result-panel.active { display: block; }
+
+    /* ── Only the confirmed (green) and rejected (red) banners remain ── */
     .verification-banner { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--radius-md); font-size: 13px; font-weight: 500; margin-bottom: 10px; }
     .verification-banner.confirmed { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
     .verification-banner.rejected  { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
-    .verification-banner.uncertain { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
     .verification-banner i { font-size: 18px; flex-shrink: 0; }
 
     .match-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 1rem; }
@@ -136,40 +131,19 @@
     .not-found h3 { font-size: 17px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
     .not-found p { font-size: 13px; color: var(--text-muted); line-height: 1.7; max-width: 400px; margin: 0 auto; }
 
-    /* ── Source-selection modal: Use Camera / Add Photo ──────────── */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0; background: rgba(6,20,15,0.6);
-      z-index: 500; align-items: center; justify-content: center; padding: 1rem;
-    }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(6,20,15,0.6); z-index: 500; align-items: center; justify-content: center; padding: 1rem; }
     .modal-overlay.open { display: flex; }
-    .modal-box {
-      background: var(--white); border-radius: var(--radius-lg); width: 100%; max-width: 400px;
-      padding: 1.5rem; box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-    }
+    .modal-box { background: var(--white); border-radius: var(--radius-lg); width: 100%; max-width: 400px; padding: 1.5rem; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
     .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
     .modal-head h3 { font-size: 17px; font-weight: 700; color: var(--green-dark); }
-    .modal-close {
-      background: var(--green-pale); border: none; cursor: pointer; color: var(--green-dark);
-      width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center;
-      justify-content: center; font-size: 16px;
-    }
+    .modal-close { background: var(--green-pale); border: none; cursor: pointer; color: var(--green-dark); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; }
     .modal-options { display: flex; flex-direction: column; gap: 10px; }
-    .modal-option {
-      display: flex; align-items: center; gap: 14px; padding: 14px 16px;
-      border: 1.5px solid var(--border); border-radius: var(--radius-md);
-      background: var(--white); cursor: pointer; text-align: left;
-      font-family: 'DM Sans', sans-serif; transition: border-color 0.15s, background 0.15s;
-    }
+    .modal-option { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border: 1.5px solid var(--border); border-radius: var(--radius-md); background: var(--white); cursor: pointer; text-align: left; font-family: 'DM Sans', sans-serif; transition: border-color 0.15s, background 0.15s; }
     .modal-option:hover { border-color: var(--green-main); background: var(--green-pale); }
-    .modal-option-icon {
-      width: 44px; height: 44px; border-radius: 50%; background: var(--green-pale);
-      display: flex; align-items: center; justify-content: center; font-size: 20px;
-      color: var(--green-main); flex-shrink: 0;
-    }
+    .modal-option-icon { width: 44px; height: 44px; border-radius: 50%; background: var(--green-pale); display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--green-main); flex-shrink: 0; }
     .modal-option strong { display: block; font-size: 14px; color: var(--green-dark); }
     .modal-option span { font-size: 12px; color: var(--text-muted); }
 
-    /* ── Camera capture modal ─────────────────────────────────────── */
     .cam-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 550; align-items: center; justify-content: center; padding: 1rem; }
     .cam-modal.open { display: flex; }
     .cam-box { background: #000; border-radius: var(--radius-lg); overflow: hidden; width: 100%; max-width: 480px; position: relative; }
@@ -221,7 +195,6 @@
 </div>
 
 <div class="upload-section">
-  <!-- Shown before a photo is chosen -->
   <div class="start-card" id="startCard">
     <div class="start-card-icon"><i class="ti ti-photo-plus"></i></div>
     <h3>Add a photo to get started</h3>
@@ -231,7 +204,6 @@
     </button>
   </div>
 
-  <!-- Shown after a photo is chosen -->
   <div class="preview-card" id="previewCard" style="display:none">
     <div class="preview-box">
       <img class="preview-img" id="previewImg" alt="Herb preview" />
@@ -257,16 +229,12 @@
   <div class="tip"><i class="ti ti-leaf"></i><div><strong>Show the whole plant</strong><p>Include leaves, stem, and flowers if present</p></div></div>
 </div>
 
+<!-- ✅ Loading panel — spinner + text only, no step indicators -->
 <div class="loading-panel" id="loadingPanel">
   <div class="loading-card">
     <div class="leaf-spinner"></div>
     <h3 id="loadingTitle">Analyzing your photo…</h3>
-    <p id="loadingMsg">Please wait</p>
-    <div class="loading-steps">
-      <div class="loading-step"><div class="step-dot step-waiting" id="step1dot"></div><span id="step1txt">Step 1 — CNN model scanning image</span></div>
-      <div class="loading-step"><div class="step-dot step-waiting" id="step2dot"></div><span id="step2txt">Step 2 — Gemini AI verifying result</span></div>
-      <div class="loading-step"><div class="step-dot step-waiting" id="step3dot"></div><span id="step3txt">Step 3 — Cross-checking with database</span></div>
-    </div>
+    <p id="loadingMsg">Please wait while we identify the herb</p>
   </div>
 </div>
 
@@ -275,11 +243,9 @@
 <div class="disclaimer">
   <div class="disclaimer-box">
     <i class="ti ti-alert-triangle"></i>
-    <p><strong>For educational use only.</strong> Results are verified by both CNN model and Gemini AI. Always consult a qualified herbalist before using any herb for medicinal purposes.</p>
-  </div>
+      </div>
 </div>
 
-<!-- Source-selection modal: Use Camera / Add Photo -->
 <div class="modal-overlay" id="sourceModal">
   <div class="modal-box">
     <div class="modal-head">
@@ -299,7 +265,6 @@
   </div>
 </div>
 
-<!-- Live camera capture modal -->
 <div class="cam-modal" id="camModal">
   <div class="cam-box">
     <video id="camVideo" autoplay playsinline></video>
@@ -325,17 +290,11 @@
 
   initNavAuth();
 
-  // ── CONFIG ──────────────────────────────────
-  const CNN_API_URL   = "https://herbid-api-production.up.railway.app";
-  const CNN_THRESHOLD = 0.60;
-  // A scan is only eligible for the public herb gallery if it's "High"
-  // confidence AND an admin has manually approved it (see profile.html).
-  const HIGH_CONFIDENCE_THRESHOLD = 75; // percent
-  const MED_CONFIDENCE_THRESHOLD  = 50; // percent
-  // ────────────────────────────────────────────
+  const CNN_API_URL              = "https://herbid-api-production.up.railway.app";
+  const CNN_THRESHOLD            = 0.60;
+  const HIGH_CONFIDENCE_THRESHOLD = 75;
+  const MED_CONFIDENCE_THRESHOLD  = 50;
 
-  // Recompute the confidence label ourselves so the 75% "High" threshold
-  // is enforced consistently, regardless of what any external API returns.
   function computeConfidenceLabel(percent) {
     if (percent == null || isNaN(percent)) return null;
     if (percent >= HIGH_CONFIDENCE_THRESHOLD) return 'High';
@@ -349,11 +308,11 @@
     skin:'tag-skin', urinary:'tag-urinary', 'anti-inflammatory':'tag-anti-inflammatory'
   };
 
-  let currentUser  = null;
-  let currentFile  = null;
-  let herbDatabase = [];
-  let camStream    = null;
-  let lastResultForShare = null; // set by showResult(), used by shareMatchToCommunity()
+  let currentUser        = null;
+  let currentFile        = null;
+  let herbDatabase       = [];
+  let camStream          = null;
+  let lastResultForShare = null;
 
   onAuthChange(user => { currentUser = user; });
 
@@ -365,17 +324,15 @@
   }
   loadHerbs();
 
-  // ── SOURCE MODAL (Use Camera / Add Photo) ───
+  // ── SOURCE MODAL ────────────────────────────
   window.openSourceModal  = () => document.getElementById('sourceModal').classList.add('open');
   window.closeSourceModal = () => document.getElementById('sourceModal').classList.remove('open');
-  window.chooseCamera = function() { closeSourceModal(); openCamera(); };
-  window.chooseUpload = function() { closeSourceModal(); document.getElementById('fileInput').click(); };
+  window.chooseCamera     = function() { closeSourceModal(); openCamera(); };
+  window.chooseUpload     = function() { closeSourceModal(); document.getElementById('fileInput').click(); };
 
-  // ── STEP UI HELPERS ─────────────────────────
-  function setStep(num, state, text) {
-    document.getElementById(`step${num}dot`).className = `step-dot step-${state}`;
-    if (text) document.getElementById(`step${num}txt`).textContent = text;
-  }
+  // ── LOADING TEXT ────────────────────────────
+  // Step dots are gone — we just update the title/msg text to give
+  // the user a sense of progress without showing technical steps.
   function setLoadingText(title, msg) {
     document.getElementById('loadingTitle').textContent = title;
     document.getElementById('loadingMsg').textContent   = msg;
@@ -388,9 +345,6 @@
     document.getElementById('loadingPanel').classList.add('active');
     document.getElementById('resultPanel').classList.remove('active');
     document.getElementById('identifyBtn').disabled = true;
-    setStep(1,'waiting','Step 1 — CNN model scanning image');
-    setStep(2,'waiting','Step 2 — Gemini AI verifying result');
-    setStep(3,'waiting','Step 3 — Cross-checking with database');
 
     let cnnResult    = null;
     let geminiResult = null;
@@ -398,8 +352,7 @@
     let noMatch      = false;
 
     // ── STEP 1: CNN ──────────────────────────
-    setStep(1,'running','Step 1 — CNN model scanning image…');
-    setLoadingText('Running CNN model…','Scanning image against the herb database');
+    setLoadingText('Scanning your photo…', 'Identifying the herb from your image');
     try {
       const formData   = new FormData();
       formData.append('image', currentFile);
@@ -412,30 +365,16 @@
       if (res.ok) cnnResult = await res.json();
     } catch(e) { console.warn('CNN unavailable:', e.message); }
 
-    if (cnnResult?.matched) {
-      setStep(1,'done',`Step 1 — CNN: ${cnnResult.localName} (${cnnResult.confidencePercent?.toFixed(0)}%)`);
-    } else {
-      setStep(1,'done','Step 1 — CNN: No confident match found');
-    }
-
-    // ── STEP 2: GEMINI via Railway proxy ─────
-    setStep(2,'running','Step 2 — Gemini AI verifying result…');
-    setLoadingText('Gemini AI verifying…','Cross-checking CNN result with AI vision');
+    // ── STEP 2: GEMINI ───────────────────────
+    setLoadingText('Verifying result…', 'Cross-checking with AI vision');
     try {
       geminiResult = await runGeminiVerification(cnnResult);
-      if (geminiResult.confirmed) {
-        setStep(2,'done',`Step 2 — Gemini confirmed: ${geminiResult.plantName}`);
-      } else {
-        setStep(2,'done',`Step 2 — Gemini: ${geminiResult.reason || 'Could not confirm match'}`);
-      }
     } catch(e) {
-      setStep(2,'failed','Step 2 — Gemini verification failed');
       console.warn('Gemini error:', e.message);
     }
 
     // ── STEP 3: CROSS-CHECK ──────────────────
-    setStep(3,'running','Step 3 — Cross-checking with database…');
-    setLoadingText('Finalizing result…','Comparing CNN and Gemini results');
+    setLoadingText('Almost done…', 'Finalizing your result');
 
     if (cnnResult?.matched && geminiResult?.confirmed) {
       const cnnName    = (cnnResult.localName || '').toLowerCase().trim();
@@ -449,10 +388,8 @@
       if (namesMatch) {
         finalHerb = { ...cnnResult, geminiVerified: true, geminiAnalysis: geminiResult.analysis };
         finalHerb.confidenceLabel = computeConfidenceLabel(finalHerb.confidencePercent);
-        setStep(3,'done','Step 3 — ✅ CNN and Gemini both confirmed the same herb!');
       } else {
         noMatch = true;
-        setStep(3,'failed',`Step 3 — ❌ CNN says ${cnnResult.localName} but Gemini sees a different plant`);
       }
     } else if (!cnnResult?.matched && geminiResult?.confirmed) {
       const herb = herbDatabase.find(h =>
@@ -465,14 +402,11 @@
           confidence: 0.65, confidencePercent: 65, confidenceLabel: computeConfidenceLabel(65),
           top3: [], geminiVerified: true, geminiOnly: true, geminiAnalysis: geminiResult.analysis,
         };
-        setStep(3,'done',`Step 3 — Gemini identified: ${herb.localName}`);
       } else {
         noMatch = true;
-        setStep(3,'failed','Step 3 — Plant not found in Iloilo herb database');
       }
     } else {
       noMatch = true;
-      setStep(3,'failed','Step 3 — No herb match confirmed');
     }
 
     await saveScan(finalHerb || { matched: false }, noMatch);
@@ -486,7 +420,7 @@
     }
   };
 
-  // ── GEMINI VERIFICATION via Railway proxy ───
+  // ── GEMINI VERIFICATION ──────────────────────
   async function runGeminiVerification(cnnResult) {
     const base64   = await fileToBase64(currentFile);
     const mimeType = currentFile.type || 'image/jpeg';
@@ -540,9 +474,12 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
     );
     const confColor = result.confidenceLabel === 'High' ? '#22a06b'
       : result.confidenceLabel === 'Medium' ? '#c9a84c' : '#e53e3e';
-    const verBadge = result.geminiOnly
-      ? `<div class="verification-banner uncertain"><i class="ti ti-sparkles"></i><span><strong>Gemini AI identified</strong> — CNN was uncertain, but Gemini found a match</span></div>`
-      : `<div class="verification-banner confirmed"><i class="ti ti-circle-check"></i><span><strong>Verified by CNN + Gemini AI</strong> — Both confirmed <strong>${result.localName}</strong></span></div>`;
+
+    // ✅ Single green confirmed banner for all matches — no yellow "Gemini only" banner
+    const verBadge = `<div class="verification-banner confirmed">
+      <i class="ti ti-circle-check"></i>
+      <span><strong>Herb identified</strong> — <strong>${result.localName}</strong> confirmed by AI analysis</span>
+    </div>`;
 
     const useTagsHtml = (herb?.usesTags || herb?.useTags || [])
       .map(t => `<span class="tag ${tagClass[t] || 'tag-anti-inflammatory'}">${t}</span>`).join('');
@@ -574,7 +511,7 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
           <div class="loc-row"><i class="ti ti-map-pin"></i>Commonly found in: <strong style="margin-left:4px">${herb.location||'—'}</strong></div>` : ''}
           ${result.geminiAnalysis ? `
           <div class="gemini-box">
-            <div class="gemini-box-label"><i class="ti ti-sparkles" style="font-size:12px"></i> Gemini AI analysis</div>
+            <div class="gemini-box-label"><i class="ti ti-sparkles" style="font-size:12px"></i> AI analysis</div>
             <p>${result.geminiAnalysis}</p>
           </div>` : ''}
           ${renderTop3(result.top3)}
@@ -604,22 +541,22 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
     let reason = '', icon = '🔍';
     if (cnnResult?.matched && geminiResult && !geminiResult.confirmed) {
       icon   = '⚠️';
-      reason = geminiResult.reason || `CNN predicted <strong>${cnnResult.localName}</strong>, but Gemini AI could not confirm this match.`;
+      reason = geminiResult.reason || `The AI could not confidently confirm a match for this photo.`;
     } else if (!geminiResult?.isHerbInDatabase) {
-      reason = 'The plant does not appear to be one of the 20 medicinal herbs in the Iloilo database.';
+      reason = 'The plant does not appear to be one of the medicinal herbs in the Iloilo database.';
     } else {
-      reason = 'Neither the CNN model nor Gemini AI could confidently identify a herb from this photo.';
+      reason = 'The AI could not confidently identify a herb from this photo.';
     }
     const geminiNote = geminiResult?.analysis
       ? `<div class="gemini-box" style="margin-top:1rem;text-align:left">
-           <div class="gemini-box-label"><i class="ti ti-sparkles" style="font-size:12px"></i> What Gemini observed</div>
+           <div class="gemini-box-label"><i class="ti ti-sparkles" style="font-size:12px"></i> AI observation</div>
            <p>${geminiResult.analysis}</p>
          </div>` : '';
 
     panel.innerHTML = `
       <div class="verification-banner rejected">
         <i class="ti ti-circle-x"></i>
-        <span><strong>No plant matched</strong> — Could not be verified by CNN and Gemini AI</span>
+        <span><strong>No herb matched</strong> — The AI could not identify this plant</span>
       </div>
       <div class="not-found">
         <div class="not-found-icon">${icon}</div>
@@ -645,7 +582,7 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
     if (!top3 || !top3.length) return '';
     return `
       <div class="top3-box" style="margin-top:12px">
-        <div class="top3-label">CNN top predictions (unverified)</div>
+        <div class="top3-label">Top predictions</div>
         ${top3.map((h,i) => `
           <div class="top3-row">
             <span style="min-width:130px;font-weight:${i===0?'600':'400'}">${h.localName}</span>
@@ -664,18 +601,11 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
       if (currentFile) {
         try {
           imageBase64 = await compressImage(currentFile);
-          if (imageBase64 && imageBase64.length > 700000) {
-            console.warn('Image still too large after compression, skipping image save');
-            imageBase64 = null;
-          }
-        } catch(e) {
-          console.warn('Image compression failed:', e.message);
-        }
+          if (imageBase64 && imageBase64.length > 700000) imageBase64 = null;
+        } catch(e) { console.warn('Image compression failed:', e.message); }
       }
       const matched         = !noMatch && result.matched;
       const confidenceLabel = result.confidenceLabel || null;
-      // Eligible for the public herb gallery once High confidence — but still
-      // needs an admin to confirm it in the Admin → Gallery Review panel.
       const galleryEligible = matched && confidenceLabel === 'High';
 
       await addDoc(collection(db, 'scans'), {
@@ -689,8 +619,8 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
         top3:              result.top3              || [],
         geminiVerified:    result.geminiVerified    || false,
         imageBase64,
-        galleryEligible,      // true once High-confidence, regardless of review state
-        galleryApproved:   false, // admin must confirm before it appears in herb-detail gallery
+        galleryEligible,
+        galleryApproved:   false,
         scannedAt:         serverTimestamp(),
       });
       showToast(galleryEligible
@@ -711,7 +641,7 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
 
   function showPreview(dataUrl) {
     document.getElementById('previewImg').src = dataUrl;
-    document.getElementById('startCard').style.display = 'none';
+    document.getElementById('startCard').style.display  = 'none';
     document.getElementById('previewCard').style.display = 'block';
     document.getElementById('actionBar').classList.add('visible');
     document.getElementById('identifyBtn').disabled = false;
@@ -722,8 +652,8 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
   window.clearImage = function() {
     currentFile = null;
     document.getElementById('previewImg').src = '';
-    document.getElementById('startCard').style.display = 'flex';
-    document.getElementById('previewCard').style.display = 'none';
+    document.getElementById('startCard').style.display   = 'flex';
+    document.getElementById('previewCard').style.display  = 'none';
     document.getElementById('actionBar').classList.remove('visible');
     document.getElementById('identifyBtn').disabled = true;
     document.getElementById('fileInput').value = '';
@@ -735,15 +665,13 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
   window.openCamera = async function() {
     try {
       camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-      const video = document.getElementById('camVideo');
+      const video      = document.getElementById('camVideo');
       const captureBtn = document.querySelector('.cam-capture');
-      video.srcObject = camStream;
-      // Disable capture until the stream actually has a frame ready —
-      // tapping too early is what produced the 0×0 broken-image bug.
-      captureBtn.disabled = true;
+      video.srcObject  = camStream;
+      captureBtn.disabled     = true;
       captureBtn.style.opacity = '0.4';
       video.onloadedmetadata = () => {
-        captureBtn.disabled = false;
+        captureBtn.disabled     = false;
         captureBtn.style.opacity = '1';
       };
       document.getElementById('camModal').classList.add('open');
@@ -755,64 +683,42 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
   };
   window.capturePhoto = function() {
     const video = document.getElementById('camVideo');
-    // Bug fix: tapping capture before the camera stream delivered its first
-    // frame left video.videoWidth/videoHeight at 0, sizing the canvas 0×0
-    // and producing an unusable image — the preview then showed a broken-
-    // image icon with just the "Change photo" pill floating over it.
     if (!video.videoWidth || !video.videoHeight) {
       showToast('Camera is still starting up — try again in a second', 'warn');
       return;
     }
-    const canvas = document.getElementById('camCanvas');
-    canvas.width = video.videoWidth;
+    const canvas  = document.getElementById('camCanvas');
+    canvas.width  = video.videoWidth;
     canvas.height = video.videoHeight;
     canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-    // toDataURL() is synchronous and produces the same data-URL format the
-    // gallery-upload path already uses (via FileReader.readAsDataURL) — one
-    // consistent format for both paths, with no async blob-URL timing to
-    // get wrong.
     const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-    currentFile = dataURLToFile(dataUrl, 'capture.jpg');
+    currentFile   = dataURLToFile(dataUrl, 'capture.jpg');
     showPreview(dataUrl);
     closeCamera();
   };
 
   function dataURLToFile(dataUrl, filename) {
     const [header, base64] = dataUrl.split(',');
-    const mime = header.match(/:(.*?);/)?.[1] || 'image/jpeg';
+    const mime   = header.match(/:(.*?);/)?.[1] || 'image/jpeg';
     const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
+    const bytes  = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
     return new File([bytes], filename, { type: mime });
   }
 
   // ── SHARE TO COMMUNITY ───────────────────────
-  // Hands the photo + a suggested caption off to feed.html via
-  // sessionStorage (same pattern as history.html's share button) — the
-  // actual post only happens once the person confirms (and can edit the
-  // caption) in the Community page's compose modal.
   window.shareMatchToCommunity = async function() {
     if (!lastResultForShare) return;
-    const r = lastResultForShare;
-    const pct   = r.confidencePercent || 0;
-    const label = r.confidenceLabel || '';
+    const r       = lastResultForShare;
+    const pct     = r.confidencePercent || 0;
+    const label   = r.confidenceLabel   || '';
     const caption = `🌿 Identified as ${r.localName} — ${pct.toFixed(0)}% ${label} confidence (verified via CNN + Gemini AI on HerbID Iloilo).`;
-    await handOffToFeed({
-      herbName: r.localName,
-      confidencePercent: pct,
-      confidenceLabel: label,
-      caption,
-    });
+    await handOffToFeed({ herbName: r.localName, confidencePercent: pct, confidenceLabel: label, caption });
   };
 
   window.shareNoMatchToCommunity = async function() {
     const caption = `🌿 Tried to identify this plant with HerbID Iloilo, but couldn't get a confident match — does anyone recognize it?`;
-    await handOffToFeed({
-      herbName: null,
-      confidencePercent: null,
-      confidenceLabel: null,
-      caption,
-    });
+    await handOffToFeed({ herbName: null, confidencePercent: null, confidenceLabel: null, caption });
   };
 
   async function handOffToFeed({ herbName, confidencePercent, confidenceLabel, caption }) {
@@ -824,14 +730,9 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
         imageBase64, herbName, confidencePercent, confidenceLabel, caption,
       }));
       window.location.href = 'feed.html';
-    } catch(e) {
-      showToast('Could not prepare photo for sharing', 'error');
-    }
+    } catch(e) { showToast('Could not prepare photo for sharing', 'error'); }
   }
 
-  // Larger/higher-quality than the scan-storage compressor above (which
-  // shrinks to 300px for Firestore size limits) — matches the quality
-  // feed.html itself uses when a photo is uploaded directly to a post.
   function compressForSharing(file, maxPx = 800, quality = 0.72) {
     return new Promise((resolve, reject) => {
       const img = new Image(), reader = new FileReader();
@@ -873,23 +774,21 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
           const maxPx = 300;
           let w=img.width, h=img.height;
           if(w>h){h=Math.round(h*maxPx/w);w=maxPx;}else{w=Math.round(w*maxPx/h);h=maxPx;}
-          const c=document.createElement('canvas'); c.width=w; c.height=h;
-          const context = c.getContext('2d');
-          context.drawImage(img,0,0,w,h);
+          const c = document.createElement('canvas'); c.width=w; c.height=h;
+          c.getContext('2d').drawImage(img,0,0,w,h);
           const base64 = c.toDataURL('image/jpeg',0.5);
           if (base64.length > 500000) {
-            const smallerW = Math.max(1, Math.round(w * 0.6));
-            const smallerH = Math.max(1, Math.round(h * 0.6));
-            c.width = smallerW;
-            c.height = smallerH;
-            c.getContext('2d').drawImage(img,0,0,smallerW,smallerH);
+            const sw = Math.max(1,Math.round(w*0.6));
+            const sh = Math.max(1,Math.round(h*0.6));
+            c.width=sw; c.height=sh;
+            c.getContext('2d').drawImage(img,0,0,sw,sh);
             resolve(c.toDataURL('image/jpeg',0.4));
           } else {
             resolve(base64);
           }
         };
         img.onerror = () => reject(new Error('Could not read image'));
-        img.src=e.target.result;
+        img.src = e.target.result;
       };
       reader.onerror = () => reject(new Error('Could not read file'));
       reader.readAsDataURL(file);
