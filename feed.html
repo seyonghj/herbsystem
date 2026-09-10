@@ -593,7 +593,7 @@
     const panel = document.getElementById('notifPanel');
     panel.classList.toggle('open');
     if (panel.classList.contains('open') && currentUser) {
-      markAllRead(currentUser.uid);
+      markAllRead(db, currentUser.uid);
       document.getElementById('notifBadge').classList.remove('show');
       document.getElementById('notifBadge').textContent = '';
     }
@@ -601,9 +601,8 @@
 
   window.markAllNotificationsRead = async function() {
     if (!currentUser) return;
-    await markAllRead(currentUser.uid);
+    await markAllRead(db, currentUser.uid);
     document.getElementById('notifBadge').classList.remove('show');
-    // Re-render items as read
     document.querySelectorAll('.notif-item.unread').forEach(el => el.classList.remove('unread'));
     document.querySelectorAll('.notif-dot').forEach(el => el.remove());
   };
@@ -654,7 +653,7 @@
   }
 
   window.onNotifClick = async function(notifId, postId, uid) {
-    if (uid && notifId) await markRead(uid, notifId);
+    if (uid && notifId) await markRead(db, uid, notifId);
     document.getElementById('notifPanel').classList.remove('open');
     if (postId) openDetailModal(postId, true);
   };
@@ -697,7 +696,7 @@
 
     // Start notification listener
     if (unsubNotif) unsubNotif();
-    unsubNotif = listenNotifications(user.uid, (items, unread) => {
+    unsubNotif = listenNotifications(db, user.uid, (items, unread) => {
       renderNotifications(items);
       const badge = document.getElementById('notifBadge');
       if (unread > 0) {
@@ -844,6 +843,10 @@
     const timeStr   = p.createdAt?.toDate?.()?.toLocaleDateString('en-PH', {
       month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit'
     }) || 'just now';
+
+    // Store post data so sharePost() can access full values safely
+    postDataMap.set(p.id, { uid: p.uid, herbName: p.herbName || '', caption: p.caption || '' });
+
     const avatarHTML = p.userPhoto
       ? `<img src="${p.userPhoto}" referrerpolicy="no-referrer">`
       : (p.userName || 'U')[0].toUpperCase();
@@ -867,9 +870,6 @@
              </div>
            </div>
          </div>` : '';
-    const myAvatarHTML = currentUser?.photoURL
-      ? `<img src="${currentUser.photoURL}" referrerpolicy="no-referrer">`
-      : (currentUser?.displayName || 'U')[0].toUpperCase();
 
     return `
       <div class="feed-card" id="post-${p.id}">
@@ -897,7 +897,7 @@
               <span>${cmtCount} ${cmtCount===1?'Comment':'Comments'}</span>
             </button>
             <div class="reaction-divider"></div>
-            <button class="reaction-btn" onclick="sharePost('${p.id}','${p.uid}','${escapeAttr(p.herbName||'')}','${escapeAttr(p.caption||'')}')">
+            <button class="reaction-btn" onclick="sharePost('${p.id}')">
               <i class="ti ti-share"></i> Share
             </button>
           </div>
@@ -916,15 +916,13 @@
         await updateDoc(ref, { likes: arrayRemove(currentUser.uid), likeCount: increment(-1) });
       } else {
         await updateDoc(ref, { likes: arrayUnion(currentUser.uid), likeCount: increment(1) });
-        // Notify post owner
-        await createNotification({
-          toUid:       postOwnerUid,
-          fromUid:     currentUser.uid,
-          fromName:    currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
-          fromPhoto:   currentUser.photoURL,
-          type:        'like',
-          postId,
-          postSnippet,
+        await createNotification(db, {
+          toUid:     postOwnerUid,
+          fromUid:   currentUser.uid,
+          fromName:  currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
+          fromPhoto: currentUser.photoURL,
+          type:      'like',
+          postId,    postSnippet,
         });
       }
     } catch(e) { showToast('Could not update like', 'error'); }
@@ -994,7 +992,7 @@
         await updateDoc(ref, { likes: arrayRemove(currentUser.uid), likeCount: increment(-1) });
       } else {
         await updateDoc(ref, { likes: arrayUnion(currentUser.uid), likeCount: increment(1) });
-        await createNotification({
+        await createNotification(db, {
           toUid: postOwnerUid, fromUid: currentUser.uid,
           fromName: currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
           fromPhoto: currentUser.photoURL, type: 'like',
@@ -1134,8 +1132,7 @@
     if (!text || !activePostId) return;
     input.value = '';
 
-    // Parse @mentions
-    const { mentionedUids, mentionedUsers } = parseMentions(text, userCache);
+    const { mentionedUids } = parseMentions(text, userCache);
 
     try {
       const cmtRef = await addDoc(collection(db,'posts',activePostId,'comments'), {
@@ -1146,27 +1143,28 @@
       });
       await updateDoc(doc(db,'posts',activePostId), { commentCount: increment(1) });
 
-      // Get post owner to notify
-      const postSnap = await getDocs(query(collection(db,'posts')));
+      // Get post owner uid directly — fetch just this post document
+      const postDoc = await getDocs(query(
+        collection(db,'posts'), where('__name__', '==', activePostId), limit(1)
+      )).catch(() => null);
       let postOwnerUid = null, postSnippet = '';
-      postSnap.forEach(d => {
+      // Fallback: iterate posts snap
+      const allSnap = await getDocs(collection(db,'posts'));
+      allSnap.forEach(d => {
         if (d.id === activePostId) { postOwnerUid = d.data().uid; postSnippet = (d.data().caption||'').slice(0,80); }
       });
 
-      // Notify post owner (comment)
       if (postOwnerUid) {
-        await createNotification({
+        await createNotification(db, {
           toUid: postOwnerUid, fromUid: currentUser.uid,
           fromName: currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
           fromPhoto: currentUser.photoURL, type: 'comment',
-          postId: activePostId, postSnippet,
-          commentId: cmtRef.id, text,
+          postId: activePostId, postSnippet, commentId: cmtRef.id, text,
         });
       }
 
-      // Notify mentioned users
       for (const uid of mentionedUids) {
-        await createNotification({
+        await createNotification(db, {
           toUid: uid, fromUid: currentUser.uid,
           fromName: currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
           fromPhoto: currentUser.photoURL, type: 'mention',
@@ -1210,17 +1208,15 @@
         text, createdAt: serverTimestamp(),
       });
 
-      // Notify comment owner (reply)
-      await createNotification({
+      await createNotification(db, {
         toUid: commentOwnerUid, fromUid: currentUser.uid,
         fromName: currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
         fromPhoto: currentUser.photoURL, type: 'reply',
         postId: mainPostId || postId, commentId, replyId: replyRef.id, text,
       });
 
-      // Notify mentioned users
       for (const uid of mentionedUids) {
-        await createNotification({
+        await createNotification(db, {
           toUid: uid, fromUid: currentUser.uid,
           fromName: currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
           fromPhoto: currentUser.photoURL, type: 'mention',
@@ -1266,24 +1262,35 @@
 
   // ══════════════════════════════════════════════
   //  SHARE — with notification
+  //  Store post data on feed cards so share has full info without
+  //  truncated onclick attributes.
   // ══════════════════════════════════════════════
-  window.sharePost = async function(postId, postOwnerUid, herbName, postSnippet) {
-    const text = herbName
-      ? `Check out this ${herbName} post on HerbID Iloilo!`
+  // postDataMap holds {uid, herbName, caption} keyed by postId
+  const postDataMap = new Map();
+
+  window.sharePost = async function(postId) {
+    const p = postDataMap.get(postId) || {};
+    const text = p.herbName
+      ? `Check out this ${p.herbName} post on HerbID Iloilo!`
       : 'Check out this post on HerbID Iloilo!';
+
     if (navigator.share) {
-      navigator.share({ title: 'HerbID Iloilo', text, url: location.href });
+      try { await navigator.share({ title: 'HerbID Iloilo', text, url: location.href }); }
+      catch(e) { /* user cancelled */ }
     } else {
-      navigator.clipboard.writeText(location.href);
-      showToast('Link copied!');
+      await navigator.clipboard.writeText(location.href);
+      showToast('Link copied to clipboard!');
     }
-    // Notify post owner about the share
-    if (currentUser) {
-      await createNotification({
-        toUid: postOwnerUid, fromUid: currentUser.uid,
-        fromName: currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
-        fromPhoto: currentUser.photoURL, type: 'share',
-        postId, postSnippet,
+
+    if (currentUser && p.uid) {
+      await createNotification(db, {
+        toUid:     p.uid,
+        fromUid:   currentUser.uid,
+        fromName:  currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
+        fromPhoto: currentUser.photoURL,
+        type:      'share',
+        postId,
+        postSnippet: (p.caption || '').slice(0, 80),
       });
     }
   };
