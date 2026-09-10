@@ -162,9 +162,23 @@ export function initMentions(inputEl, userCache, onSelect) {
 
 // ── Parse @mentions in submitted text ─────────────────────
 // Returns:
-//   html         — text with @Name wrapped in <span class="mention">
-//   mentionedUids — array of uids that were mentioned
+//   html          — text with @Name wrapped in <span class="mention">
+//   mentionedUids  — array of uids that were mentioned
 //   mentionedUsers — array of user objects that were mentioned
+//
+// Bug fix: this used to match a generic "@word(s)" pattern with a LAZY
+// quantifier ({1,30}?), which stops at the *first* space — so any
+// multi-word display name (e.g. "Juan Dela Cruz", the norm for full
+// names) only ever matched its first word ("Juan"), failed the
+// registered-user lookup, and silently produced no highlight and no
+// notification. It also required the character right after a name to
+// be whitespace/end-of-string, so "@Juan," or "@Juan!" never matched
+// either.
+//
+// Fix: match directly against the known registered display names
+// (longest name first, so a multi-word name is tried before any
+// shorter name that happens to be a prefix of it), with a boundary
+// that also accepts common punctuation right after the name.
 
 export function parseMentions(text, userCache) {
   if (!text) return { html: '', mentionedUids: [], mentionedUsers: [] };
@@ -172,26 +186,43 @@ export function parseMentions(text, userCache) {
   const mentionedUids  = [];
   const mentionedUsers = [];
 
-  // Build a lookup: lowercase displayName → user
-  const byName = new Map();
+  // Collect known users with a displayName, longest name first.
+  const knownUsers = [];
   userCache.forEach(user => {
-    if (user.displayName) {
-      byName.set(user.displayName.toLowerCase(), user);
-    }
+    if (user.displayName && user.displayName.trim()) knownUsers.push(user);
   });
+  knownUsers.sort((a, b) => b.displayName.length - a.displayName.length);
 
-  // Replace @Name with highlighted span
-  const html = escapeHTML(text).replace(/@([\w\s]{1,30}?)(?=\s|$|<)/g, (match, name) => {
-    const user = byName.get(name.trim().toLowerCase());
-    if (!user) return match;  // not a registered user — leave as-is
+  if (!knownUsers.length) {
+    return { html: escapeHTML(text), mentionedUids: [], mentionedUsers: [] };
+  }
+
+  // Lookup by lowercase name for matching back to the right user object.
+  const byLowerName = new Map();
+  knownUsers.forEach(u => byLowerName.set(u.displayName.toLowerCase(), u));
+
+  const alternation = knownUsers.map(u => escapeRegExp(u.displayName)).join('|');
+  // Boundary after the name: whitespace, end of string, an HTML tag
+  // (from escapeHTML turning "\n" into "<br>"), or common punctuation —
+  // NOT another word character, so "@Juan" never matches inside
+  // "@Juanita" when both are registered names.
+  const mentionRe = new RegExp('@(' + alternation + ')(?=\\s|$|<|[.,!?;:)\\]"\'])', 'gi');
+
+  const html = escapeHTML(text).replace(mentionRe, (match, name) => {
+    const user = byLowerName.get(name.toLowerCase());
+    if (!user) return match; // shouldn't happen, but leave text untouched if so
     if (!mentionedUids.includes(user.uid)) {
       mentionedUids.push(user.uid);
       mentionedUsers.push(user);
     }
-    return `<span class="mention" style="color:#22a06b;font-weight:600;cursor:default">@${name.trim()}</span>`;
+    return `<span class="mention" style="color:#22a06b;font-weight:600;cursor:default">@${escapeHTML(name)}</span>`;
   });
 
   return { html, mentionedUids, mentionedUsers };
+}
+
+function escapeRegExp(str) {
+  return (str || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function escapeHTML(str) {
