@@ -14,36 +14,33 @@
 import {
   collection, addDoc, query, orderBy, limit,
   onSnapshot, updateDoc, doc, where, getDocs,
-  serverTimestamp, writeBatch, getFirestore
+  serverTimestamp, writeBatch
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-import { getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+// ── db is passed in by the caller (feed.html already has it) ──
+// This avoids the getApp() timing issue where notifications.js
+// tries to call getFirestore() before firebase-config.js has run.
 
-const db = getFirestore(getApp());
-
-// ── Create a notification ─────────────────────────────────
-// Called whenever a like/comment/reply/mention/share happens.
-// Does nothing if the target user is the same as the actor
-// (you don't notify yourself).
-
-export async function createNotification({
-  toUid,          // uid of the user being notified
-  fromUid,        // uid of the user who triggered it
-  fromName,       // display name of the actor
-  fromPhoto,      // photoURL of the actor (nullable)
-  type,           // 'like' | 'comment' | 'reply' | 'mention' | 'share'
-  postId,         // always included so the UI can deep-link
-  postSnippet,    // short preview of the post caption (optional)
-  commentId,      // included for comment/reply/mention
-  replyId,        // included for reply
-  text,           // the comment/reply text that triggered this (optional)
+export async function createNotification(db, {
+  toUid,
+  fromUid,
+  fromName,
+  fromPhoto,
+  type,
+  postId,
+  postSnippet,
+  commentId,
+  replyId,
+  text,
 }) {
-  if (!toUid || toUid === fromUid) return;   // no self-notifications
-
+  if (!toUid || toUid === fromUid) return;
   try {
     await addDoc(collection(db, 'notifications', toUid, 'items'), {
-      toUid, fromUid, fromName, fromPhoto: fromPhoto || null,
-      type, postId,
+      toUid, fromUid,
+      fromName:    fromName    || 'Someone',
+      fromPhoto:   fromPhoto   || null,
+      type,
+      postId:      postId      || null,
       postSnippet: postSnippet ? postSnippet.slice(0, 80) : null,
       commentId:   commentId   || null,
       replyId:     replyId     || null,
@@ -56,12 +53,7 @@ export async function createNotification({
   }
 }
 
-// ── Real-time listener ────────────────────────────────────
-// Calls onUpdate(notifications, unreadCount) whenever new
-// notifications arrive for the given uid.
-// Returns the unsubscribe function.
-
-export function listenNotifications(uid, onUpdate) {
+export function listenNotifications(db, uid, onUpdate) {
   const q = query(
     collection(db, 'notifications', uid, 'items'),
     orderBy('createdAt', 'desc'),
@@ -72,11 +64,12 @@ export function listenNotifications(uid, onUpdate) {
     snap.forEach(d => items.push({ id: d.id, ...d.data() }));
     const unread = items.filter(n => !n.read).length;
     onUpdate(items, unread);
+  }, err => {
+    console.warn('listenNotifications error:', err.message);
   });
 }
 
-// ── Mark all as read ──────────────────────────────────────
-export async function markAllRead(uid) {
+export async function markAllRead(db, uid) {
   try {
     const q    = query(
       collection(db, 'notifications', uid, 'items'),
@@ -93,8 +86,7 @@ export async function markAllRead(uid) {
   }
 }
 
-// ── Mark single notification read ─────────────────────────
-export async function markRead(uid, notifId) {
+export async function markRead(db, uid, notifId) {
   try {
     await updateDoc(doc(db, 'notifications', uid, 'items', notifId), { read: true });
   } catch(e) {
@@ -102,37 +94,33 @@ export async function markRead(uid, notifId) {
   }
 }
 
-// ── Notification label helpers ────────────────────────────
 export function notifIcon(type) {
-  const icons = {
+  return {
     like:    'ti-heart',
     comment: 'ti-message-circle',
     reply:   'ti-message-reply',
     mention: 'ti-at',
     share:   'ti-share',
-  };
-  return icons[type] || 'ti-bell';
+  }[type] || 'ti-bell';
 }
 
 export function notifColor(type) {
-  const colors = {
+  return {
     like:    '#e53e3e',
     comment: '#22a06b',
     reply:   '#1a7a55',
     mention: '#7c3aed',
     share:   '#2563eb',
-  };
-  return colors[type] || '#22a06b';
+  }[type] || '#22a06b';
 }
 
 export function notifMessage(n) {
   const name = n.fromName || 'Someone';
-  switch(n.type) {
-    case 'like':    return `${name} liked your post`;
-    case 'comment': return `${name} commented on your post`;
-    case 'reply':   return `${name} replied to your comment`;
-    case 'mention': return `${name} mentioned you`;
-    case 'share':   return `${name} shared your post`;
-    default:        return `${name} interacted with your post`;
-  }
+  return {
+    like:    `${name} liked your post`,
+    comment: `${name} commented on your post`,
+    reply:   `${name} replied to your comment`,
+    mention: `${name} mentioned you`,
+    share:   `${name} shared your post`,
+  }[n.type] || `${name} interacted with your post`;
 }
