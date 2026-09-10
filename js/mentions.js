@@ -40,10 +40,10 @@ export function initMentions(inputEl, userCache, onSelect) {
     dropdown = document.createElement('div');
     dropdown.className = 'mention-dropdown';
     dropdown.style.cssText = `
-      position: absolute; z-index: 9999;
+      position: fixed; z-index: 9999;
       background: #fff; border: 1px solid #dde5e0; border-radius: 10px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.14); min-width: 200px;
-      max-height: 200px; overflow-y: auto;
+      max-height: min(200px, 40vh); overflow-y: auto;
       font-family: 'DM Sans', sans-serif;
     `;
 
@@ -87,11 +87,15 @@ export function initMentions(inputEl, userCache, onSelect) {
       dropdown.appendChild(item);
     });
 
-    // Position below the input
+    // Position ABOVE the input, anchored to the viewport (not the
+    // document). Comment boxes in this app sit at the bottom of the
+    // screen — on mobile that's made worse by the on-screen keyboard —
+    // so anchoring downward from rect.bottom used to place the list
+    // below the visible viewport, where it was never actually seen.
     const rect = inputEl.getBoundingClientRect();
-    dropdown.style.top   = `${rect.bottom + window.scrollY + 4}px`;
-    dropdown.style.left  = `${rect.left   + window.scrollX}px`;
-    dropdown.style.width = `${rect.width}px`;
+    dropdown.style.left   = `${rect.left}px`;
+    dropdown.style.width  = `${rect.width}px`;
+    dropdown.style.bottom = `${window.innerHeight - rect.top + 6}px`;
 
     document.body.appendChild(dropdown);
   }
