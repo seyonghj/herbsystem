@@ -354,7 +354,7 @@
     const confPct     = scan.confidencePercent || 0;
     const confLabel   = scan.confidenceLabel || (confPct >= 85 ? "High" : confPct >= 70 ? "Medium" : "Low");
     const methodLabel = scan.method === "gemini" ? "Gemini AI" : "CNN model";
-    const caption = `🌿 Identified as ${scan.identifiedHerb} — ${confPct.toFixed(0)}% ${confLabel} confidence (verified via ${methodLabel} on HerbID Iloilo).`;
+    const caption = `🌿 Identified as ${scan.identifiedHerb} —(verified via ${methodLabel} on HerbID Iloilo).`;
 
     const payload = {
       imageBase64:       scan.imageBase64 || null,
