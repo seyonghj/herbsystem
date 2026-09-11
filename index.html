@@ -66,8 +66,25 @@
     }
     .hero-stat-label { font-size: 12px; color: rgba(255,255,255,0.5); }
 
-    /* ── HERO VISUAL: 4 random cards ── */
-    .hero-visual { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    /* ── HERO VISUAL: two column layout, right col offset down ── */
+    .hero-visual {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      align-items: start;
+      /* Clip so no card can overflow the grid container */
+      overflow: hidden;
+      border-radius: 4px;
+    }
+    /* Each column is a flex stack so cards don't escape the grid */
+    .hero-col {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    /* Right column pushed down for the stagger effect — uses padding-top
+       instead of negative margins so nothing overflows the parent */
+    .hero-col:last-child { padding-top: 28px; }
 
     .herb-preview-card {
       background: rgba(255,255,255,0.06);
@@ -76,11 +93,13 @@
       transition: background 0.2s, transform 0.2s;
       text-decoration: none; display: block;
       animation: fadeInCard 0.4s ease both;
+      /* Prevent any card from growing out of its column */
+      min-width: 0;
     }
-    .herb-preview-card:nth-child(1) { margin-top: 24px; animation-delay: 0.05s; }
-    .herb-preview-card:nth-child(2) { animation-delay: 0.1s; }
-    .herb-preview-card:nth-child(3) { margin-top: -24px; animation-delay: 0.15s; }
-    .herb-preview-card:nth-child(4) { animation-delay: 0.2s; }
+    .hero-col:first-child .herb-preview-card:first-child { animation-delay: 0.05s; }
+    .hero-col:first-child .herb-preview-card:last-child  { animation-delay: 0.15s; }
+    .hero-col:last-child  .herb-preview-card:first-child { animation-delay: 0.1s; }
+    .hero-col:last-child  .herb-preview-card:last-child  { animation-delay: 0.2s; }
     .herb-preview-card:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
 
     @keyframes fadeInCard {
@@ -111,7 +130,6 @@
       background: rgba(255,255,255,0.06);
     }
 
-    .herb-emoji { font-size: 32px; margin-bottom: 8px; }
     .herb-preview-local { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 2px; }
     .herb-preview-sci { font-size: 11px; color: rgba(255,255,255,0.45); font-style: italic; margin: 2px 0 8px; }
     .herb-preview-tag {
@@ -169,7 +187,6 @@
       .hero-ctas .btn { width: 100%; justify-content: center; }
       .hero-stats { gap: 1.25rem; flex-wrap: wrap; }
       .hero-stat-num { font-size: 1.5rem; }
-
       .features { padding: 2.5rem 0; }
       .features-grid { grid-template-columns: 1fr; gap: 10px; margin-top: 1.5rem; }
       .feature-card { padding: 1.25rem; }
@@ -239,31 +256,37 @@
       </div>
     </div>
 
-    <!-- RIGHT: 4 random herb cards — loaded from Firebase -->
+    <!-- RIGHT: 4 herb cards in 2 columns — JS populates this -->
     <div class="hero-visual" id="heroVisual">
-      <div class="herb-preview-card skeleton">
-        <div class="skeleton-line" style="width:100%;height:90px;border-radius:10px;margin-bottom:10px"></div>
-        <div class="skeleton-line" style="width:72%;height:11px;margin-bottom:7px"></div>
-        <div class="skeleton-line" style="width:90%;height:9px;margin-bottom:10px"></div>
-        <div class="skeleton-line" style="width:52%;height:17px;border-radius:99px"></div>
+      <!-- Left column skeleton -->
+      <div class="hero-col">
+        <div class="herb-preview-card skeleton">
+          <div class="skeleton-line" style="width:100%;height:90px;border-radius:10px;margin-bottom:10px"></div>
+          <div class="skeleton-line" style="width:72%;height:11px;margin-bottom:7px"></div>
+          <div class="skeleton-line" style="width:90%;height:9px;margin-bottom:10px"></div>
+          <div class="skeleton-line" style="width:52%;height:17px;border-radius:99px"></div>
+        </div>
+        <div class="herb-preview-card skeleton">
+          <div class="skeleton-line" style="width:100%;height:90px;border-radius:10px;margin-bottom:10px"></div>
+          <div class="skeleton-line" style="width:78%;height:11px;margin-bottom:7px"></div>
+          <div class="skeleton-line" style="width:80%;height:9px;margin-bottom:10px"></div>
+          <div class="skeleton-line" style="width:58%;height:17px;border-radius:99px"></div>
+        </div>
       </div>
-      <div class="herb-preview-card skeleton">
-        <div class="skeleton-line" style="width:100%;height:90px;border-radius:10px;margin-bottom:10px"></div>
-        <div class="skeleton-line" style="width:60%;height:11px;margin-bottom:7px"></div>
-        <div class="skeleton-line" style="width:85%;height:9px;margin-bottom:10px"></div>
-        <div class="skeleton-line" style="width:46%;height:17px;border-radius:99px"></div>
-      </div>
-      <div class="herb-preview-card skeleton">
-        <div class="skeleton-line" style="width:100%;height:90px;border-radius:10px;margin-bottom:10px"></div>
-        <div class="skeleton-line" style="width:78%;height:11px;margin-bottom:7px"></div>
-        <div class="skeleton-line" style="width:80%;height:9px;margin-bottom:10px"></div>
-        <div class="skeleton-line" style="width:58%;height:17px;border-radius:99px"></div>
-      </div>
-      <div class="herb-preview-card skeleton">
-        <div class="skeleton-line" style="width:100%;height:90px;border-radius:10px;margin-bottom:10px"></div>
-        <div class="skeleton-line" style="width:65%;height:11px;margin-bottom:7px"></div>
-        <div class="skeleton-line" style="width:88%;height:9px;margin-bottom:10px"></div>
-        <div class="skeleton-line" style="width:50%;height:17px;border-radius:99px"></div>
+      <!-- Right column skeleton -->
+      <div class="hero-col">
+        <div class="herb-preview-card skeleton">
+          <div class="skeleton-line" style="width:100%;height:90px;border-radius:10px;margin-bottom:10px"></div>
+          <div class="skeleton-line" style="width:60%;height:11px;margin-bottom:7px"></div>
+          <div class="skeleton-line" style="width:85%;height:9px;margin-bottom:10px"></div>
+          <div class="skeleton-line" style="width:46%;height:17px;border-radius:99px"></div>
+        </div>
+        <div class="herb-preview-card skeleton">
+          <div class="skeleton-line" style="width:100%;height:90px;border-radius:10px;margin-bottom:10px"></div>
+          <div class="skeleton-line" style="width:65%;height:11px;margin-bottom:7px"></div>
+          <div class="skeleton-line" style="width:88%;height:9px;margin-bottom:10px"></div>
+          <div class="skeleton-line" style="width:50%;height:17px;border-radius:99px"></div>
+        </div>
       </div>
     </div>
 
@@ -302,36 +325,28 @@
   </div>
 </section>
 
-<!-- FOOTER -->
 <footer class="footer">
-  <p>
-    <strong>HerbID Iloilo</strong> — Medicinal Herb Identification System for Iloilo
-  </p>
+  <p><strong>HerbID Iloilo</strong> — Medicinal Herb Identification System for Iloilo</p>
 </footer>
 
 <script type="module">
-  import { db, collection, getDocs } from './js/firebase-config.js';  // ← FIRST
-  import { initNavAuth } from './js/nav-auth.js';                      // ← SECOND
+  import { db, collection, getDocs } from './js/firebase-config.js';
+  import { initNavAuth } from './js/nav-auth.js';
   initNavAuth();
+
   function pickRandom(arr, n) {
     return [...arr].sort(() => Math.random() - 0.5).slice(0, n);
   }
-
   function firstTag(h) {
     if (h.usesTags && h.usesTags.length) return h.usesTags[0];
     if (h.uses    && h.uses.length)    return h.uses[0];
     return 'Medicinal';
   }
 
-  // ── FIX: hero cards now link to herbs.html (no herb-detail needed) ──
-  function heroCardHTML(h) {
-    const emoji = h.emoji || '🌿';
+  function herbCardHTML(h) {
     const thumb = h.imageUrl
-      ? `<div class="herb-card-img">
-           <img src="${h.imageUrl}" alt="${h.localName}" loading="lazy" />
-         </div>`
-      : `<div class="herb-card-emoji">${emoji}</div>`;
-
+      ? `<div class="herb-card-img"><img src="${h.imageUrl}" alt="${h.localName}" loading="lazy"></div>`
+      : `<div class="herb-card-emoji">${h.emoji || '🌿'}</div>`;
     return `
       <a class="herb-preview-card" href="herbs.html">
         ${thumb}
@@ -341,53 +356,51 @@
       </a>`;
   }
 
+  // Fallback cards shown when Firebase is unavailable
+  const FALLBACK = [
+    { localName:'Lagundi',    scientificName:'Vitex negundo',              emoji:'🌿', tag:'Respiratory'     },
+    { localName:'Tawa-tawa',  scientificName:'Euphorbia hirta',            emoji:'🌼', tag:'Fever / Dengue'  },
+    { localName:'Lapunaya',   scientificName:'Plectranthus scutellarioides',emoji:'🍃', tag:'Anti-inflammatory'},
+    { localName:'Sinaw-sinaw',scientificName:'Peperomia pellucida',        emoji:'🌱', tag:'Pain relief'     },
+  ];
+
+  function fallbackCardHTML(h) {
+    return `
+      <a class="herb-preview-card" href="herbs.html">
+        <div class="herb-card-emoji">${h.emoji}</div>
+        <div class="herb-preview-local">${h.localName}</div>
+        <div class="herb-preview-sci">${h.scientificName}</div>
+        <span class="herb-preview-tag">${h.tag}</span>
+      </a>`;
+  }
+
+  // Build the two-column layout so cards stay inside the grid
+  function buildVisual(cards, cardFn) {
+    const col1 = cards.slice(0, 2).map(cardFn).join('');
+    const col2 = cards.slice(2, 4).map(cardFn).join('');
+    return `<div class="hero-col">${col1}</div><div class="hero-col">${col2}</div>`;
+  }
+
   async function loadPage() {
     try {
       const snap  = await getDocs(collection(db, 'herbs'));
       const herbs = [];
       snap.forEach(d => herbs.push({ id: d.id, ...d.data() }));
 
+      document.getElementById('statHerbs').textContent = herbs.length || '0';
+
       if (!herbs.length) {
-        document.getElementById('statHerbs').textContent = '0';
-        document.getElementById('heroVisual').innerHTML = '';
+        document.getElementById('heroVisual').innerHTML = buildVisual(FALLBACK, fallbackCardHTML);
         return;
       }
 
-      // Update hero stat
-      document.getElementById('statHerbs').textContent = herbs.length;
-
-      // Hero visual: 4 random herbs
-      const heroFour = pickRandom(herbs, Math.min(4, herbs.length));
-      document.getElementById('heroVisual').innerHTML = heroFour.map(heroCardHTML).join('');
+      const four = pickRandom(herbs, Math.min(4, herbs.length));
+      document.getElementById('heroVisual').innerHTML = buildVisual(four, herbCardHTML);
 
     } catch(e) {
       console.error('Firebase error:', e);
-      document.getElementById('statHerbs').textContent = '18';
-      document.getElementById('heroVisual').innerHTML = `
-        <a class="herb-preview-card" href="herbs.html">
-          <div class="herb-card-emoji">🌿</div>
-          <div class="herb-preview-local">Lagundi</div>
-          <div class="herb-preview-sci">Vitex negundo</div>
-          <span class="herb-preview-tag">Respiratory</span>
-        </a>
-        <a class="herb-preview-card" href="herbs.html">
-          <div class="herb-card-emoji">🌼</div>
-          <div class="herb-preview-local">Tawa-tawa</div>
-          <div class="herb-preview-sci">Euphorbia hirta</div>
-          <span class="herb-preview-tag">Fever / Dengue</span>
-        </a>
-        <a class="herb-preview-card" href="herbs.html">
-          <div class="herb-card-emoji">🍃</div>
-          <div class="herb-preview-local">Lapunaya</div>
-          <div class="herb-preview-sci">Coleus scutellarioides</div>
-          <span class="herb-preview-tag">Wound healing</span>
-        </a>
-        <a class="herb-preview-card" href="herbs.html">
-          <div class="herb-card-emoji">🌱</div>
-          <div class="herb-preview-local">Sinaw-sinaw</div>
-          <div class="herb-preview-sci">Peperomia pellucida</div>
-          <span class="herb-preview-tag">Pain relief</span>
-        </a>`;
+      document.getElementById('statHerbs').textContent = '21';
+      document.getElementById('heroVisual').innerHTML = buildVisual(FALLBACK, fallbackCardHTML);
     }
   }
 
