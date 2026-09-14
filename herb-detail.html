@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>Herb Detail — HerbID Iloilo</title>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css" />
@@ -51,6 +52,37 @@
     }
     .info-section-title i { font-size: 15px; color: var(--green-main); }
     .info-val { font-size: 14px; color: var(--text-primary); line-height: 1.7; }
+    /* Preparation method: preserve the exact line breaks/blank lines entered by admin */
+    #preparation { white-space: pre-wrap; }
+    .preparation-admin-panel {
+      display: none; margin-top: 12px; padding-top: 12px;
+      border-top: 1px dashed var(--border);
+    }
+    .preparation-admin-panel.visible { display: block; }
+    .preparation-admin-label {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--green-main);
+      display: flex; align-items: center; gap: 5px; margin-bottom: 8px;
+    }
+    .preparation-editor {
+      width: 100%; min-height: 180px; box-sizing: border-box; resize: vertical;
+      border: 1.5px solid var(--border); border-radius: var(--radius-md);
+      padding: 10px 12px; font-size: 14px; line-height: 1.7;
+      font-family: 'DM Sans', sans-serif; color: var(--text-primary);
+      background: var(--white);
+    }
+    .preparation-editor:focus {
+      outline: none; border-color: var(--green-main);
+      box-shadow: 0 0 0 3px rgba(34,160,107,0.1);
+    }
+    .preparation-save-btn {
+      margin-top: 8px; padding: 9px 16px; background: var(--green-main);
+      color: #fff; border: none; border-radius: var(--radius-md);
+      font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
+    }
+    .preparation-save-btn:hover:not(:disabled) { background: var(--green-mid); }
+    .preparation-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .info-tags { display: flex; flex-wrap: wrap; gap: 6px; }
     .info-tags span { font-size: 12px; padding: 4px 12px; border-radius: 99px; }
 
@@ -101,6 +133,81 @@
     }
     .lightbox.open { display: flex; }
     .lightbox img { max-width: 100%; max-height: 90vh; border-radius: var(--radius-md); }
+
+    /* ── VIDEO TUTORIAL SECTION ───────────────────────────── */
+    .video-list { display: flex; flex-direction: column; gap: 14px; }
+
+    .video-card {
+      border: 1px solid var(--border); border-radius: var(--radius-md);
+      overflow: hidden; background: var(--white);
+    }
+    .video-card-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; background: var(--green-pale);
+      border-bottom: 1px solid var(--border);
+    }
+    .video-card-header i { color: var(--green-main); font-size: 17px; flex-shrink: 0; }
+    .video-card-title { font-size: 13px; font-weight: 600; color: var(--green-dark); flex: 1; min-width: 0; }
+    .video-delete-btn {
+      background: none; border: none; cursor: pointer;
+      color: #c0c8d0; font-size: 16px; padding: 2px 4px;
+      border-radius: 6px; transition: color 0.15s, background 0.15s;
+      display: none; /* shown only to admins */
+    }
+    .video-delete-btn:hover { color: #e53e3e; background: #fff5f5; }
+    .video-player { width: 100%; display: block; max-height: 320px; background: #000; }
+
+    .video-empty {
+      font-size: 13px; color: var(--text-muted);
+      display: flex; align-items: center; gap: 8px; padding: 4px 0;
+    }
+
+    /* Admin upload area */
+    .video-admin-panel {
+      display: none; /* shown only to admins */
+      margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 12px;
+    }
+    .video-admin-panel.visible { display: block; }
+    .video-upload-form { display: flex; flex-direction: column; gap: 10px; }
+    .video-input {
+      width: 100%; border: 1.5px solid var(--border); border-radius: var(--radius-md);
+      padding: 9px 12px; font-size: 13px; font-family: 'DM Sans', sans-serif;
+      color: var(--text-primary); box-sizing: border-box;
+      transition: border-color 0.15s;
+    }
+    .video-input:focus { outline: none; border-color: var(--green-main); box-shadow: 0 0 0 3px rgba(34,160,107,0.1); }
+    .video-file-label {
+      display: flex; align-items: center; gap: 8px;
+      border: 2px dashed var(--border); border-radius: var(--radius-md);
+      padding: 14px; cursor: pointer; background: var(--green-pale);
+      font-size: 13px; color: var(--text-muted); transition: border-color 0.15s;
+    }
+    .video-file-label:hover { border-color: var(--green-main); color: var(--green-dark); }
+    .video-file-label i { font-size: 20px; color: var(--green-main); }
+    .video-file-label input { display: none; }
+    .video-file-selected { font-size: 12px; color: var(--green-main); font-weight: 500; }
+    .video-upload-progress {
+      display: none; height: 6px; border-radius: 3px;
+      background: var(--green-pale); overflow: hidden;
+    }
+    .video-upload-progress.show { display: block; }
+    .video-upload-progress-bar {
+      height: 100%; background: var(--green-main);
+      border-radius: 3px; width: 0%; transition: width 0.3s;
+    }
+    .video-upload-btn {
+      padding: 10px 18px; background: var(--green-main); color: #fff;
+      border: none; border-radius: var(--radius-md); font-size: 13px;
+      font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer;
+      display: flex; align-items: center; gap: 7px; transition: background 0.15s;
+    }
+    .video-upload-btn:hover:not(:disabled) { background: var(--green-mid); }
+    .video-upload-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .video-admin-label {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--green-main);
+      display: flex; align-items: center; gap: 5px; margin-bottom: 8px;
+    }
 
     @media (max-width: 768px) {
       .detail-layout { grid-template-columns: 1fr; gap: 1.5rem; }
@@ -183,6 +290,91 @@
       <div class="info-section">
         <div class="info-section-title"><i class="ti ti-kettle"></i> Preparation method</div>
         <div class="info-val" id="preparation"></div>
+
+        <!-- Admin-only preparation method editor -->
+        <div class="preparation-admin-panel" id="preparationAdminPanel">
+          <div class="preparation-admin-label">
+            <i class="ti ti-shield" style="font-size:12px"></i> Admin — Edit preparation method
+          </div>
+          <textarea
+            class="preparation-editor"
+            id="preparationEditor"
+            placeholder="Enter the preparation method. Line breaks and blank lines will be preserved."
+          ></textarea>
+          <button class="preparation-save-btn" id="preparationSaveBtn" onclick="savePreparation()">
+            <i class="ti ti-device-floppy"></i> Save Preparation Method
+          </button>
+        </div>
+      </div>
+
+      <!-- ── VIDEO TUTORIALS — placed right after preparation ── -->
+      <div class="info-section" id="videoSection">
+        <div class="info-section-title">
+          <i class="ti ti-video"></i> Preparation video tutorials
+        </div>
+
+        <!-- Video list — populated by loadVideos() -->
+        <div id="videoList" class="video-list">
+          <div class="gallery-status">
+            <div class="spinner" style="width:16px;height:16px"></div> Loading videos…
+          </div>
+        </div>
+
+        <!-- Admin-only upload panel -->
+        <div class="video-admin-panel" id="videoAdminPanel">
+          <div class="video-admin-label">
+            <i class="ti ti-shield" style="font-size:12px"></i> Admin — Add video tutorial
+          </div>
+          <div class="video-upload-form">
+            <input
+              class="video-input"
+              type="text"
+              id="videoTitle"
+              placeholder="Video title (e.g. How to prepare Sambong tea)"
+              maxlength="100"
+            />
+
+            <!-- Option A: YouTube URL (recommended — plays instantly) -->
+            <div style="font-size:11px;font-weight:600;color:#8c96a0;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;display:flex;align-items:center;gap:5px">
+              <i class="ti ti-brand-youtube" style="color:#e53e3e;font-size:14px"></i>
+              Option A — YouTube URL <span style="font-weight:400;text-transform:none;letter-spacing:0">(recommended — plays instantly)</span>
+            </div>
+            <input
+              class="video-input"
+              type="url"
+              id="videoYoutubeUrl"
+              placeholder="https://www.youtube.com/watch?v=... or youtu.be/..."
+              oninput="checkUploadReady()"
+            />
+            <div style="font-size:11px;color:#8c96a0;margin-top:-4px;margin-bottom:4px">
+              Upload to YouTube as <strong>Unlisted</strong> first, then paste the link here.
+            </div>
+
+            <!-- Divider -->
+            <div style="display:flex;align-items:center;gap:8px;margin:4px 0">
+              <div style="flex:1;height:1px;background:var(--border)"></div>
+              <span style="font-size:11px;color:#8c96a0;font-weight:600">OR</span>
+              <div style="flex:1;height:1px;background:var(--border)"></div>
+            </div>
+
+            <!-- Option B: Upload file to Firebase Storage -->
+            <div style="font-size:11px;font-weight:600;color:#8c96a0;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;display:flex;align-items:center;gap:5px">
+              <i class="ti ti-upload" style="font-size:13px"></i>
+              Option B — Upload video file <span style="font-weight:400;text-transform:none;letter-spacing:0">(MP4, MOV, WEBM — max 100 MB)</span>
+            </div>
+            <label class="video-file-label">
+              <i class="ti ti-video-plus"></i>
+              <span id="videoFileLabel">Choose a video file</span>
+              <input type="file" id="videoFileInput" accept="video/mp4,video/quicktime,video/webm" onchange="onVideoFileSelect(event)" />
+            </label>
+            <div class="video-upload-progress" id="videoUploadProgress">
+              <div class="video-upload-progress-bar" id="videoUploadProgressBar"></div>
+            </div>
+            <button class="video-upload-btn" id="videoUploadBtn" onclick="uploadVideo()" disabled>
+              <i class="ti ti-upload"></i> Save Video
+            </button>
+          </div>
+        </div>
       </div>
 
       <div class="info-section">
@@ -199,7 +391,7 @@
         </table>
       </div>
 
-      <!-- Community-verified photo gallery: scanned photos with high CNN+Gemini confidence -->
+      <!-- Community-verified photo gallery -->
       <div class="info-section" id="gallerySection">
         <div class="info-section-title"><i class="ti ti-photo"></i> Community-verified photos</div>
         <p class="gallery-note">Admin-approved community scans of this herb</p>
@@ -234,24 +426,56 @@
   </div>
 </div>
 
-<!-- Lightbox for full-size gallery photos -->
+<!-- Lightbox -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <img id="lightboxImg" src="" alt="Scanned herb photo" />
 </div>
+
+<div id="toastWrap" style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:8px"></div>
 
 <footer class="footer">
   <p><strong>HerbID Iloilo</strong> — BSIT Capstone Project · NISU Lemery Campus · 2024–2025</p>
 </footer>
 
 <script type="module">
-  import { db, doc, getDoc, collection, getDocs, query, where } from './js/firebase-config.js';
-  import { initNavAuth } from './js/nav-auth.js';
-  initNavAuth();
-  const params = new URLSearchParams(location.search);
-  const id = params.get('id');
+  import {
+    db, doc, getDoc, collection, getDocs,
+    query, where
+  } from './js/firebase-config.js';
 
-  // Photos here come only from the "public_gallery" collection — populated
-  // solely by admin approval, see loadGallery() below.
+  import {
+    addDoc, deleteDoc, updateDoc, serverTimestamp
+  } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+  import {
+    getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject
+  } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
+
+  import { getAuth } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  import { initNavAuth } from './js/nav-auth.js';
+
+  initNavAuth();
+
+  // ── Admin emails — same list as firestore.rules ──────────
+  const ADMIN_EMAILS = [
+   "marklouiepanares7@gmail.com",
+        "bilbaobenjamin11@gmail.com",
+        "jermilynazuela073@gmail.com",
+        "kurtmatthewjunealborote@gmail.com",
+        "maeloufaithluminate@gmail.com",
+        "agolitorenerose5@gmail.com",
+        "agolitorenerose07@gmail.com"
+  ];
+
+  const params = new URLSearchParams(location.search);
+  const herbId = params.get('id');
+
+  let currentHerbName = '';
+  let currentPreparation = '';
+  let selectedVideoFile = null;
+  let isAdmin = false;
+
+  const storage = getStorage();
 
   const tagClass = {
     fever:'tag-fever', wound:'tag-wound', pain:'tag-pain',
@@ -259,27 +483,52 @@
     skin:'tag-skin', urinary:'tag-urinary', 'anti-inflammatory':'tag-anti-inflammatory'
   };
 
+  // ── Check if current user is admin ───────────────────────
+  getAuth().onAuthStateChanged(user => {
+    isAdmin = !!(user && ADMIN_EMAILS.includes(user.email));
+    if (isAdmin) {
+      // Show admin preparation editor
+      document.getElementById('preparationAdminPanel').classList.add('visible');
+      document.getElementById('preparationEditor').value = currentPreparation;
+
+      // Show admin upload panel
+      document.getElementById('videoAdminPanel').classList.add('visible');
+      // Show delete buttons on all existing video cards
+      document.querySelectorAll('.video-delete-btn').forEach(btn => {
+        btn.style.display = 'flex';
+      });
+    }
+  });
+
+  // ── Load herb data ────────────────────────────────────────
   async function load() {
-    if (!id) { document.getElementById('loadingState').innerHTML = '<p style="color:var(--text-muted)">No herb ID provided.</p>'; return; }
+    if (!herbId) {
+      document.getElementById('loadingState').innerHTML = '<p style="color:var(--text-muted)">No herb ID provided.</p>';
+      return;
+    }
     try {
-      const snap = await getDoc(doc(db, 'herbs', id));
+      const snap = await getDoc(doc(db, 'herbs', herbId));
       if (!snap.exists()) {
         document.getElementById('loadingState').innerHTML = '<p style="color:var(--text-muted)">Herb not found.</p>';
         return;
       }
       const h = snap.data();
+      currentHerbName = h.localName;
+
       document.title = `${h.localName} — HerbID Iloilo`;
-      document.getElementById('bc-name').textContent = h.localName;
-      document.getElementById('herbNum').textContent = h.no || '';
-      document.getElementById('titleLocal').textContent = h.localName;
+      document.getElementById('bc-name').textContent      = h.localName;
+      document.getElementById('herbNum').textContent      = h.no || '';
+      document.getElementById('titleLocal').textContent   = h.localName;
       document.getElementById('titleEnglish').textContent = h.englishName || '';
-      document.getElementById('titleSci').textContent = h.scientificName;
-      document.getElementById('sci2').textContent = h.scientificName;
-      document.getElementById('family').textContent = h.family || '—';
-      document.getElementById('parts').textContent = h.parts || '—';
-      document.getElementById('preparation').textContent = h.preparation || '—';
-      document.getElementById('location').textContent = h.location || '—';
-      document.getElementById('mapLink').href = `map.html?herb=${id}`;
+      document.getElementById('titleSci').textContent     = h.scientificName;
+      document.getElementById('sci2').textContent         = h.scientificName;
+      document.getElementById('family').textContent       = h.family || '—';
+      document.getElementById('parts').textContent        = h.parts || '—';
+      currentPreparation = h.preparation || '';
+      document.getElementById('preparation').textContent  = currentPreparation || '—';
+      document.getElementById('preparationEditor').value  = currentPreparation;
+      document.getElementById('location').textContent     = h.location || '—';
+      document.getElementById('mapLink').href             = `map.html?herb=${herbId}`;
 
       const photoBox = document.getElementById('photoBox');
       if (h.imageUrl) {
@@ -289,94 +538,440 @@
       }
 
       document.getElementById('usesTags').innerHTML =
-        (h.usesTags || []).map(t => `<span class="tag ${tagClass[t] || 'tag-anti-inflammatory'}">${t}</span>`).join('');
+        (h.usesTags || [])
+          .map(t => `<span class="tag ${tagClass[t] || 'tag-anti-inflammatory'}">${t}</span>`)
+          .join('');
 
       document.getElementById('loadingState').style.display = 'none';
       document.getElementById('detailLayout').style.display = 'grid';
 
       loadGallery(h.localName);
+      loadVideos(herbId);
     } catch(e) {
-      document.getElementById('loadingState').innerHTML = '<p style="color:var(--text-muted)">Error loading herb data.</p>';
+      document.getElementById('loadingState').innerHTML =
+        '<p style="color:var(--text-muted)">Error loading herb data.</p>';
     }
   }
 
-  // Photos come from a separate "public_gallery" collection — a stripped-down
-  // copy written only when an admin approves a scan (see profile.html's
-  // Admin → Gallery Review panel). This collection never contains uid/email,
-  // only what's meant to be public: the photo, herb name, confidence, and a
-  // name-safe attribution string (e.g. "Juan D." or "Juan"), so herb-detail
-  // never needs read access to the private "scans" collection.
-  async function loadGallery(localName) {
-    const statusEl  = document.getElementById('galleryStatus');
-    const galleryEl = document.getElementById('photoGallery');
-
-    if (!localName) {
-      statusEl.textContent = 'No photos available.';
+  // ── Save preparation method (admin only) ───────────────────
+  window.savePreparation = async function() {
+    if (!isAdmin) {
+      showToast('Admin access required.', 'warn');
       return;
     }
 
-    try {
-      const q = query(collection(db, 'public_gallery'), where('herbName', '==', localName));
-      const snap = await getDocs(q);
+    const editor = document.getElementById('preparationEditor');
+    const btn = document.getElementById('preparationSaveBtn');
+    const preparation = editor.value;
 
-      const photos = [];
-      snap.forEach(d => {
-        const p = d.data();
-        if (p.imageBase64) photos.push(p);
-      });
+    if (!herbId) return;
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ti ti-loader"></i> Saving…';
+
+    try {
+      // Save the text exactly as entered, including line breaks and blank lines.
+      await updateDoc(doc(db, 'herbs', herbId), { preparation });
+
+      currentPreparation = preparation;
+      document.getElementById('preparation').textContent = preparation || '—';
+      showToast('✅ Preparation method updated!');
+    } catch(e) {
+      console.error('Preparation update failed:', e);
+      showToast('Could not save preparation method: ' + e.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ti ti-device-floppy"></i> Save Preparation Method';
+    }
+  };
+
+  // ── Load video tutorials ──────────────────────────────────
+  async function loadVideos(herbId) {
+    const listEl = document.getElementById('videoList');
+    try {
+      const q    = query(
+        collection(db, 'herb_videos'),
+        where('herbId', '==', herbId)
+      );
+      const snap = await getDocs(q);
+      const videos = [];
+      snap.forEach(d => videos.push({ id: d.id, ...d.data() }));
 
       // Newest first
+      videos.sort((a, b) => {
+        const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+        const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+        return tb - ta;
+      });
+
+      if (!videos.length) {
+        listEl.innerHTML = `
+          <div class="video-empty">
+            <i class="ti ti-video-off" style="font-size:17px;color:var(--text-light)"></i>
+            No video tutorials yet for this herb.
+          </div>`;
+        return;
+      }
+
+      listEl.innerHTML = '';
+      videos.forEach(v => {
+        const card = document.createElement('div');
+        card.className = 'video-card';
+        card.id = `vcard-${v.id}`;
+
+        // If admin saved a YouTube URL, embed it — loads instantly via YouTube CDN.
+        // Otherwise fall back to the Firebase Storage video file.
+        const playerHTML = v.youtubeEmbedUrl
+          ? `<iframe
+               class="video-player"
+               src="${youtubeEmbedForCurrentPage(v.youtubeEmbedUrl)}"
+               style="aspect-ratio:16/9;width:100%;border:none;display:block"
+               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+               referrerpolicy="strict-origin-when-cross-origin"
+               allowfullscreen
+               loading="lazy">
+             </iframe>`
+          : `<video
+               class="video-player"
+               controls
+               preload="auto"
+               playsinline
+               src="${v.videoUrl || ''}">
+               Your browser does not support video playback.
+             </video>`;
+
+        card.innerHTML = `
+          <div class="video-card-header">
+            <i class="ti ti-player-play"></i>
+            <span class="video-card-title">${escapeHTML(v.title || 'Untitled video')}</span>
+            <button
+              class="video-delete-btn"
+              title="Delete video"
+              style="display:${isAdmin ? 'flex' : 'none'};align-items:center"
+              onclick="deleteVideo('${v.id}', '${v.storagePath || ''}')">
+              <i class="ti ti-trash"></i>
+            </button>
+          </div>
+          ${playerHTML}`;
+        listEl.appendChild(card);
+      });
+    } catch(e) {
+      listEl.innerHTML = `
+        <div class="video-empty">
+          <i class="ti ti-alert-triangle" style="color:#e53e3e;font-size:17px"></i>
+          Could not load videos.
+        </div>`;
+      console.warn('loadVideos failed:', e.message);
+    }
+  }
+
+  // ── File select handler ───────────────────────────────────
+  window.onVideoFileSelect = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // 100 MB limit
+    if (file.size > 100 * 1024 * 1024) {
+      showToast('Video file must be under 100 MB.', 'warn');
+      e.target.value = '';
+      return;
+    }
+
+    selectedVideoFile = file;
+    const label = document.getElementById('videoFileLabel');
+    label.textContent = `✓ ${file.name} (${(file.size / (1024 * 1024)).toFixed(1)} MB)`;
+    label.style.color = 'var(--green-dark)';
+    label.style.fontWeight = '500';
+
+    checkUploadReady();
+  };
+
+  window.checkUploadReady = function() {
+    const title      = document.getElementById('videoTitle').value.trim();
+    const youtubeUrl = document.getElementById('videoYoutubeUrl')?.value.trim() || '';
+    const hasSource  = !!selectedVideoFile || !!youtubeUrl;
+    document.getElementById('videoUploadBtn').disabled = !(title && hasSource);
+  };
+  document.getElementById('videoTitle').addEventListener('input', window.checkUploadReady);
+
+  // ── Convert any YouTube URL to embed URL ─────────────────
+  function youtubeEmbedForCurrentPage(url) {
+    try {
+      const u = new URL(url);
+      if (!u.hostname.includes('youtube.com') && !u.hostname.includes('youtube-nocookie.com')) return url;
+      // YouTube Error 153 can occur when the embed request has no usable referrer.
+      // Supplying the current HTTPS site origin also gives the player its host context.
+      u.searchParams.set('origin', window.location.origin);
+      return u.toString();
+    } catch(e) { return url; }
+  }
+
+  function toYouTubeEmbed(url) {
+    try {
+      const u = new URL(url);
+      let videoId = '';
+      if (u.hostname.includes('youtu.be')) {
+        videoId = u.pathname.slice(1);
+      } else if (u.hostname.includes('youtube.com')) {
+        videoId = u.searchParams.get('v') || '';
+        // Handle /embed/ URLs too
+        if (!videoId && u.pathname.includes('/embed/')) {
+          videoId = u.pathname.split('/embed/')[1];
+        }
+      }
+      if (!videoId) return null;
+      videoId = videoId.split(/[?&#]/)[0].trim();
+      if (!/^[A-Za-z0-9_-]{11}$/.test(videoId)) return null;
+      return `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&origin=${encodeURIComponent(window.location.origin)}`;
+    } catch(e) { return null; }
+  }
+
+  // ── Save video — YouTube URL or Firebase Storage upload ──
+  window.uploadVideo = async function() {
+    if (!isAdmin) { showToast('Admin access required.', 'warn'); return; }
+    const title      = document.getElementById('videoTitle').value.trim();
+    const youtubeRaw = document.getElementById('videoYoutubeUrl')?.value.trim() || '';
+    if (!title || (!youtubeRaw && !selectedVideoFile) || !herbId) return;
+
+    // ── OPTION A: YouTube URL — just save to Firestore, no upload needed ──
+    if (youtubeRaw && !selectedVideoFile) {
+      const embedUrl = toYouTubeEmbed(youtubeRaw);
+      if (!embedUrl) { showToast('Invalid YouTube URL. Use youtube.com/watch?v=... or youtu.be/...', 'warn'); return; }
+
+      const btn = document.getElementById('videoUploadBtn');
+      btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i> Saving…';
+
+      try {
+        const docRef = await addDoc(collection(db, 'herb_videos'), {
+          herbId, herbName: currentHerbName, title,
+          youtubeEmbedUrl: embedUrl,
+          videoUrl: null, storagePath: null,
+          uploadedBy: getAuth().currentUser?.email || 'admin',
+          createdAt: serverTimestamp(),
+        });
+
+        const listEl = document.getElementById('videoList');
+        const emptyMsg = listEl.querySelector('.video-empty');
+        if (emptyMsg) emptyMsg.remove();
+
+        const card = document.createElement('div');
+        card.className = 'video-card';
+        card.id = `vcard-${docRef.id}`;
+        card.innerHTML = `
+          <div class="video-card-header">
+            <i class="ti ti-player-play"></i>
+            <span class="video-card-title">${escapeHTML(title)}</span>
+            <button class="video-delete-btn" title="Delete video"
+              style="display:flex;align-items:center"
+              onclick="deleteVideo('${docRef.id}', '')">
+              <i class="ti ti-trash"></i>
+            </button>
+          </div>
+          <iframe
+            class="video-player"
+            src="${youtubeEmbedForCurrentPage(embedUrl)}"
+            style="aspect-ratio:16/9;width:100%;border:none;display:block"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allowfullscreen loading="lazy">
+          </iframe>`;
+        listEl.prepend(card);
+
+        document.getElementById('videoTitle').value = '';
+        document.getElementById('videoYoutubeUrl').value = '';
+        showToast('✅ YouTube video added!');
+      } catch(e) { showToast('Could not save: ' + e.message, 'error'); }
+
+      btn.disabled = false; btn.innerHTML = '<i class="ti ti-upload"></i> Save Video';
+      checkUploadReady();
+      return;
+    }
+
+    const btn      = document.getElementById('videoUploadBtn');
+    const progress = document.getElementById('videoUploadProgress');
+    const bar      = document.getElementById('videoUploadProgressBar');
+
+    btn.disabled  = true;
+    btn.innerHTML = '<i class="ti ti-loader"></i> Uploading…';
+    progress.classList.add('show');
+    bar.style.width = '0%';
+
+    try {
+      // Storage path: herb_videos/{herbId}/{timestamp}_{filename}
+      const timestamp   = Date.now();
+      const safeFile    = selectedVideoFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const storagePath = `herb_videos/${herbId}/${timestamp}_${safeFile}`;
+      const storageRef  = ref(storage, storagePath);
+
+      // Upload with progress tracking
+      // Set cache headers so Firebase CDN caches the video — repeat views load much faster
+      const uploadMetadata = {
+        contentType:  selectedVideoFile.type || 'video/mp4',
+        cacheControl: 'public, max-age=604800',  // cache for 7 days
+      };
+      const uploadTask  = uploadBytesResumable(storageRef, selectedVideoFile, uploadMetadata);
+
+      await new Promise((resolve, reject) => {
+        uploadTask.on('state_changed',
+          snapshot => {
+            const pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+            bar.style.width = `${pct}%`;
+            btn.innerHTML = `<i class="ti ti-loader"></i> Uploading… ${pct}%`;
+          },
+          reject,
+          resolve
+        );
+      });
+
+      // Get public download URL
+      const videoUrl = await getDownloadURL(storageRef);
+
+      // Save metadata to Firestore
+      const docRef = await addDoc(collection(db, 'herb_videos'), {
+        herbId,
+        herbName:    currentHerbName,
+        title,
+        videoUrl,
+        storagePath,
+        uploadedBy:  getAuth().currentUser?.email || 'admin',
+        createdAt:   serverTimestamp(),
+      });
+
+      // Add new card to the list without reloading
+      const listEl = document.getElementById('videoList');
+      // Remove "no videos" message if present
+      const emptyMsg = listEl.querySelector('.video-empty');
+      if (emptyMsg) emptyMsg.remove();
+
+      const card = document.createElement('div');
+      card.className = 'video-card';
+      card.id = `vcard-${docRef.id}`;
+      card.innerHTML = `
+        <div class="video-card-header">
+          <i class="ti ti-player-play"></i>
+          <span class="video-card-title">${escapeHTML(title)}</span>
+          <button
+            class="video-delete-btn"
+            title="Delete video"
+            style="display:flex;align-items:center"
+            onclick="deleteVideo('${docRef.id}', '${storagePath}')">
+            <i class="ti ti-trash"></i>
+          </button>
+        </div>
+        <video class="video-player" controls preload="auto" playsinline src="${videoUrl}">
+          Your browser does not support video playback.
+        </video>`;
+      listEl.prepend(card);
+
+      // Reset form
+      document.getElementById('videoTitle').value = '';
+      document.getElementById('videoFileInput').value = '';
+      document.getElementById('videoFileLabel').textContent = 'Choose a video file (MP4, MOV, WEBM — max 100 MB)';
+      document.getElementById('videoFileLabel').style.color = '';
+      document.getElementById('videoFileLabel').style.fontWeight = '';
+      selectedVideoFile = null;
+      progress.classList.remove('show');
+      bar.style.width = '0%';
+
+      showToast('✅ Video uploaded successfully!');
+    } catch(e) {
+      console.error('Video upload failed:', e);
+      showToast('Upload failed: ' + e.message, 'error');
+      progress.classList.remove('show');
+    }
+
+    btn.disabled  = false;
+    btn.innerHTML = '<i class="ti ti-upload"></i> Upload Video';
+    checkUploadReady();
+  };
+
+  // ── Delete video (admin only) ─────────────────────────────
+  window.deleteVideo = async function(videoDocId, storagePath) {
+    if (!isAdmin) return;
+    if (!confirm('Delete this video tutorial? This cannot be undone.')) return;
+
+    try {
+      // Delete from Firestore
+      await deleteDoc(doc(db, 'herb_videos', videoDocId));
+
+      // Delete from Storage if path exists
+      if (storagePath) {
+        try {
+          await deleteObject(ref(storage, storagePath));
+        } catch(storageErr) {
+          // If already deleted from storage, continue
+          console.warn('Storage delete:', storageErr.message);
+        }
+      }
+
+      // Remove card from DOM
+      document.getElementById(`vcard-${videoDocId}`)?.remove();
+
+      // Show empty message if no more videos
+      const listEl = document.getElementById('videoList');
+      if (!listEl.querySelector('.video-card')) {
+        listEl.innerHTML = `
+          <div class="video-empty">
+            <i class="ti ti-video-off" style="font-size:17px;color:var(--text-light)"></i>
+            No video tutorials yet for this herb.
+          </div>`;
+      }
+
+      showToast('Video deleted.');
+    } catch(e) {
+      showToast('Could not delete video: ' + e.message, 'error');
+    }
+  };
+
+  // ── Gallery ───────────────────────────────────────────────
+  async function loadGallery(localName) {
+    const statusEl  = document.getElementById('galleryStatus');
+    const galleryEl = document.getElementById('photoGallery');
+    if (!localName) { statusEl.textContent = 'No photos available.'; return; }
+    try {
+      const q    = query(collection(db, 'public_gallery'), where('herbName', '==', localName));
+      const snap = await getDocs(q);
+      const photos = [];
+      snap.forEach(d => { const p = d.data(); if (p.imageBase64) photos.push(p); });
       photos.sort((a, b) => {
         const ta = a.approvedAt?.toMillis ? a.approvedAt.toMillis() : 0;
         const tb = b.approvedAt?.toMillis ? b.approvedAt.toMillis() : 0;
         return tb - ta;
       });
-
       if (!photos.length) {
         statusEl.innerHTML = '<i class="ti ti-photo-off" style="font-size:16px;color:var(--text-light)"></i> No approved photos yet for this herb.';
         return;
       }
-
       statusEl.style.display = 'none';
       galleryEl.style.display = 'grid';
       galleryEl.innerHTML = '';
-
       photos.forEach(p => {
         const item = document.createElement('div');
         item.className = 'gallery-item';
-
         const btn = document.createElement('button');
         btn.className = 'gallery-thumb';
         btn.type = 'button';
-
         const img = document.createElement('img');
-        img.src = p.imageBase64;
-        img.alt = `Community scan of ${localName}`;
-        img.loading = 'lazy';
+        img.src = p.imageBase64; img.alt = `Community scan of ${localName}`; img.loading = 'lazy';
         btn.appendChild(img);
-
         if (p.confidencePercent) {
           const badge = document.createElement('span');
           badge.className = 'gallery-thumb-badge';
           badge.textContent = `${Math.round(p.confidencePercent)}%`;
           btn.appendChild(badge);
         }
-
         btn.addEventListener('click', () => openLightbox(p.imageBase64));
         item.appendChild(btn);
-
         if (p.scannerName) {
           const caption = document.createElement('span');
           caption.className = 'gallery-caption';
           caption.textContent = `Scanned by ${p.scannerName}`;
           item.appendChild(caption);
         }
-
         galleryEl.appendChild(item);
       });
     } catch(e) {
       statusEl.innerHTML = '<i class="ti ti-alert-triangle" style="font-size:16px;color:#e53e3e"></i> Could not load photos.';
-      console.warn('Gallery load failed:', e.message);
     }
   }
 
@@ -387,6 +982,23 @@
   window.closeLightbox = function() {
     document.getElementById('lightbox').classList.remove('open');
   };
+
+  // ── Helpers ───────────────────────────────────────────────
+  function escapeHTML(str) {
+    return (str || '')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+  }
+
+  function showToast(msg, type = 'ok') {
+    const wrap = document.getElementById('toastWrap');
+    const colors = { ok: '#0a4a35', error: '#7f1d1d', warn: '#92400e' };
+    const t = document.createElement('div');
+    t.style.cssText = `background:${colors[type]||colors.ok};color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;box-shadow:0 4px 20px rgba(0,0,0,0.2)`;
+    t.textContent = msg;
+    wrap.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
 
   load();
 </script>
