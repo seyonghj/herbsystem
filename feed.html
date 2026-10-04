@@ -41,24 +41,22 @@
     .fab-new-post i { font-size: 20px; }
 
     /* NOTIFICATION BELL */
-    .notif-bell-wrap {
-      position: fixed; bottom: 5.5rem; left: 1.5rem; z-index: 200;
-    }
+    .notif-bell-wrap { position: fixed; bottom: 5.5rem; left: 1.5rem; z-index: 200; }
     .notif-bell {
       width: 52px; height: 52px; border-radius: 50%;
       background: #fff; border: 1.5px solid var(--border);
       box-shadow: 0 4px 16px rgba(0,0,0,0.1);
       display: flex; align-items: center; justify-content: center;
       font-size: 22px; color: var(--green-dark); cursor: pointer;
-      transition: background 0.15s;
+      transition: background 0.15s; position: relative;
     }
     .notif-bell:hover { background: var(--green-pale); }
     .notif-badge {
       position: absolute; top: -4px; right: -4px;
       width: 20px; height: 20px; border-radius: 50%;
       background: #e53e3e; color: #fff; font-size: 11px; font-weight: 700;
-      display: flex; align-items: center; justify-content: center;
-      border: 2px solid #f4f6f5; display: none;
+      display: none; align-items: center; justify-content: center;
+      border: 2px solid #f4f6f5;
     }
     .notif-badge.show { display: flex; }
 
@@ -74,40 +72,22 @@
     }
     .notif-panel.open { display: flex; }
     @keyframes panelUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-
     .notif-panel-head {
       display: flex; align-items: center; justify-content: space-between;
       padding: 12px 14px; border-bottom: 1px solid var(--border);
       font-size: 13px; font-weight: 700; color: var(--green-dark);
     }
-    .notif-mark-all {
-      font-size: 11px; font-weight: 500; color: var(--green-main);
-      background: none; border: none; cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
-    }
+    .notif-mark-all { font-size: 11px; font-weight: 500; color: var(--green-main); background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; }
     .notif-list { flex: 1; overflow-y: auto; }
-    .notif-item {
-      display: flex; gap: 10px; padding: 11px 14px;
-      border-bottom: 1px solid #f0f2f1; cursor: pointer;
-      transition: background 0.12s; align-items: flex-start;
-    }
+    .notif-item { display: flex; gap: 10px; padding: 11px 14px; border-bottom: 1px solid #f0f2f1; cursor: pointer; transition: background 0.12s; align-items: flex-start; }
     .notif-item:hover { background: var(--green-pale); }
     .notif-item.unread { background: #f0faf5; }
     .notif-item.unread:hover { background: #e0f5ec; }
-    .notif-icon-wrap {
-      width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 15px; overflow: hidden; position: relative;
-    }
+    .notif-icon-wrap { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 15px; overflow: hidden; position: relative; }
     .notif-icon-wrap img { width: 100%; height: 100%; object-fit: cover; }
-    .notif-type-dot {
-      position: absolute; bottom: -1px; right: -1px;
-      width: 16px; height: 16px; border-radius: 50%; border: 2px solid #fff;
-      display: flex; align-items: center; justify-content: center; font-size: 8px;
-    }
+    .notif-type-dot { position: absolute; bottom: -1px; right: -1px; width: 16px; height: 16px; border-radius: 50%; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 8px; }
     .notif-body { flex: 1; min-width: 0; }
     .notif-msg  { font-size: 12px; color: #1a1a1a; line-height: 1.5; }
-    .notif-msg strong { color: var(--green-dark); }
     .notif-sub  { font-size: 11px; color: #8c96a0; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .notif-time { font-size: 10px; color: #8c96a0; margin-top: 3px; }
     .notif-dot  { width: 7px; height: 7px; border-radius: 50%; background: var(--green-main); flex-shrink: 0; margin-top: 5px; }
@@ -122,7 +102,6 @@
     .compose-sheet { background: #fff; border-radius: 24px 24px 0 0; width: 100%; max-width: 600px; padding: 0 0 2rem; box-shadow: 0 -8px 40px rgba(0,0,0,0.18); animation: sheetUp 0.28s cubic-bezier(0.34,1.56,0.64,1); max-height: 90vh; overflow-y: auto; }
     @media (min-width: 600px) { .compose-sheet { border-radius: 24px; max-height: 85vh; } }
     @keyframes sheetUp { from{transform:translateY(40px);opacity:0} to{transform:translateY(0);opacity:1} }
-
     .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.25rem 0.75rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: #fff; z-index: 2; border-radius: 24px 24px 0 0; }
     .modal-title  { font-size: 16px; font-weight: 700; color: var(--green-dark); }
     .modal-close  { width: 32px; height: 32px; border-radius: 50%; border: none; background: var(--green-pale); color: #5a6472; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
@@ -143,11 +122,15 @@
     .post-upload-area p { font-size: 13px; color: #5a6472; margin: 0; }
     .post-preview-img { width: 100%; max-height: 300px; object-fit: cover; border-radius: calc(var(--radius-md) - 2px); display: none; }
     .post-upload-area.has-img .post-preview-img { display: block; }
+    .upload-placeholder { display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
     .post-upload-area.has-img .upload-placeholder { display: none; }
     .post-img-overlay { display: none; position: absolute; inset: 0; background: rgba(10,74,53,0.5); align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 500; gap: 6px; z-index: 2; }
     .post-upload-area.has-img:hover .post-img-overlay { display: flex; }
     .post-caption { width: 100%; border: 1.5px solid var(--border); border-radius: var(--radius-md); padding: 10px 13px; font-size: 14px; font-family: 'DM Sans', sans-serif; resize: none; height: 90px; color: #1a1a1a; transition: border-color 0.15s; box-sizing: border-box; }
     .post-caption:focus { outline: none; border-color: var(--green-main); box-shadow: 0 0 0 3px rgba(34,160,107,0.1); }
+    /* Read-only state — system-generated caption from scan, cannot be edited */
+    .post-caption[readonly] { background: #f0faf5 !important; color: #0a4a35 !important; cursor: not-allowed !important; border: 1.5px solid #d4f0e4 !important; resize: none; user-select: none; pointer-events: none; }
+    .post-caption[readonly]:focus { outline: none !important; box-shadow: none !important; border-color: #d4f0e4 !important; }
     .post-herb-tag { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #5a6472; margin: 8px 0; }
     .herb-tag-pill { display: inline-flex; align-items: center; gap: 4px; background: var(--green-pale); border: 1px solid var(--green-light); color: var(--green-dark); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 99px; }
     .post-from-scan { font-size: 12px; color: var(--green-main); cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 500; background: none; border: none; font-family: 'DM Sans', sans-serif; }
@@ -155,91 +138,26 @@
     .post-submit:hover:not(:disabled) { background: var(--green-mid); }
     .post-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* POST DETAIL MODAL — single scrollable sheet */
-    .post-detail-overlay {
-      display: none; position: fixed; inset: 0; z-index: 600;
-      background: rgba(5,15,10,0.7); backdrop-filter: blur(6px);
-      align-items: flex-end; justify-content: center; padding: 0;
-    }
+    /* POST DETAIL MODAL */
+    .post-detail-overlay { display: none; position: fixed; inset: 0; z-index: 600; background: rgba(5,15,10,0.7); backdrop-filter: blur(6px); align-items: flex-end; justify-content: center; padding: 0; }
     .post-detail-overlay.open { display: flex; }
-    @media (min-width: 600px) {
-      .post-detail-overlay { align-items: center; padding: 1rem; }
-    }
-    .post-detail-window {
-      background: #fff;
-      border-radius: 20px 20px 0 0;
-      width: 100%; max-width: 560px;
-      max-height: 94vh;
-      display: flex; flex-direction: column;
-      box-shadow: 0 -8px 40px rgba(0,0,0,0.25);
-      animation: sheetUp 0.28s cubic-bezier(0.34,1.3,0.64,1);
-      overflow: hidden; position: relative;
-    }
-    @media (min-width: 600px) {
-      .post-detail-window { border-radius: 20px; max-height: 90vh; }
-    }
-    @keyframes popIn { from{transform:scale(0.93);opacity:0} to{transform:scale(1);opacity:1} }
-
-    /* Single inner column — everything scrolls together */
-    .post-detail-inner {
-      display: flex; flex-direction: column;
-      flex: 1; overflow-y: auto; min-height: 0;
-    }
-    /* Left/right no longer exist — kept as no-ops so JS still works */
+    @media (min-width: 600px) { .post-detail-overlay { align-items: center; padding: 1rem; } }
+    .post-detail-window { background: #fff; border-radius: 20px 20px 0 0; width: 100%; max-width: 560px; max-height: 94vh; display: flex; flex-direction: column; box-shadow: 0 -8px 40px rgba(0,0,0,0.25); animation: sheetUp 0.28s cubic-bezier(0.34,1.3,0.64,1); overflow: hidden; position: relative; }
+    @media (min-width: 600px) { .post-detail-window { border-radius: 20px; max-height: 90vh; } }
+    .post-detail-inner { display: flex; flex-direction: column; flex: 1; overflow-y: auto; min-height: 0; }
     .post-detail-left  { display: contents; }
     .post-detail-right { display: contents; }
-
-    /* Full photo — no crop */
-    .post-detail-img {
-      width: 100%; display: block;
-      object-fit: contain; background: #f4f6f5;
-      max-height: none;
-    }
-    .post-detail-img-placeholder {
-      height: 180px; background: var(--green-pale);
-      display: flex; align-items: center; justify-content: center; font-size: 64px;
-    }
+    .post-detail-img { width: 100%; display: block; object-fit: contain; background: #f4f6f5; }
+    .post-detail-img-placeholder { height: 180px; background: var(--green-pale); display: flex; align-items: center; justify-content: center; font-size: 64px; }
     .post-detail-meta { padding: 1rem 1.1rem; }
     .post-detail-author { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
     .post-detail-caption { font-size: 14px; color: #1a1a1a; line-height: 1.7; margin-bottom: 10px; }
     .post-detail-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
-
-    /* Reactions bar — sticks between photo and comments */
-    .post-detail-reactions {
-      display: flex; gap: 0;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-
-    /* Comments section — scrolls with everything */
-    .post-detail-right-header {
-      padding: 0.9rem 1rem 0.7rem;
-      border-bottom: 1px solid var(--border);
-      font-size: 13px; font-weight: 600; color: var(--green-dark);
-      display: flex; align-items: center; gap: 6px;
-      flex-shrink: 0;
-    }
-    .post-detail-comments-list {
-      padding: 0.75rem 1rem 0.5rem;
-    }
-
-    /* Comment input — sticky at bottom of modal */
-    .post-detail-comment-input {
-      padding: 0.75rem 1rem;
-      border-top: 1px solid var(--border);
-      display: flex; gap: 8px; align-items: center;
-      background: #fff; position: sticky; bottom: 0; z-index: 2;
-      flex-shrink: 0;
-    }
-
-    .post-detail-close {
-      position: absolute; top: 12px; right: 12px; z-index: 10;
-      width: 34px; height: 34px; border-radius: 50%; border: none;
-      background: rgba(255,255,255,0.92); color: #1a1a1a;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-    }
+    .post-detail-reactions { display: flex; gap: 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .post-detail-right-header { padding: 0.9rem 1rem 0.7rem; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 600; color: var(--green-dark); display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .post-detail-comments-list { padding: 0.75rem 1rem 0.5rem; }
+    .post-detail-comment-input { padding: 0.75rem 1rem; border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: center; background: #fff; position: sticky; bottom: 0; z-index: 2; flex-shrink: 0; }
+    .post-detail-close { position: absolute; top: 12px; right: 12px; z-index: 10; width: 34px; height: 34px; border-radius: 50%; border: none; background: rgba(255,255,255,0.92); color: #1a1a1a; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
 
     /* REACTIONS */
     .reaction-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px; border: none; background: none; font-size: 13px; font-weight: 500; color: #5a6472; cursor: pointer; transition: background 0.15s; font-family: 'DM Sans', sans-serif; }
@@ -254,6 +172,7 @@
     .feed-card-header { display: flex; align-items: center; gap: 10px; padding: 1rem 1.25rem; }
     .feed-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--green-main); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; overflow: hidden; flex-shrink: 0; }
     .feed-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .feed-user-name-row { display: flex; align-items: center; gap: 5px; min-width: 0; }
     .feed-user-name { font-size: 13px; font-weight: 600; color: #1a1a1a; }
     .feed-time { font-size: 11px; color: #8c96a0; margin-top: 1px; }
     .feed-herb-badge { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; background: var(--green-pale); border: 1px solid var(--green-light); color: var(--green-dark); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 99px; white-space: nowrap; }
@@ -268,6 +187,34 @@
     .conf-med  { background: #fef3c7; color: #92400e; }
     .conf-low  { background: #fee2e2; color: #991b1b; }
     .feed-reactions { display: flex; align-items: center; padding: 8px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+
+    /* REPOST */
+    .repost-inline { flex-shrink: 0; font-size: 11px; font-weight: 500; color: #5a6472; display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
+    .repost-inline i { color: var(--green-main); font-size: 13px; }
+    .shared-embed { border: 1px solid var(--border); border-radius: var(--radius-md); margin: 0 1.25rem 0.75rem; overflow: hidden; background: #fbfcfb; }
+    .shared-embed-header { display: flex; align-items: center; gap: 8px; padding: 10px 12px 6px; }
+    .shared-embed-avatar { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; background: var(--green-main); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; overflow: hidden; }
+    .shared-embed-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .shared-embed-info { min-width: 0; flex-shrink: 1; }
+    .shared-embed-name { font-size: 12px; font-weight: 700; color: #1a1a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .shared-embed-time { font-size: 10px; color: #8c96a0; }
+    .shared-embed-herb { margin-left: auto; font-size: 10px; font-weight: 600; background: var(--green-pale); color: var(--green-dark); border: 1px solid var(--green-light); padding: 2px 8px; border-radius: 99px; white-space: nowrap; max-width: 35vw; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+    .shared-embed-caption { font-size: 13px; color: #1a1a1a; line-height: 1.55; padding: 0 12px 8px; }
+    .shared-embed-img { width: 100%; max-height: 350px; object-fit: contain; background: #f1f3f2; display: block; }
+    .shared-embed-img-placeholder { height: 120px; background: var(--green-pale); display: flex; align-items: center; justify-content: center; font-size: 40px; }
+    .shared-embed-deleted { padding: 1rem 12px; font-size: 12px; color: #8c96a0; text-align: center; }
+
+    /* SHARE MODAL */
+    #shareModal .compose-sheet { max-width: 520px; }
+    .share-compose { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 1rem; }
+    .share-caption { flex: 1; border: none; outline: none; resize: none; font-size: 15px; font-family: 'DM Sans', sans-serif; color: #1a1a1a; height: 70px; padding: 0; }
+    .share-embed-preview { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; background: #fbfcfb; }
+    .share-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 1.1rem; }
+    .share-btn-primary { width: 100%; padding: 11px; background: var(--green-main); color: #fff; border: none; border-radius: var(--radius-md); font-size: 14px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .share-btn-primary:hover:not(:disabled) { background: var(--green-mid); }
+    .share-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .share-btn-secondary { width: 100%; padding: 10px; background: #fff; color: #5a6472; border: 1.5px solid var(--border); border-radius: var(--radius-md); font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s, border-color 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .share-btn-secondary:hover { background: var(--green-pale); border-color: var(--green-main); color: var(--green-dark); }
 
     /* DELETE MENU */
     .feed-card-menu { margin-left: auto; position: relative; }
@@ -294,8 +241,6 @@
     .comment-delete-btn { background: none; border: none; cursor: pointer; color: #c0c8d0; font-size: 11px; padding: 0; font-family: 'DM Sans', sans-serif; transition: color 0.15s; margin-left: auto; }
     .comment-delete-btn:hover { color: #e53e3e; }
     .mention { color: var(--green-main); font-weight: 600; }
-
-    /* REPLIES */
     .replies-thread { margin-top: 4px; padding-left: 16px; border-left: 2px solid var(--green-light); margin-left: 8px; }
     .reply-item { display: flex; gap: 7px; margin-top: 6px; }
     .reply-avatar { width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; background: var(--green-mid); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; overflow: hidden; }
@@ -307,101 +252,22 @@
     .reply-time { font-size: 10px; color: #8c96a0; }
     .reply-delete-btn { background: none; border: none; cursor: pointer; color: #c0c8d0; font-size: 11px; padding: 0; font-family: 'DM Sans', sans-serif; transition: color 0.15s; margin-left: auto; }
     .reply-delete-btn:hover { color: #e53e3e; }
-
-    /* REPLY INPUT */
     .reply-input-row { display: none; gap: 6px; align-items: center; margin-top: 6px; padding-left: 26px; }
     .reply-input-row.open { display: flex; }
     .reply-input { flex: 1; padding: 6px 11px; border: 1px solid var(--border); border-radius: 99px; font-size: 12px; font-family: 'DM Sans', sans-serif; color: #1a1a1a; transition: border-color 0.15s; background: #f9fafb; }
     .reply-input:focus { outline: none; border-color: var(--green-main); background: #fff; }
     .reply-send { width: 28px; height: 28px; border-radius: 50%; background: var(--green-main); color: #fff; border: none; display: flex; align-items: center; justify-content: center; font-size: 13px; cursor: pointer; flex-shrink: 0; }
     .reply-send:hover { background: var(--green-mid); }
-
-    /* COMMENT INPUT */
     .comment-input-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; position: relative; }
     .comment-input { flex: 1; padding: 9px 14px; border: 1px solid var(--border); border-radius: 99px; font-size: 13px; font-family: 'DM Sans', sans-serif; color: #1a1a1a; transition: border-color 0.15s; }
     .comment-input:focus { outline: none; border-color: var(--green-main); }
     .comment-send { width: 36px; height: 36px; border-radius: 50%; background: var(--green-main); color: #fff; border: none; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; flex-shrink: 0; }
     .comment-send:hover { background: var(--green-mid); }
 
-    /* EMPTY / LOADING */
     .feed-empty { text-align: center; padding: 3rem 1rem; color: #5a6472; }
     .feed-empty-icon { font-size: 48px; margin-bottom: 1rem; }
     .feed-empty h3 { font-size: 17px; color: #1a1a1a; margin-bottom: 0.5rem; }
-
     @keyframes slideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-
-    /* ══════════════════════════════════════
-       REPOST (share-to-feed)
-    ══════════════════════════════════════ */
-    .feed-user-name-row { display: flex; align-items: center; gap: 5px; min-width: 0; }
-    .repost-inline {
-      flex-shrink: 0; font-size: 11px; font-weight: 500; color: #5a6472;
-      display: inline-flex; align-items: center; gap: 3px; white-space: nowrap;
-    }
-    .repost-inline i { color: var(--green-main); font-size: 13px; }
-
-    .shared-embed {
-      border: 1px solid var(--border); border-radius: var(--radius-md);
-      margin: 0 1.25rem 0.75rem; overflow: hidden; background: #fbfcfb;
-    }
-    .shared-embed-header { display: flex; align-items: center; gap: 8px; padding: 10px 12px 6px; }
-    .shared-embed-avatar {
-      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
-      background: var(--green-main); color: #fff;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 700; overflow: hidden;
-    }
-    .shared-embed-avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .shared-embed-info { min-width: 0; flex-shrink: 1; }
-    .shared-embed-name {
-      font-size: 12px; font-weight: 700; color: #1a1a1a;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .shared-embed-time { font-size: 10px; color: #8c96a0; }
-    .shared-embed-herb {
-      margin-left: auto; font-size: 10px; font-weight: 600;
-      background: var(--green-pale); color: var(--green-dark);
-      border: 1px solid var(--green-light); padding: 2px 8px; border-radius: 99px;
-      white-space: nowrap; max-width: 35vw; overflow: hidden; text-overflow: ellipsis;
-      flex-shrink: 0;
-    }
-    .shared-embed-caption { font-size: 13px; color: #1a1a1a; line-height: 1.55; padding: 0 12px 8px; }
-    .shared-embed-img { width: 100%; max-height: 350px; object-fit: contain; background: #f1f3f2; display: block; }
-    .shared-embed-img-placeholder {
-      height: 120px; background: var(--green-pale);
-      display: flex; align-items: center; justify-content: center; font-size: 40px;
-    }
-    .shared-embed-deleted { padding: 1rem 12px; font-size: 12px; color: #8c96a0; text-align: center; }
-
-    /* Share-to-feed modal */
-    #shareModal .compose-sheet { max-width: 520px; }
-    .share-compose { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 1rem; }
-    .share-caption {
-      flex: 1; border: none; outline: none; resize: none;
-      font-size: 15px; font-family: 'DM Sans', sans-serif; color: #1a1a1a;
-      height: 70px; padding: 0;
-    }
-    .share-embed-preview {
-      border: 1px solid var(--border); border-radius: var(--radius-md);
-      overflow: hidden; background: #fbfcfb;
-    }
-    .share-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 1.1rem; }
-    .share-btn-primary {
-      width: 100%; padding: 11px; background: var(--green-main); color: #fff;
-      border: none; border-radius: var(--radius-md); font-size: 14px; font-weight: 600;
-      font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-    }
-    .share-btn-primary:hover:not(:disabled) { background: var(--green-mid); }
-    .share-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-    .share-btn-secondary {
-      width: 100%; padding: 10px; background: #fff; color: #5a6472;
-      border: 1.5px solid var(--border); border-radius: var(--radius-md);
-      font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif;
-      cursor: pointer; transition: background 0.15s, border-color 0.15s;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-    }
-    .share-btn-secondary:hover { background: var(--green-pale); border-color: var(--green-main); color: var(--green-dark); }
 
     @media (max-width: 640px) {
       .feed-layout { padding: 1rem 0.75rem 5rem; }
@@ -420,10 +286,9 @@
   </a>
   <ul class="nav-links" id="navLinks">
     <li><a href="index.html">Home</a></li>
-     <li><a href="feed.html" class="active">Community</a></li>
     <li><a href="herbs.html">Herb Database</a></li>
     <li><a href="identify.html">Identify Herb</a></li>
-   
+    <li><a href="feed.html" class="active">Community</a></li>
     <li><a href="map.html">Map</a></li>
     <li><a href="about.html">About</a></li>
   </ul>
@@ -481,12 +346,15 @@
   </div>
 </div>
 
-<!-- COMPOSE MODAL -->
+<!-- COMPOSE MODAL
+     id="composeModal" — also aliased as "postModal" in JS so that
+     history.html's loadPendingScanShare() which calls openComposeModal()
+     works correctly regardless of which name is used. -->
 <div class="modal-overlay" id="composeModal" onclick="onComposeOverlayClick(event)">
   <div class="compose-sheet">
     <div class="modal-header">
       <span class="modal-title">🌿 Share a Discovery</span>
-      <button class="modal-close" onclick="closeComposeModal()"><i class="ti ti-x"></i></button>
+      <button class="modal-close" id="composeCloseBtn" onclick="closeComposeModal()"><i class="ti ti-x"></i></button>
     </div>
     <div class="modal-body">
       <div class="create-post-header">
@@ -498,7 +366,7 @@
       </div>
       <div class="post-upload-area" id="postUploadArea">
         <input type="file" id="postImageInput" accept="image/*" onchange="onPostImageSelect(event)" />
-        <div class="upload-placeholder" style="display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none">
+        <div class="upload-placeholder">
           <i class="ti ti-photo-plus"></i>
           <p>Add a herb photo</p>
           <span style="font-size:11px;color:#8c96a0">JPG, PNG, WEBP</span>
@@ -509,12 +377,19 @@
       <div class="post-herb-tag" id="postHerbTag" style="display:none">
         <span style="color:#8c96a0">Herb:</span>
         <span class="herb-tag-pill"><i class="ti ti-leaf"></i><span id="postHerbName"></span></span>
-        <button onclick="clearHerbTag()" style="background:none;border:none;cursor:pointer;color:#8c96a0;font-size:12px;margin-left:4px">✕ remove</button>
+        <button id="clearHerbTagBtn" onclick="clearHerbTag()" style="background:none;border:none;cursor:pointer;color:#8c96a0;font-size:12px;margin-left:4px">✕ remove</button>
       </div>
       <textarea class="post-caption" id="postCaption" placeholder="Write something about this herb…"></textarea>
+      <!-- Additional editable note — only shown when caption is system-generated (read-only) -->
+      <div id="postNoteWrap" style="display:none;margin-top:8px">
+        <div style="font-size:11px;color:#8c96a0;margin-bottom:4px;display:flex;align-items:center;gap:5px">
+          <i class="ti ti-pencil" style="font-size:12px"></i> Add your own note (optional)
+        </div>
+        <textarea class="post-caption" id="postNote" placeholder="Write something to add…" style="height:70px"></textarea>
+      </div>
     </div>
     <div class="modal-footer">
-      <button class="post-from-scan" onclick="useLastScan()">
+      <button class="post-from-scan" id="postFromScanBtn" onclick="useLastScan()">
         <i class="ti ti-camera-bolt"></i> Use my last scan
       </button>
       <button class="post-submit" id="postSubmitBtn" onclick="submitPost()">
@@ -524,7 +399,7 @@
   </div>
 </div>
 
-<!-- SHARE-TO-FEED MODAL (repost) -->
+<!-- SHARE-TO-FEED MODAL (Facebook-style repost) -->
 <div class="modal-overlay" id="shareModal" onclick="onShareOverlayClick(event)">
   <div class="compose-sheet">
     <div class="modal-header">
@@ -608,34 +483,105 @@
 
   initNavAuth();
 
-  let currentUser  = null;
-  let postImageB64 = null;
-  let postHerbData = null;
-  let unsubFeed    = null;
-  let unsubNotif   = null;
-  let activePostId = null;
-  let userCache    = new Map();   // Map<uid, {uid,displayName,photoURL}>
-  let mentionCleanups = [];       // cleanup functions for mention listeners
-  let shareSourcePost = null;     // the post snapshot currently being shared/reposted
+  let currentUser     = null;
+  let postImageB64    = null;
+  let postHerbData    = null;
+  let unsubFeed       = null;
+  let unsubNotif      = null;
+  let activePostId    = null;
+  let userCache       = new Map();
+  let mentionCleanups = [];
+  let shareSourcePost = null;
+
+  // ══════════════════════════════════════════════
+  //  PENDING SCAN SHARE (from history.html)
+  //  Called first — before any slow async work —
+  //  so the compose modal opens immediately on landing.
+  // ══════════════════════════════════════════════
+  function loadPendingScanShare() {
+    let raw;
+    try { raw = sessionStorage.getItem('herbid_pending_post'); } catch(e) { return; }
+    if (!raw) return;
+    sessionStorage.removeItem('herbid_pending_post');
+    let data;
+    try { data = JSON.parse(raw); } catch(e) { return; }
+
+    // Small delay so DOM and auth state are settled before we inject
+    setTimeout(() => {
+      openComposeModal();
+
+      if (data.imageBase64) {
+        postImageB64 = data.imageBase64;
+        const img  = document.getElementById('postPreviewImg');
+        const area = document.getElementById('postUploadArea');
+        if (img)  img.src = data.imageBase64;
+        if (area) area.classList.add('has-img');
+      }
+      if (data.herbName) {
+        postHerbData = {
+          identifiedHerb:    data.herbName,
+          confidencePercent: data.confidencePercent || null,
+          confidenceLabel:   data.confidenceLabel   || null,
+        };
+        const nameEl = document.getElementById('postHerbName');
+        const tagEl  = document.getElementById('postHerbTag');
+        if (nameEl) nameEl.textContent = data.herbName;
+        if (tagEl)  tagEl.style.display = '';
+      }
+      if (data.caption) {
+        const cap = document.getElementById('postCaption');
+        if (cap) {
+          cap.value            = data.caption;
+          // ── Lock — system-generated caption, not editable ──
+          cap.readOnly         = true;
+          cap.style.background = '#f0faf5';
+          cap.style.color      = '#0a4a35';
+          cap.style.cursor     = 'not-allowed';
+          cap.style.border     = '1.5px solid #d4f0e4';
+          cap.title            = 'This caption was generated by the system';
+          // Show the extra editable note box
+          const wrap = document.getElementById('postNoteWrap');
+          if (wrap) wrap.style.display = '';
+        }
+      }
+    }, 250);
+  }
 
   // ══════════════════════════════════════════════
   //  COMPOSE MODAL
+  //  Exposed as both openComposeModal (new name) and openPostModal
+  //  (legacy) so any old references keep working.
   // ══════════════════════════════════════════════
-  window.openComposeModal = function() {
+  window.openComposeModal = window.openPostModal = function() {
     document.getElementById('composeModal').classList.add('open');
     document.body.style.overflow = 'hidden';
   };
-  window.closeComposeModal = function() {
+  window.closeComposeModal = window.closePostModal = function() {
     document.getElementById('composeModal').classList.remove('open');
     document.body.style.overflow = '';
+    // Reset caption to editable for next manual New Post — without this,
+    // the read-only lock set by loadPendingScanShare stays on forever.
+    const cap = document.getElementById('postCaption');
+    if (cap) {
+      cap.readOnly         = false;
+      cap.style.background = '';
+      cap.style.color      = '';
+      cap.style.cursor     = '';
+      cap.style.border     = '';
+      cap.title            = '';
+    }
+    // Hide and clear the extra note box
+    const note = document.getElementById('postNote');
+    const noteWrap = document.getElementById('postNoteWrap');
+    if (note)     note.value          = '';
+    if (noteWrap) noteWrap.style.display = 'none';
   };
   window.onComposeOverlayClick = function(e) {
     if (e.target === document.getElementById('composeModal')) closeComposeModal();
   };
 
   // ══════════════════════════════════════════════
-  //  SHARED-POST EMBED RENDERING (used by feed cards, detail modal, and
-  //  the share compose preview — one function, one look everywhere)
+  //  SHARED-POST EMBED RENDERING
   // ══════════════════════════════════════════════
   function renderSharedEmbedHTML(shared) {
     if (!shared) {
@@ -644,15 +590,12 @@
     const avatarHTML = shared.userPhoto
       ? `<img src="${shared.userPhoto}" referrerpolicy="no-referrer">`
       : (shared.userName || 'U')[0].toUpperCase();
-    const timeStr = shared.createdAt?.toDate?.()?.toLocaleDateString('en-PH', {
-      month:'short', day:'numeric', year:'numeric'
-    }) || '';
+    const timeStr = shared.createdAt?.toDate?.()?.toLocaleDateString('en-PH', { month:'short', day:'numeric', year:'numeric' }) || '';
     const herbBadge = shared.herbName
       ? `<span class="shared-embed-herb"><i class="ti ti-leaf" style="font-size:10px"></i> ${escapeHTML(shared.herbName)}</span>` : '';
     const imgHTML = shared.imageBase64
       ? `<img class="shared-embed-img" src="${shared.imageBase64}" alt="herb photo" loading="lazy">`
       : shared.herbName ? `<div class="shared-embed-img-placeholder">🌿</div>` : '';
-
     return `
       <div class="shared-embed-header">
         <div class="shared-embed-avatar">${avatarHTML}</div>
@@ -667,37 +610,29 @@
   }
 
   // ══════════════════════════════════════════════
-  //  SHARE-TO-FEED MODAL (repost, Facebook-style) — with notification
+  //  SHARE-TO-FEED MODAL (Facebook-style repost)
   // ══════════════════════════════════════════════
   window.openShareModal = async function(postId) {
     if (!currentUser) { showToast('Sign in to share posts', 'warn'); return; }
-
-    // Prefer the live-feed cache; fall back to a direct fetch (covers a
-    // post opened via a notification that has scrolled out of the cache).
     let p = (window._allPosts || []).find(x => x.id === postId);
     if (!p) {
       try {
-        const snap = await getDocs(query(collection(db, 'posts')));
+        const snap = await getDocs(collection(db, 'posts'));
         snap.forEach(d => { if (d.id === postId) p = { id: d.id, ...d.data() }; });
-      } catch(e) { /* fall through to the not-found check below */ }
+      } catch(e) {}
     }
     if (!p) { showToast('Could not find that post', 'error'); return; }
 
-    // Re-sharing a repost shares the ROOT original — keeps the chain flat,
-    // like Facebook does, instead of nesting shares inside shares.
     const original = p.sharedPost
       ? { ...p.sharedPost }
-      : {
-          id: p.id, uid: p.uid, userName: p.userName, userPhoto: p.userPhoto,
+      : { id: p.id, uid: p.uid, userName: p.userName, userPhoto: p.userPhoto,
           caption: p.caption || null, imageBase64: p.imageBase64 || null,
           herbName: p.herbName || null, confidence: p.confidence || null,
-          confidenceLabel: p.confidenceLabel || null, createdAt: p.createdAt,
-        };
+          confidenceLabel: p.confidenceLabel || null, createdAt: p.createdAt };
     shareSourcePost = original;
 
     document.getElementById('shareCaption').value = '';
     document.getElementById('sharePreviewEmbed').innerHTML = renderSharedEmbedHTML(original);
-
     const av = document.getElementById('shareAvatar');
     av.innerHTML = currentUser.photoURL
       ? `<img src="${currentUser.photoURL}" referrerpolicy="no-referrer">`
@@ -719,8 +654,7 @@
   window.confirmShareToFeed = async function() {
     if (!currentUser || !shareSourcePost) return;
     const btn = document.getElementById('shareConfirmBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="ti ti-loader"></i> Sharing…';
+    btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i> Sharing…';
     try {
       const myCaption = document.getElementById('shareCaption').value.trim();
       await addDoc(collection(db, 'posts'), {
@@ -728,73 +662,48 @@
         userName: currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
         userPhoto: currentUser.photoURL || null,
         userEmail: currentUser.email,
-        caption: myCaption || null,
-        imageBase64: null,
+        caption: myCaption || null, imageBase64: null,
         herbName: null, confidence: null, confidenceLabel: null,
         likes: [], likeCount: 0, commentCount: 0,
         sharedPost: shareSourcePost,
         createdAt: serverTimestamp(),
       });
-
-      // Best-effort: bump a share counter and notify the original owner —
-      // neither should block the repost itself if they fail.
-      if (shareSourcePost.id) {
-        updateDoc(doc(db, 'posts', shareSourcePost.id), { shareCount: increment(1) }).catch(() => {});
-      }
+      if (shareSourcePost.id)
+        updateDoc(doc(db,'posts',shareSourcePost.id), { shareCount: increment(1) }).catch(()=>{});
       if (shareSourcePost.uid) {
-        await createNotification(db, {
-          toUid:     shareSourcePost.uid,
-          fromUid:   currentUser.uid,
-          fromName:  currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
-          fromPhoto: currentUser.photoURL,
-          type:      'share',
-          postId:      shareSourcePost.id,
-          postSnippet: (shareSourcePost.caption || '').slice(0, 80),
-        }).catch(() => {});
+        createNotification(db, {
+          toUid: shareSourcePost.uid, fromUid: currentUser.uid,
+          fromName: currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
+          fromPhoto: currentUser.photoURL, type: 'share',
+          postId: shareSourcePost.id,
+          postSnippet: (shareSourcePost.caption||'').slice(0,80),
+        }).catch(()=>{});
       }
-
       closeShareModal();
       showToast('🔁 Shared to your feed!');
-    } catch(e) {
-      showToast('Could not share: ' + e.message, 'error');
-    }
-    btn.disabled = false;
-    btn.innerHTML = '<i class="ti ti-share"></i> Share to Feed';
+    } catch(e) { showToast('Could not share: '+e.message,'error'); }
+    btn.disabled = false; btn.innerHTML = '<i class="ti ti-share"></i> Share to Feed';
   };
 
   window.copyShareLink = async function() {
     const herbName = shareSourcePost?.herbName || '';
-    const text = herbName
-      ? `Check out this ${herbName} post on HerbID Iloilo!`
-      : 'Check out this post on HerbID Iloilo!';
-
-    if (navigator.share) {
-      try { await navigator.share({ title: 'HerbID Iloilo', text, url: location.href }); }
-      catch(e) { /* user cancelled */ }
-    } else {
-      await navigator.clipboard.writeText(location.href);
-      showToast('Link copied to clipboard!');
-    }
-
+    const text = herbName ? `Check out this ${herbName} post on HerbID Iloilo!` : 'Check out this post on HerbID Iloilo!';
+    if (navigator.share) { try { await navigator.share({ title:'HerbID Iloilo', text, url:location.href }); } catch(e){} }
+    else { await navigator.clipboard.writeText(location.href); showToast('Link copied!'); }
     if (currentUser && shareSourcePost?.uid) {
-      await createNotification(db, {
-        toUid:     shareSourcePost.uid,
-        fromUid:   currentUser.uid,
-        fromName:  currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
-        fromPhoto: currentUser.photoURL,
-        type:      'share',
-        postId:      shareSourcePost.id,
-        postSnippet: (shareSourcePost.caption || '').slice(0, 80),
-      }).catch(() => {});
+      createNotification(db, {
+        toUid: shareSourcePost.uid, fromUid: currentUser.uid,
+        fromName: currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
+        fromPhoto: currentUser.photoURL, type: 'share',
+        postId: shareSourcePost.id,
+        postSnippet: (shareSourcePost.caption||'').slice(0,80),
+      }).catch(()=>{});
     }
     closeShareModal();
   };
 
-  // Kept so old inline onclick="sharePost('id')" references keep working —
-  // routes straight into the same share-to-feed flow.
-  window.sharePost = function(postId) {
-    openShareModal(postId);
-  };
+  // Alias so old onclick="sharePost('id')" keeps working
+  window.sharePost = function(postId) { openShareModal(postId); };
 
   // ══════════════════════════════════════════════
   //  POST DETAIL MODAL
@@ -803,27 +712,18 @@
     activePostId = postId;
     document.getElementById('postDetailModal').classList.add('open');
     document.body.style.overflow = 'hidden';
-
     try {
-      const snap = await getDocs(query(collection(db, 'posts')));
-      let postData = null;
-      snap.forEach(d => { if (d.id === postId) postData = { id: d.id, ...d.data() }; });
+      let postData = (window._allPosts||[]).find(x => x.id === postId);
+      if (!postData) {
+        const snap = await getDocs(collection(db,'posts'));
+        snap.forEach(d => { if (d.id === postId) postData = { id:d.id, ...d.data() }; });
+      }
       if (postData) populateDetailModal(postData);
-    } catch(e) { showToast('Could not load post', 'error'); }
-
+    } catch(e) { showToast('Could not load post','error'); }
     await loadDetailComments(postId);
-
-    if (focusComment) {
-      setTimeout(() => {
-        const inp = document.getElementById('detailCommentInput');
-        inp?.focus();
-        // Attach mention autocomplete to the detail comment input
-        attachMentions(inp);
-      }, 300);
-    } else {
-      const inp = document.getElementById('detailCommentInput');
-      attachMentions(inp);
-    }
+    const inp = document.getElementById('detailCommentInput');
+    attachMentions(inp);
+    if (focusComment) setTimeout(() => inp?.focus(), 300);
   };
 
   window.closeDetailModal = function() {
@@ -841,10 +741,8 @@
   // ══════════════════════════════════════════════
   function attachMentions(inputEl) {
     if (!inputEl) return;
-    const cleanup = initMentions(inputEl, userCache, () => {});
-    mentionCleanups.push(cleanup);
+    mentionCleanups.push(initMentions(inputEl, userCache, ()=>{}));
   }
-
   function cleanupMentions() {
     mentionCleanups.forEach(fn => fn());
     mentionCleanups = [];
@@ -858,11 +756,10 @@
     panel.classList.toggle('open');
     if (panel.classList.contains('open') && currentUser) {
       markAllRead(db, currentUser.uid);
-      document.getElementById('notifBadge').classList.remove('show');
-      document.getElementById('notifBadge').textContent = '';
+      const badge = document.getElementById('notifBadge');
+      badge.classList.remove('show'); badge.textContent = '';
     }
   };
-
   window.markAllNotificationsRead = async function() {
     if (!currentUser) return;
     await markAllRead(db, currentUser.uid);
@@ -870,48 +767,31 @@
     document.querySelectorAll('.notif-item.unread').forEach(el => el.classList.remove('unread'));
     document.querySelectorAll('.notif-dot').forEach(el => el.remove());
   };
-
   document.addEventListener('click', e => {
     const panel = document.getElementById('notifPanel');
     const bell  = document.getElementById('notifBell');
-    if (panel?.classList.contains('open') && !panel.contains(e.target) && !bell?.contains(e.target)) {
+    if (panel?.classList.contains('open') && !panel.contains(e.target) && !bell?.contains(e.target))
       panel.classList.remove('open');
-    }
   });
 
   function renderNotifications(items) {
     const list = document.getElementById('notifList');
-    if (!items.length) {
-      list.innerHTML = '<div class="notif-empty">No notifications yet</div>';
-      return;
-    }
-
+    if (!items.length) { list.innerHTML = '<div class="notif-empty">No notifications yet</div>'; return; }
     list.innerHTML = items.map(n => {
-      const color   = notifColor(n.type);
-      const icon    = notifIcon(n.type);
-      const msg     = notifMessage(n);
-      const time    = n.createdAt?.toDate?.()?.toLocaleDateString('en-PH', {
-        month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'
-      }) || '';
-      const avHTML  = n.fromPhoto
-        ? `<img src="${n.fromPhoto}" referrerpolicy="no-referrer">`
-        : (n.fromName || 'U')[0].toUpperCase();
-
+      const color = notifColor(n.type), icon = notifIcon(n.type), msg = notifMessage(n);
+      const time  = n.createdAt?.toDate?.()?.toLocaleDateString('en-PH',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})||'';
       return `
-        <div class="notif-item ${n.read ? '' : 'unread'}"
-             onclick="onNotifClick('${n.id}','${n.postId || ''}','${n.toUid || ''}')">
+        <div class="notif-item ${n.read?'':'unread'}" onclick="onNotifClick('${n.id}','${n.postId||''}','${n.toUid||''}')">
           <div class="notif-icon-wrap" style="background:${color}22;color:${color}">
-            ${n.fromPhoto ? `<img src="${n.fromPhoto}" referrerpolicy="no-referrer">` : `<span style="font-weight:700;font-size:13px">${(n.fromName||'U')[0].toUpperCase()}</span>`}
-            <div class="notif-type-dot" style="background:${color}">
-              <i class="ti ${icon}" style="font-size:7px;color:#fff"></i>
-            </div>
+            ${n.fromPhoto?`<img src="${n.fromPhoto}" referrerpolicy="no-referrer">`:`<span style="font-weight:700;font-size:13px">${(n.fromName||'U')[0].toUpperCase()}</span>`}
+            <div class="notif-type-dot" style="background:${color}"><i class="ti ${icon}" style="font-size:7px;color:#fff"></i></div>
           </div>
           <div class="notif-body">
             <div class="notif-msg">${msg}</div>
-            ${n.text ? `<div class="notif-sub">"${escapeHTML(n.text)}"</div>` : ''}
+            ${n.text?`<div class="notif-sub">"${escapeHTML(n.text)}"</div>`:''}
             <div class="notif-time">${time}</div>
           </div>
-          ${!n.read ? '<div class="notif-dot"></div>' : ''}
+          ${!n.read?'<div class="notif-dot"></div>':''}
         </div>`;
     }).join('');
   }
@@ -933,8 +813,7 @@
     if (!user) {
       document.getElementById('authGate').style.display    = '';
       document.getElementById('feedContent').style.display = 'none';
-      fab.style.display  = 'none';
-      bell.style.display = 'none';
+      fab.style.display = 'none'; bell.style.display = 'none';
       if (unsubFeed)  { unsubFeed();  unsubFeed  = null; }
       if (unsubNotif) { unsubNotif(); unsubNotif = null; }
       return;
@@ -942,24 +821,17 @@
 
     document.getElementById('authGate').style.display    = 'none';
     document.getElementById('feedContent').style.display = '';
-    fab.style.display  = 'flex';
-    bell.style.display = 'block';
+    fab.style.display = 'flex'; bell.style.display = 'block';
 
     updateCreateHeader(user);
 
-    // Pick up any pending scan-to-post handoff first — this used to run
-    // after the (awaited) user-cache load below, which could block for
-    // 1-3 seconds fetching every user from Firestore while the pending
-    // post data just sat in sessionStorage waiting.
+    // ── Check for a pending scan share from history.html FIRST ──
+    // Must run before loadUserCache (slow) so the modal opens immediately.
     loadPendingScanShare();
 
-    // Load the mention user cache in the background instead of
-    // blocking on it — mentions still work fine once it resolves, but
-    // nothing else on the page (feed, notifications, the compose modal)
-    // should have to wait for a full Firestore users-collection fetch.
+    // Load user cache without blocking
     loadUserCache(db).then(cache => {
       userCache = cache;
-      // Make sure current user is in cache
       userCache.set(user.uid, {
         uid: user.uid,
         displayName: user.displayName || user.email?.split('@')[0] || 'User',
@@ -969,17 +841,12 @@
 
     listenFeed();
 
-    // Start notification listener
     if (unsubNotif) unsubNotif();
     unsubNotif = listenNotifications(db, user.uid, (items, unread) => {
       renderNotifications(items);
       const badge = document.getElementById('notifBadge');
-      if (unread > 0) {
-        badge.textContent = unread > 9 ? '9+' : unread;
-        badge.classList.add('show');
-      } else {
-        badge.classList.remove('show');
-      }
+      if (unread > 0) { badge.textContent = unread > 9 ? '9+' : unread; badge.classList.add('show'); }
+      else { badge.classList.remove('show'); }
     });
   });
 
@@ -991,71 +858,21 @@
       : (user.displayName || user.email || 'U')[0].toUpperCase();
   }
 
-  // ── Pick up a scan handed off from history.html's "Share" button ──────
-  // history.html stores the scan's photo + a suggested caption in
-  // sessionStorage rather than posting directly, so the person can still
-  // edit the caption here before it actually goes out.
-  function loadPendingScanShare() {
-    let raw;
-    try { raw = sessionStorage.getItem('herbid_pending_post'); } catch(e) { return; }
-    if (!raw) return;
-    sessionStorage.removeItem('herbid_pending_post');
-    let data;
-    try { data = JSON.parse(raw); } catch(e) { return; }
-
-    openComposeModal();
-
-    // Give the DOM a moment to actually paint the modal before touching
-    // its elements — without this, on a cold page load the modal markup
-    // can still be mid-render when this runs, so img.src/textarea.value
-    // silently land on nothing. Null checks throughout so a missing
-    // element (or a modal layout change down the line) can't crash the
-    // whole handoff instead of just skipping that one field.
-    setTimeout(() => {
-      if (data.imageBase64) {
-        const preview = document.getElementById('postPreviewImg');
-        const uploadArea = document.getElementById('postUploadArea');
-        if (preview) preview.src = data.imageBase64;
-        if (uploadArea) uploadArea.classList.add('has-img');
-        postImageB64 = data.imageBase64;
-      }
-      if (data.herbName) {
-        postHerbData = {
-          identifiedHerb: data.herbName,
-          confidencePercent: data.confidencePercent || null,
-          confidenceLabel: data.confidenceLabel || null,
-        };
-        const herbNameEl = document.getElementById('postHerbName');
-        const herbTagEl  = document.getElementById('postHerbTag');
-        if (herbNameEl) herbNameEl.textContent = data.herbName;
-        if (herbTagEl)  herbTagEl.style.display = '';
-      }
-      if (data.caption) {
-        const captionEl = document.getElementById('postCaption');
-        if (captionEl) captionEl.value = data.caption;
-      }
-    }, 200);
-  }
-
   // ══════════════════════════════════════════════
   //  IMAGE COMPRESS
   // ══════════════════════════════════════════════
-  function compressImage(file, maxPx = 800, quality = 0.72) {
+  function compressImage(file, maxPx=800, quality=0.72) {
     return new Promise(resolve => {
       const img = new Image(), reader = new FileReader();
       reader.onload = e => {
         img.onload = () => {
-          let w = img.width, h = img.height;
-          if (w > maxPx || h > maxPx) {
-            if (w > h) { h = Math.round(h * maxPx / w); w = maxPx; }
-            else        { w = Math.round(w * maxPx / h); h = maxPx; }
-          }
-          const canvas = document.createElement('canvas');
-          canvas.width = w; canvas.height = h;
-          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-          resolve(canvas.toDataURL('image/jpeg', quality));
+          let w=img.width, h=img.height;
+          if(w>maxPx||h>maxPx){if(w>h){h=Math.round(h*maxPx/w);w=maxPx;}else{w=Math.round(w*maxPx/h);h=maxPx;}}
+          const c=document.createElement('canvas'); c.width=w; c.height=h;
+          c.getContext('2d').drawImage(img,0,0,w,h);
+          resolve(c.toDataURL('image/jpeg',quality));
         };
-        img.src = e.target.result;
+        img.src=e.target.result;
       };
       reader.readAsDataURL(file);
     });
@@ -1065,8 +882,7 @@
   //  COMPOSE
   // ══════════════════════════════════════════════
   window.onPostImageSelect = async function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+    const file = e.target.files[0]; if (!file) return;
     postImageB64 = await compressImage(file);
     document.getElementById('postPreviewImg').src = postImageB64;
     document.getElementById('postUploadArea').classList.add('has-img');
@@ -1080,9 +896,9 @@
     try {
       const q    = query(collection(db,'scans'), where('uid','==',currentUser.uid), orderBy('scannedAt','desc'), limit(1));
       const snap = await getDocs(q);
-      if (snap.empty) { showToast('No scans found. Identify a herb first!', 'warn'); return; }
+      if (snap.empty) { showToast('No scans found. Identify a herb first!','warn'); return; }
       const scan = snap.docs[0].data();
-      if (!scan.matched) { showToast('Your last scan had no match.', 'warn'); return; }
+      if (!scan.matched) { showToast('Your last scan had no match.','warn'); return; }
       postHerbData = scan;
       if (scan.imageBase64) {
         postImageB64 = scan.imageBase64;
@@ -1092,22 +908,44 @@
       document.getElementById('postHerbName').textContent = scan.identifiedHerb;
       document.getElementById('postHerbTag').style.display = '';
       showToast(`✅ Loaded scan: ${scan.identifiedHerb}`);
-    } catch(e) { showToast('Could not load last scan: ' + e.message, 'error'); }
+    } catch(e) { showToast('Could not load last scan: '+e.message,'error'); }
   };
 
   window.submitPost = async function() {
     if (!currentUser) return;
     const caption = document.getElementById('postCaption').value.trim();
-    if (!postImageB64 && !caption) { showToast('Add a photo or write something first.', 'warn'); return; }
-    const btn = document.getElementById('postSubmitBtn');
-    btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i> Sharing…';
+    const note    = document.getElementById('postNote')?.value.trim() || '';
+    const fullCaption = note ? caption + (caption ? '\n\n' + note : note) : caption;
+    if (!postImageB64 && !fullCaption) { showToast('Add a photo or write something first.','warn'); return; }
+
+    // ── Grab all elements to lock during upload ──
+    const btn          = document.getElementById('postSubmitBtn');
+    const textarea     = document.getElementById('postCaption');
+    const uploadArea   = document.getElementById('postUploadArea');
+    const scanBtn      = document.getElementById('postFromScanBtn');
+    const closeBtn     = document.getElementById('composeCloseBtn');
+    const clearHerbBtn = document.getElementById('clearHerbTagBtn');
+
+    // ── Lock everything while uploading ──
+    btn.disabled                   = true;
+    btn.innerHTML                  = '<i class="ti ti-loader"></i> Sharing…';
+    textarea.readOnly              = true;
+    textarea.style.opacity         = '0.5';
+    textarea.style.cursor          = 'not-allowed';
+    uploadArea.style.pointerEvents = 'none';
+    uploadArea.style.opacity       = '0.5';
+    if (scanBtn)      { scanBtn.disabled      = true; scanBtn.style.opacity      = '0.5'; }
+    if (closeBtn)     { closeBtn.disabled     = true; closeBtn.style.opacity     = '0.5'; }
+    if (clearHerbBtn) { clearHerbBtn.disabled = true; clearHerbBtn.style.opacity = '0.5'; }
+    const noteEl = document.getElementById('postNote'); if (noteEl) { noteEl.readOnly = true; noteEl.style.opacity = '0.5'; noteEl.style.cursor = 'not-allowed'; }
+
     try {
-      await addDoc(collection(db, 'posts'), {
+      await addDoc(collection(db,'posts'), {
         uid: currentUser.uid,
         userName: currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
         userPhoto: currentUser.photoURL || null,
         userEmail: currentUser.email,
-        caption, imageBase64: postImageB64 || null,
+        caption: fullCaption || caption, imageBase64: postImageB64 || null,
         herbName: postHerbData?.identifiedHerb || null,
         confidence: postHerbData?.confidencePercent || null,
         confidenceLabel: postHerbData?.confidenceLabel || null,
@@ -1116,14 +954,27 @@
       });
       postImageB64 = null; postHerbData = null;
       document.getElementById('postCaption').value = '';
+      const postNoteEl = document.getElementById('postNote'); if (postNoteEl) postNoteEl.value = '';
       document.getElementById('postPreviewImg').src = '';
       document.getElementById('postUploadArea').classList.remove('has-img');
       document.getElementById('postImageInput').value = '';
       document.getElementById('postHerbTag').style.display = 'none';
       closeComposeModal();
       showToast('🌿 Post shared with the community!');
-    } catch(e) { showToast('Could not post: ' + e.message, 'error'); }
-    btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Share';
+    } catch(e) { showToast('Could not post: '+e.message,'error'); }
+
+    // ── Unlock everything whether success or fail ──
+    btn.disabled                   = false;
+    btn.innerHTML                  = '<i class="ti ti-send"></i> Share';
+    textarea.readOnly              = false;
+    textarea.style.opacity         = '';
+    textarea.style.cursor          = '';
+    uploadArea.style.pointerEvents = '';
+    uploadArea.style.opacity       = '';
+    if (scanBtn)      { scanBtn.disabled      = false; scanBtn.style.opacity      = ''; }
+    if (closeBtn)     { closeBtn.disabled     = false; closeBtn.style.opacity     = ''; }
+    if (clearHerbBtn) { clearHerbBtn.disabled = false; clearHerbBtn.style.opacity = ''; }
+    if (noteEl) { noteEl.readOnly = false; noteEl.style.opacity = ''; noteEl.style.cursor = ''; }
   };
 
   // ══════════════════════════════════════════════
@@ -1134,8 +985,8 @@
     const q = query(collection(db,'posts'), orderBy('createdAt','desc'), limit(30));
     unsubFeed = onSnapshot(q, snap => {
       const posts = [];
-      snap.forEach(d => posts.push({ id: d.id, ...d.data() }));
-      window._allPosts = posts;  // cache so the share modal doesn't need a fetch
+      snap.forEach(d => posts.push({ id:d.id, ...d.data() }));
+      window._allPosts = posts;
       renderFeed(posts);
     }, err => {
       document.getElementById('feedPosts').innerHTML =
@@ -1146,12 +997,7 @@
   function renderFeed(posts) {
     const container = document.getElementById('feedPosts');
     if (!posts.length) {
-      container.innerHTML = `
-        <div class="feed-empty">
-          <div class="feed-empty-icon">🌱</div>
-          <h3>No posts yet</h3>
-          <p>Be the first to share a herb discovery!</p>
-        </div>`;
+      container.innerHTML = `<div class="feed-empty"><div class="feed-empty-icon">🌱</div><h3>No posts yet</h3><p>Be the first to share a herb discovery!</p></div>`;
       return;
     }
     container.innerHTML = posts.map(p => renderPost(p)).join('');
@@ -1159,42 +1005,28 @@
 
   function renderPost(p) {
     const isOwner   = currentUser && currentUser.uid === p.uid;
-    const isLiked   = currentUser && (p.likes || []).includes(currentUser.uid);
+    const isLiked   = currentUser && (p.likes||[]).includes(currentUser.uid);
     const likeCount = p.likeCount || 0;
     const cmtCount  = p.commentCount || 0;
-    const timeStr   = p.createdAt?.toDate?.()?.toLocaleDateString('en-PH', {
-      month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit'
-    }) || 'just now';
+    const timeStr   = p.createdAt?.toDate?.()?.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'})||'just now';
+    const avatarHTML = p.userPhoto ? `<img src="${p.userPhoto}" referrerpolicy="no-referrer">` : (p.userName||'U')[0].toUpperCase();
 
-    const avatarHTML = p.userPhoto
-      ? `<img src="${p.userPhoto}" referrerpolicy="no-referrer">`
-      : (p.userName || 'U')[0].toUpperCase();
-
-    // Reposts don't carry their own top-level image/herb badge — that
-    // content belongs to the embedded original shown further down.
     const imageHTML = (!p.sharedPost && p.imageBase64)
-      ? `<div class="feed-image-wrap" onclick="openDetailModal('${p.id}')">
-           <img class="feed-image" src="${p.imageBase64}" alt="herb photo" loading="lazy">
-         </div>`
+      ? `<div class="feed-image-wrap" onclick="openDetailModal('${p.id}')"><img class="feed-image" src="${p.imageBase64}" alt="herb photo" loading="lazy"></div>`
       : (!p.sharedPost && p.herbName) ? `<div class="feed-image-placeholder" onclick="openDetailModal('${p.id}')">🌿</div>` : '';
     const herbBadge = (!p.sharedPost && p.herbName)
       ? `<span class="feed-herb-badge"><i class="ti ti-leaf" style="font-size:11px"></i> ${p.herbName}</span>` : '';
     const confBadge = (!p.sharedPost && p.confidence)
-      ? `<span class="conf-badge ${p.confidenceLabel==='High'?'conf-high':p.confidenceLabel==='Medium'?'conf-med':'conf-low'}">
-           ${p.confidence.toFixed(0)}% ${p.confidenceLabel||''}
-         </span>` : '';
+      ? `<span class="conf-badge ${p.confidenceLabel==='High'?'conf-high':p.confidenceLabel==='Medium'?'conf-med':'conf-low'}">${p.confidence.toFixed(0)}% ${p.confidenceLabel||''}</span>` : '';
     const repostInline = p.sharedPost
       ? `<span class="repost-inline"><i class="ti ti-repeat"></i> shared a post</span>` : '';
     const sharedEmbedHTML = p.sharedPost
       ? `<div class="shared-embed" style="cursor:pointer" onclick="openDetailModal('${p.id}')">${renderSharedEmbedHTML(p.sharedPost)}</div>` : '';
-
     const menuHTML = isOwner
       ? `<div class="feed-card-menu">
            <button class="feed-menu-btn" onclick="togglePostMenu('${p.id}',event)"><i class="ti ti-dots"></i></button>
            <div class="feed-dropdown" id="menu-${p.id}">
-             <div class="feed-dropdown-item danger" onclick="deletePost('${p.id}')">
-               <i class="ti ti-trash"></i> Delete post
-             </div>
+             <div class="feed-dropdown-item danger" onclick="deletePost('${p.id}')"><i class="ti ti-trash"></i> Delete post</div>
            </div>
          </div>` : '';
 
@@ -1204,7 +1036,7 @@
           <div class="feed-avatar">${avatarHTML}</div>
           <div style="cursor:pointer" onclick="openDetailModal('${p.id}')">
             <div class="feed-user-name-row">
-              <span class="feed-user-name">${p.userName || 'User'}</span>
+              <span class="feed-user-name">${p.userName||'User'}</span>
               ${repostInline}
             </div>
             <div class="feed-time">${timeStr}</div>
@@ -1215,8 +1047,8 @@
         ${imageHTML}
         ${sharedEmbedHTML}
         <div class="feed-card-body">
-          ${p.caption ? `<div class="feed-caption" style="cursor:pointer" onclick="openDetailModal('${p.id}')">${escapeHTML(p.caption)}</div>` : ''}
-          ${confBadge ? `<div class="feed-conf-row">${confBadge}<span style="font-size:12px;color:#5a6472">Identification confidence</span></div>` : ''}
+          ${p.caption?`<div class="feed-caption" style="cursor:pointer" onclick="openDetailModal('${p.id}')">${escapeHTML(p.caption)}</div>`:''}
+          ${confBadge?`<div class="feed-conf-row">${confBadge}<span style="font-size:12px;color:#5a6472">Identification confidence</span></div>`:''}
           <div class="feed-reactions">
             <button class="reaction-btn ${isLiked?'liked':''}" onclick="toggleLike('${p.id}','${p.uid}',${isLiked},'${escapeAttr(p.caption)}')">
               <i class="ti ti-heart${isLiked?'-filled':''}"></i>
@@ -1237,26 +1069,23 @@
   }
 
   // ══════════════════════════════════════════════
-  //  LIKES — with notification
+  //  LIKES
   // ══════════════════════════════════════════════
   window.toggleLike = async function(postId, postOwnerUid, isLiked, postSnippet) {
-    if (!currentUser) { showToast('Sign in to like posts', 'warn'); return; }
-    const ref = doc(db, 'posts', postId);
+    if (!currentUser) { showToast('Sign in to like posts','warn'); return; }
+    const ref = doc(db,'posts',postId);
     try {
       if (isLiked) {
         await updateDoc(ref, { likes: arrayRemove(currentUser.uid), likeCount: increment(-1) });
       } else {
         await updateDoc(ref, { likes: arrayUnion(currentUser.uid), likeCount: increment(1) });
-        await createNotification(db, {
-          toUid:     postOwnerUid,
-          fromUid:   currentUser.uid,
-          fromName:  currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
-          fromPhoto: currentUser.photoURL,
-          type:      'like',
-          postId,    postSnippet,
-        });
+        createNotification(db, {
+          toUid: postOwnerUid, fromUid: currentUser.uid,
+          fromName: currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
+          fromPhoto: currentUser.photoURL, type: 'like', postId, postSnippet,
+        }).catch(()=>{});
       }
-    } catch(e) { showToast('Could not update like', 'error'); }
+    } catch(e) { showToast('Could not update like','error'); }
   };
 
   // ══════════════════════════════════════════════
@@ -1268,29 +1097,21 @@
       imgWrap.innerHTML = `<img class="post-detail-img" src="${p.imageBase64}" alt="herb photo">`;
     } else if (!p.sharedPost && p.herbName) {
       imgWrap.innerHTML = `<div class="post-detail-img-placeholder">🌿</div>`;
-    } else {
-      imgWrap.innerHTML = '';
-    }
+    } else { imgWrap.innerHTML = ''; }
+
     const avHTML  = p.userPhoto
       ? `<img src="${p.userPhoto}" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
-      : (p.userName || 'U')[0].toUpperCase();
-    const timeStr = p.createdAt?.toDate?.()?.toLocaleDateString('en-PH', {
-      month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit'
-    }) || '';
-    const repostInline = p.sharedPost
-      ? `<span class="repost-inline"><i class="ti ti-repeat"></i> shared a post</span>` : '';
+      : (p.userName||'U')[0].toUpperCase();
+    const timeStr = p.createdAt?.toDate?.()?.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'})||'';
+    const repostInline = p.sharedPost ? `<span class="repost-inline"><i class="ti ti-repeat"></i> shared a post</span>` : '';
+
     document.getElementById('detailAuthor').innerHTML = `
-      <div style="width:36px;height:36px;border-radius:50%;background:var(--green-main);color:#fff;
-        display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;overflow:hidden;flex-shrink:0">
-        ${avHTML}
-      </div>
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--green-main);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;overflow:hidden;flex-shrink:0">${avHTML}</div>
       <div>
-        <div class="feed-user-name-row">
-          <span style="font-size:13px;font-weight:600;color:#1a1a1a">${p.userName || 'User'}</span>
-          ${repostInline}
-        </div>
+        <div class="feed-user-name-row"><span style="font-size:13px;font-weight:600;color:#1a1a1a">${p.userName||'User'}</span>${repostInline}</div>
         <div style="font-size:11px;color:#8c96a0">${timeStr}</div>
       </div>`;
+
     let badges = '';
     if (!p.sharedPost && p.herbName) badges += `<span class="feed-herb-badge"><i class="ti ti-leaf" style="font-size:11px"></i> ${p.herbName}</span>`;
     if (!p.sharedPost && p.confidence) {
@@ -1300,22 +1121,19 @@
     document.getElementById('detailBadges').innerHTML = badges;
     document.getElementById('detailCaption').innerHTML = p.caption ? escapeHTML(p.caption) : '';
 
-    // shared-post embed (only present when this post is a repost)
     const embedWrap = document.getElementById('detailSharedEmbed');
     if (embedWrap) {
       embedWrap.innerHTML = p.sharedPost
-        ? `<div class="shared-embed" style="margin:0 1.1rem 0.75rem">${renderSharedEmbedHTML(p.sharedPost)}</div>`
-        : '';
+        ? `<div class="shared-embed" style="margin:0 1.1rem 0.75rem">${renderSharedEmbedHTML(p.sharedPost)}</div>` : '';
     }
 
-    const isLiked   = currentUser && (p.likes || []).includes(currentUser.uid);
-    const likeCount = p.likeCount  || 0;
+    const isLiked   = currentUser && (p.likes||[]).includes(currentUser.uid);
+    const likeCount = p.likeCount || 0;
     const cmtCount  = p.commentCount || 0;
     document.getElementById('detailReactions').innerHTML = `
-      <button class="reaction-btn ${isLiked?'liked':''}" id="detailLikeBtn"
-        onclick="toggleDetailLike('${p.id}','${p.uid}',${isLiked},'${escapeAttr(p.caption||'')}')">
+      <button class="reaction-btn ${isLiked?'liked':''}" onclick="toggleDetailLike('${p.id}','${p.uid}',${isLiked},'${escapeAttr(p.caption||'')}')">
         <i class="ti ti-heart${isLiked?'-filled':''}"></i>
-        <span id="detail-like-count">${likeCount} ${likeCount===1?'Like':'Likes'}</span>
+        <span>${likeCount} ${likeCount===1?'Like':'Likes'}</span>
       </button>
       <div class="reaction-divider"></div>
       <button class="reaction-btn" onclick="document.getElementById('detailCommentInput').focus()">
@@ -1328,27 +1146,26 @@
 
     const myAv = currentUser?.photoURL
       ? `<img src="${currentUser.photoURL}" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
-      : (currentUser?.displayName || 'U')[0].toUpperCase();
+      : (currentUser?.displayName||'U')[0].toUpperCase();
     document.getElementById('detailMyAvatar').innerHTML = myAv;
   }
 
   window.toggleDetailLike = async function(postId, postOwnerUid, isLiked, postSnippet) {
-    if (!currentUser) { showToast('Sign in to like', 'warn'); return; }
-    const ref = doc(db, 'posts', postId);
+    if (!currentUser) { showToast('Sign in to like','warn'); return; }
+    const ref = doc(db,'posts',postId);
     try {
       if (isLiked) {
         await updateDoc(ref, { likes: arrayRemove(currentUser.uid), likeCount: increment(-1) });
       } else {
         await updateDoc(ref, { likes: arrayUnion(currentUser.uid), likeCount: increment(1) });
-        await createNotification(db, {
+        createNotification(db, {
           toUid: postOwnerUid, fromUid: currentUser.uid,
           fromName: currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
-          fromPhoto: currentUser.photoURL, type: 'like',
-          postId, postSnippet,
-        });
+          fromPhoto: currentUser.photoURL, type: 'like', postId, postSnippet,
+        }).catch(()=>{});
       }
       openDetailModal(postId, false);
-    } catch(e) { showToast('Could not update like', 'error'); }
+    } catch(e) { showToast('Could not update like','error'); }
   };
 
   // ══════════════════════════════════════════════
@@ -1361,18 +1178,14 @@
       const q    = query(collection(db,'posts',postId,'comments'), orderBy('createdAt','asc'), limit(50));
       const snap = await getDocs(q);
       const cmts = [];
-      snap.forEach(d => cmts.push({ id: d.id, ...d.data() }));
+      snap.forEach(d => cmts.push({ id:d.id, ...d.data() }));
       if (!cmts.length) {
         listEl.innerHTML = `<p style="font-size:13px;color:#8c96a0;text-align:center;margin-top:1.5rem">No comments yet. Be the first!</p>`;
         return;
       }
       listEl.innerHTML = cmts.map(c => renderDetailComment(postId, c)).join('');
-      for (const c of cmts) await loadDetailReplies(postId, c.id);
-      // Attach mention autocomplete to all reply inputs
-      cmts.forEach(c => {
-        const inp = document.getElementById(`dri-${c.id}`);
-        if (inp) attachMentions(inp);
-      });
+            for (const c of cmts) await loadDetailReplies(postId, c.id);
+      cmts.forEach(c => { const inp = document.getElementById(`dri-${c.id}`); if (inp) attachMentions(inp); });
     } catch(e) {
       listEl.innerHTML = `<p style="font-size:12px;color:#e53e3e">Could not load comments.</p>`;
     }
@@ -1380,37 +1193,28 @@
 
   function renderDetailComment(postId, c) {
     const isOwner = currentUser && currentUser.uid === c.uid;
-    const avHTML  = c.userPhoto
-      ? `<img src="${c.userPhoto}" referrerpolicy="no-referrer">`
-      : (c.userName || 'U')[0].toUpperCase();
-    const timeStr = c.createdAt?.toDate?.()?.toLocaleDateString('en-PH', {
-      month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'
-    }) || '';
-    // Render @mentions as highlighted spans
+    const avHTML  = c.userPhoto ? `<img src="${c.userPhoto}" referrerpolicy="no-referrer">` : (c.userName||'U')[0].toUpperCase();
+    const timeStr = c.createdAt?.toDate?.()?.toLocaleDateString('en-PH',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})||'';
     const { html: textHtml } = parseMentions(c.text, userCache);
-
     return `
       <div class="comment-item" id="dc-${c.id}">
         <div class="comment-avatar">${avHTML}</div>
         <div class="comment-right">
           <div class="comment-bubble">
-            <div class="comment-name">${c.userName || 'User'}</div>
+            <div class="comment-name">${c.userName||'User'}</div>
             <div class="comment-text">${textHtml}</div>
           </div>
           <div class="comment-meta">
             <span class="comment-time">${timeStr}</span>
             <button class="comment-reply-btn" onclick="toggleDetailReplyBox('${postId}','${c.id}','${escapeAttr(c.userName||'')}','${c.uid}')">Reply</button>
-            ${isOwner ? `<button class="comment-delete-btn" onclick="deleteDetailComment('${postId}','${c.id}')"><i class="ti ti-trash"></i> Delete</button>` : ''}
+            ${isOwner?`<button class="comment-delete-btn" onclick="deleteDetailComment('${postId}','${c.id}')"><i class="ti ti-trash"></i> Delete</button>`:''}
           </div>
           <div class="replies-thread" id="dr-${c.id}"></div>
           <div class="reply-input-row" id="drir-${c.id}">
             <div class="reply-avatar" style="flex-shrink:0">
-              ${currentUser?.photoURL
-                ? `<img src="${currentUser.photoURL}" referrerpolicy="no-referrer">`
-                : (currentUser?.displayName || 'U')[0].toUpperCase()}
+              ${currentUser?.photoURL?`<img src="${currentUser.photoURL}" referrerpolicy="no-referrer">`:(currentUser?.displayName||'U')[0].toUpperCase()}
             </div>
-            <input class="reply-input" id="dri-${c.id}"
-              placeholder="Reply… use @ to mention"
+            <input class="reply-input" id="dri-${c.id}" placeholder="Reply… use @ to mention"
               onkeydown="if(event.key==='Enter')submitDetailReply('${postId}','${c.id}','${c.uid}','${escapeAttr(c.userName||'')}','${escapeAttr(activePostId||postId)}')" />
             <button class="reply-send" onclick="submitDetailReply('${postId}','${c.id}','${c.uid}','${escapeAttr(c.userName||'')}','${escapeAttr(activePostId||postId)}')">
               <i class="ti ti-send"></i>
@@ -1426,10 +1230,8 @@
     row.classList.toggle('open');
     if (row.classList.contains('open')) {
       const inp = document.getElementById(`dri-${commentId}`);
-      // Pre-fill @mention of comment author
-      if (inp && commentAuthorName && commentAuthorName !== (currentUser?.displayName || '')) {
+      if (inp && commentAuthorName && commentAuthorName !== (currentUser?.displayName||''))
         if (!inp.value) inp.value = `@${commentAuthorName} `;
-      }
       setTimeout(() => inp?.focus(), 50);
       loadDetailReplies(postId, commentId);
     }
@@ -1442,46 +1244,39 @@
       const q    = query(collection(db,'posts',postId,'comments',commentId,'replies'), orderBy('createdAt','asc'), limit(20));
       const snap = await getDocs(q);
       const replies = [];
-      snap.forEach(d => replies.push({ id: d.id, ...d.data() }));
+      snap.forEach(d => replies.push({ id:d.id, ...d.data() }));
       thread.innerHTML = replies.map(r => renderDetailReply(postId, commentId, r)).join('');
-    } catch(e) { console.error('loadDetailReplies', e); }
+    } catch(e) { console.error('loadDetailReplies',e); }
   }
 
   function renderDetailReply(postId, commentId, r) {
     const isOwner = currentUser && currentUser.uid === r.uid;
-    const avHTML  = r.userPhoto
-      ? `<img src="${r.userPhoto}" referrerpolicy="no-referrer">`
-      : (r.userName || 'U')[0].toUpperCase();
-    const timeStr = r.createdAt?.toDate?.()?.toLocaleDateString('en-PH', {
-      month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'
-    }) || '';
+    const avHTML  = r.userPhoto ? `<img src="${r.userPhoto}" referrerpolicy="no-referrer">` : (r.userName||'U')[0].toUpperCase();
+    const timeStr = r.createdAt?.toDate?.()?.toLocaleDateString('en-PH',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})||'';
     const { html: textHtml } = parseMentions(r.text, userCache);
-
     return `
       <div class="reply-item" id="dr-reply-${r.id}">
         <div class="reply-avatar">${avHTML}</div>
         <div style="flex:1;min-width:0">
           <div class="reply-bubble">
-            <div class="reply-name">${r.userName || 'User'}</div>
+            <div class="reply-name">${r.userName||'User'}</div>
             <div class="reply-text">${textHtml}</div>
           </div>
           <div class="reply-meta">
             <span class="reply-time">${timeStr}</span>
-            ${isOwner ? `<button class="reply-delete-btn" onclick="deleteDetailReply('${postId}','${commentId}','${r.id}')"><i class="ti ti-trash"></i> Delete</button>` : ''}
+            ${isOwner?`<button class="reply-delete-btn" onclick="deleteDetailReply('${postId}','${commentId}','${r.id}')"><i class="ti ti-trash"></i> Delete</button>`:''}
           </div>
         </div>
       </div>`;
   }
 
   window.submitDetailComment = async function() {
-    if (!currentUser) { showToast('Sign in to comment', 'warn'); return; }
+    if (!currentUser) { showToast('Sign in to comment','warn'); return; }
     const input = document.getElementById('detailCommentInput');
     const text  = input.value.trim();
     if (!text || !activePostId) return;
     input.value = '';
-
     const { mentionedUids } = parseMentions(text, userCache);
-
     try {
       const cmtRef = await addDoc(collection(db,'posts',activePostId,'comments'), {
         uid: currentUser.uid,
@@ -1490,38 +1285,29 @@
         text, createdAt: serverTimestamp(),
       });
       await updateDoc(doc(db,'posts',activePostId), { commentCount: increment(1) });
-
-      // Get post owner uid directly — fetch just this post document
-      const postDoc = await getDocs(query(
-        collection(db,'posts'), where('__name__', '==', activePostId), limit(1)
-      )).catch(() => null);
       let postOwnerUid = null, postSnippet = '';
-      // Fallback: iterate posts snap
       const allSnap = await getDocs(collection(db,'posts'));
       allSnap.forEach(d => {
         if (d.id === activePostId) { postOwnerUid = d.data().uid; postSnippet = (d.data().caption||'').slice(0,80); }
       });
-
       if (postOwnerUid) {
-        await createNotification(db, {
+        createNotification(db, {
           toUid: postOwnerUid, fromUid: currentUser.uid,
           fromName: currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
           fromPhoto: currentUser.photoURL, type: 'comment',
           postId: activePostId, postSnippet, commentId: cmtRef.id, text,
-        });
+        }).catch(()=>{});
       }
-
       for (const uid of mentionedUids) {
-        await createNotification(db, {
+        createNotification(db, {
           toUid: uid, fromUid: currentUser.uid,
           fromName: currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
           fromPhoto: currentUser.photoURL, type: 'mention',
           postId: activePostId, commentId: cmtRef.id, text,
-        });
+        }).catch(()=>{});
       }
-
       await loadDetailComments(activePostId);
-    } catch(e) { showToast('Could not post comment: ' + e.message, 'error'); }
+    } catch(e) { showToast('Could not post comment: '+e.message,'error'); }
   };
 
   window.deleteDetailComment = async function(postId, commentId) {
@@ -1530,14 +1316,11 @@
       await deleteDoc(doc(db,'posts',postId,'comments',commentId));
       await updateDoc(doc(db,'posts',postId), { commentCount: increment(-1) });
       document.getElementById(`dc-${commentId}`)?.remove();
-    } catch(e) { showToast('Could not delete comment', 'error'); }
+    } catch(e) { showToast('Could not delete comment','error'); }
   };
 
-  // ══════════════════════════════════════════════
-  //  REPLIES — with notifications + mentions
-  // ══════════════════════════════════════════════
   window.submitDetailReply = async function(postId, commentId, commentOwnerUid, commentOwnerName, mainPostId) {
-    if (!currentUser) { showToast('Sign in to reply', 'warn'); return; }
+    if (!currentUser) { showToast('Sign in to reply','warn'); return; }
     const input = document.getElementById(`dri-${commentId}`);
     if (!input) return;
     const text = input.value.trim();
@@ -1545,9 +1328,7 @@
     const sendBtn = input.nextElementSibling;
     if (sendBtn) sendBtn.disabled = true;
     input.value = '';
-
     const { mentionedUids } = parseMentions(text, userCache);
-
     try {
       const replyRef = await addDoc(collection(db,'posts',postId,'comments',commentId,'replies'), {
         uid: currentUser.uid,
@@ -1555,26 +1336,23 @@
         userPhoto: currentUser.photoURL || null,
         text, createdAt: serverTimestamp(),
       });
-
-      await createNotification(db, {
+      createNotification(db, {
         toUid: commentOwnerUid, fromUid: currentUser.uid,
         fromName: currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
         fromPhoto: currentUser.photoURL, type: 'reply',
-        postId: mainPostId || postId, commentId, replyId: replyRef.id, text,
-      });
-
+        postId: mainPostId||postId, commentId, replyId: replyRef.id, text,
+      }).catch(()=>{});
       for (const uid of mentionedUids) {
-        await createNotification(db, {
+        createNotification(db, {
           toUid: uid, fromUid: currentUser.uid,
           fromName: currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
           fromPhoto: currentUser.photoURL, type: 'mention',
-          postId: mainPostId || postId, commentId, replyId: replyRef.id, text,
-        });
+          postId: mainPostId||postId, commentId, replyId: replyRef.id, text,
+        }).catch(()=>{});
       }
-
       await loadDetailReplies(postId, commentId);
     } catch(e) {
-      showToast('Could not post reply: ' + e.message, 'error');
+      showToast('Could not post reply: '+e.message,'error');
       input.value = text;
     } finally {
       if (sendBtn) sendBtn.disabled = false;
@@ -1586,7 +1364,7 @@
     try {
       await deleteDoc(doc(db,'posts',postId,'comments',commentId,'replies',replyId));
       document.getElementById(`dr-reply-${replyId}`)?.remove();
-    } catch(e) { showToast('Could not delete reply', 'error'); }
+    } catch(e) { showToast('Could not delete reply','error'); }
   };
 
   // ══════════════════════════════════════════════
@@ -1598,7 +1376,7 @@
       await deleteDoc(doc(db,'posts',postId));
       document.getElementById(`post-${postId}`)?.remove();
       showToast('Post deleted');
-    } catch(e) { showToast('Could not delete post: ' + e.message, 'error'); }
+    } catch(e) { showToast('Could not delete post: '+e.message,'error'); }
   };
   window.togglePostMenu = function(postId, e) {
     e.stopPropagation();
@@ -1616,7 +1394,6 @@
   function escapeAttr(str) {
     return (str||'').replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/\n/g,' ').slice(0,80);
   }
-
   function showToast(msg, type='ok') {
     const wrap = document.getElementById('toastWrap');
     const colors = { ok:'#0a4a35', error:'#7f1d1d', warn:'#92400e' };
@@ -1627,6 +1404,5 @@
     setTimeout(() => t.remove(), 3500);
   }
 </script>
-<script type="module" src="./js/translator.js"></script>
 </body>
 </html>
