@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>Herb Detail — HerbID Iloilo</title>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css" />
@@ -52,37 +51,6 @@
     }
     .info-section-title i { font-size: 15px; color: var(--green-main); }
     .info-val { font-size: 14px; color: var(--text-primary); line-height: 1.7; }
-    /* Preparation method: preserve the exact line breaks/blank lines entered by admin */
-    #preparation { white-space: pre-wrap; }
-    .preparation-admin-panel {
-      display: none; margin-top: 12px; padding-top: 12px;
-      border-top: 1px dashed var(--border);
-    }
-    .preparation-admin-panel.visible { display: block; }
-    .preparation-admin-label {
-      font-size: 11px; font-weight: 600; text-transform: uppercase;
-      letter-spacing: 0.06em; color: var(--green-main);
-      display: flex; align-items: center; gap: 5px; margin-bottom: 8px;
-    }
-    .preparation-editor {
-      width: 100%; min-height: 180px; box-sizing: border-box; resize: vertical;
-      border: 1.5px solid var(--border); border-radius: var(--radius-md);
-      padding: 10px 12px; font-size: 14px; line-height: 1.7;
-      font-family: 'DM Sans', sans-serif; color: var(--text-primary);
-      background: var(--white);
-    }
-    .preparation-editor:focus {
-      outline: none; border-color: var(--green-main);
-      box-shadow: 0 0 0 3px rgba(34,160,107,0.1);
-    }
-    .preparation-save-btn {
-      margin-top: 8px; padding: 9px 16px; background: var(--green-main);
-      color: #fff; border: none; border-radius: var(--radius-md);
-      font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif;
-      cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
-    }
-    .preparation-save-btn:hover:not(:disabled) { background: var(--green-mid); }
-    .preparation-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .info-tags { display: flex; flex-wrap: wrap; gap: 6px; }
     .info-tags span { font-size: 12px; padding: 4px 12px; border-radius: 99px; }
 
@@ -135,6 +103,83 @@
     .lightbox img { max-width: 100%; max-height: 90vh; border-radius: var(--radius-md); }
 
     /* ── VIDEO TUTORIAL SECTION ───────────────────────────── */
+    /* ── Admin inline edit — shared styles for all editable fields ── */
+    .admin-edit-btn {
+      margin-left: auto; background: none; border: 1px solid var(--border);
+      border-radius: 8px; padding: 4px 10px; font-size: 11px; font-weight: 600;
+      color: var(--green-main); cursor: pointer; display: none;
+      align-items: center; gap: 4px; font-family: 'DM Sans', sans-serif;
+      transition: background 0.15s; white-space: nowrap;
+    }
+    .admin-edit-btn:hover { background: var(--green-pale); }
+    .admin-edit-btn.visible { display: inline-flex; }
+    .editable-input {
+      width: 100%; border: 1.5px solid var(--green-main); border-radius: var(--radius-md);
+      padding: 8px 12px; font-size: 14px; font-family: 'DM Sans', sans-serif;
+      color: var(--text-primary); box-sizing: border-box; background: #f8fffc;
+      display: none; transition: border-color 0.15s;
+    }
+    .editable-input:focus { outline: none; box-shadow: 0 0 0 3px rgba(34,160,107,0.1); }
+    .editable-save-row {
+      display: none; gap: 8px; margin-top: 8px; align-items: center; flex-wrap: wrap;
+    }
+    .editable-save-row.visible { display: flex; }
+    .editable-save-btn {
+      padding: 7px 14px; background: var(--green-main); color: #fff;
+      border: none; border-radius: var(--radius-md); font-size: 12px; font-weight: 600;
+      font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .editable-save-btn:hover:not(:disabled) { background: var(--green-mid); }
+    .editable-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .editable-cancel-btn {
+      padding: 7px 12px; background: #fff; color: var(--text-muted);
+      border: 1px solid var(--border); border-radius: var(--radius-md);
+      font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer;
+    }
+    .editable-cancel-btn:hover { background: #f4f6f5; }
+    .editable-hint { font-size: 11px; color: #8c96a0; }
+
+    /* ── Preparation method editable by admin ── */
+    .prep-display { white-space: pre-wrap; font-size: 14px; color: var(--text-primary); line-height: 1.7; }
+    .prep-edit-btn {
+      margin-left: auto; background: none; border: 1px solid var(--border);
+      border-radius: 8px; padding: 4px 10px; font-size: 11px; font-weight: 600;
+      color: var(--green-main); cursor: pointer; display: none;
+      align-items: center; gap: 4px; font-family: 'DM Sans', sans-serif;
+      transition: background 0.15s;
+    }
+    .prep-edit-btn:hover { background: var(--green-pale); }
+    .prep-edit-btn.visible { display: inline-flex; }
+    .prep-textarea {
+      width: 100%; border: 1.5px solid var(--green-main); border-radius: var(--radius-md);
+      padding: 10px 13px; font-size: 14px; font-family: 'DM Sans', sans-serif;
+      color: var(--text-primary); line-height: 1.7; resize: vertical;
+      min-height: 120px; box-sizing: border-box; display: none;
+      transition: border-color 0.15s; background: #f8fffc;
+    }
+    .prep-textarea:focus { outline: none; box-shadow: 0 0 0 3px rgba(34,160,107,0.1); }
+    .prep-save-row {
+      display: none; gap: 8px; margin-top: 8px; align-items: center;
+    }
+    .prep-save-row.visible { display: flex; }
+    .prep-save-btn {
+      padding: 8px 16px; background: var(--green-main); color: #fff;
+      border: none; border-radius: var(--radius-md); font-size: 13px; font-weight: 600;
+      font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .prep-save-btn:hover:not(:disabled) { background: var(--green-mid); }
+    .prep-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .prep-cancel-btn {
+      padding: 8px 14px; background: #fff; color: var(--text-muted);
+      border: 1px solid var(--border); border-radius: var(--radius-md);
+      font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .prep-cancel-btn:hover { background: #f4f6f5; }
+    .prep-hint { font-size: 11px; color: #8c96a0; margin-left: auto; }
+
     .video-list { display: flex; flex-direction: column; gap: 14px; }
 
     .video-card {
@@ -272,10 +317,56 @@
 
     <!-- RIGHT -->
     <div class="detail-right">
-      <div class="herb-num-badge" id="herbNum"></div>
-      <h1 class="herb-title-local" id="titleLocal"></h1>
-      <div class="herb-title-english" id="titleEnglish"></div>
-      <div class="herb-title-sci" id="titleSci"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:0.5rem">
+        <div class="herb-num-badge" id="herbNum"></div>
+        <button class="admin-edit-btn" id="editTitlesBtn" onclick="startEdit('titles')">
+          <i class="ti ti-pencil"></i> Edit names
+        </button>
+      </div>
+      <!-- Display -->
+      <div id="titlesDisplay">
+        <h1 class="herb-title-local" id="titleLocal"></h1>
+        <div class="herb-title-english" id="titleEnglish"></div>
+        <div class="herb-title-sci" id="titleSci"></div>
+      </div>
+      <!-- Edit -->
+      <div id="titlesEdit" style="display:none;margin-bottom:1rem">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div>
+            <div style="font-size:11px;color:#8c96a0;margin-bottom:3px">Local name</div>
+            <input class="editable-input" style="display:block;font-size:18px;font-weight:700" id="editLocalName" type="text" placeholder="Local name" />
+          </div>
+          <div>
+            <div style="font-size:11px;color:#8c96a0;margin-bottom:3px">English name</div>
+            <input class="editable-input" style="display:block" id="editEnglishName" type="text" placeholder="English name" />
+          </div>
+          <div>
+            <div style="font-size:11px;color:#8c96a0;margin-bottom:3px">Scientific name</div>
+            <input class="editable-input" style="display:block;font-style:italic" id="editSciName" type="text" placeholder="Scientific name" />
+          </div>
+        </div>
+        <div class="editable-save-row visible" style="margin-top:10px">
+          <button class="editable-save-btn" onclick="saveField('titles')"><i class="ti ti-device-floppy"></i> Save</button>
+          <button class="editable-cancel-btn" onclick="cancelEdit('titles')">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Description (new field) -->
+      <div class="info-section">
+        <div class="info-section-title">
+          <i class="ti ti-file-description"></i> Description
+          <button class="admin-edit-btn" id="editDescBtn" onclick="startEdit('description')">
+            <i class="ti ti-pencil"></i> Edit
+          </button>
+        </div>
+        <div class="prep-display" id="description" style="white-space:pre-wrap;font-size:14px;color:var(--text-primary);line-height:1.7"></div>
+        <textarea class="prep-textarea" id="descTextarea" style="display:none;width:100%;border:1.5px solid var(--green-main);border-radius:var(--radius-md);padding:10px 13px;font-size:14px;font-family:'DM Sans',sans-serif;resize:vertical;min-height:100px;box-sizing:border-box;background:#f8fffc" placeholder="Enter herb description…&#10;Line breaks will be preserved."></textarea>
+        <div class="editable-save-row" id="descSaveRow">
+          <button class="editable-save-btn" onclick="saveField('description')"><i class="ti ti-device-floppy"></i> Save</button>
+          <button class="editable-cancel-btn" onclick="cancelEdit('description')">Cancel</button>
+          <span class="editable-hint">Line breaks are preserved</span>
+        </div>
+      </div>
 
       <div class="info-section">
         <div class="info-section-title"><i class="ti ti-pill"></i> Medicinal uses</div>
@@ -283,27 +374,38 @@
       </div>
 
       <div class="info-section">
-        <div class="info-section-title"><i class="ti ti-flask"></i> Parts used</div>
+        <div class="info-section-title">
+          <i class="ti ti-flask"></i> Parts used
+          <button class="admin-edit-btn" id="editPartsBtn" onclick="startEdit('parts')">
+            <i class="ti ti-pencil"></i> Edit
+          </button>
+        </div>
         <div class="info-val" id="parts"></div>
+        <input class="editable-input" id="partsInput" type="text" placeholder="e.g. Leaves, Roots, Bark" />
+        <div class="editable-save-row" id="partsSaveRow">
+          <button class="editable-save-btn" onclick="saveField('parts')"><i class="ti ti-device-floppy"></i> Save</button>
+          <button class="editable-cancel-btn" onclick="cancelEdit('parts')">Cancel</button>
+        </div>
       </div>
 
       <div class="info-section">
-        <div class="info-section-title"><i class="ti ti-kettle"></i> Preparation method</div>
-        <div class="info-val" id="preparation"></div>
-
-        <!-- Admin-only preparation method editor -->
-        <div class="preparation-admin-panel" id="preparationAdminPanel">
-          <div class="preparation-admin-label">
-            <i class="ti ti-shield" style="font-size:12px"></i> Admin — Edit preparation method
-          </div>
-          <textarea
-            class="preparation-editor"
-            id="preparationEditor"
-            placeholder="Enter the preparation method. Line breaks and blank lines will be preserved."
-          ></textarea>
-          <button class="preparation-save-btn" id="preparationSaveBtn" onclick="savePreparation()">
-            <i class="ti ti-device-floppy"></i> Save Preparation Method
+        <div class="info-section-title">
+          <i class="ti ti-kettle"></i> Preparation method
+          <button class="prep-edit-btn" id="prepEditBtn" onclick="startEditPrep()">
+            <i class="ti ti-pencil"></i> Edit
           </button>
+        </div>
+        <!-- Display mode: white-space:pre-wrap preserves line breaks and spacing -->
+        <div class="prep-display" id="preparation"></div>
+        <!-- Edit mode: only visible to admins when editing -->
+        <textarea class="prep-textarea" id="prepTextarea" placeholder="Enter preparation method…
+Use Enter for new lines — formatting will be preserved exactly as you type."></textarea>
+        <div class="prep-save-row" id="prepSaveRow">
+          <button class="prep-save-btn" id="prepSaveBtn" onclick="savePrep()">
+            <i class="ti ti-device-floppy"></i> Save
+          </button>
+          <button class="prep-cancel-btn" onclick="cancelEditPrep()">Cancel</button>
+          <span class="prep-hint">Line breaks and spacing will be preserved</span>
         </div>
       </div>
 
@@ -378,8 +480,14 @@
       </div>
 
       <div class="info-section">
-        <div class="info-section-title"><i class="ti ti-dna"></i> Plant classification</div>
-        <table style="width:100%;font-size:13px;border-collapse:collapse">
+        <div class="info-section-title">
+          <i class="ti ti-dna"></i> Plant classification
+          <button class="admin-edit-btn" id="editClassBtn" onclick="startEdit('classification')">
+            <i class="ti ti-pencil"></i> Edit
+          </button>
+        </div>
+        <!-- Display -->
+        <table style="width:100%;font-size:13px;border-collapse:collapse" id="classDisplay">
           <tr>
             <td style="padding:5px 0;color:var(--text-muted);width:120px">Scientific name</td>
             <td style="font-style:italic" id="sci2"></td>
@@ -389,6 +497,21 @@
             <td id="family"></td>
           </tr>
         </table>
+        <!-- Edit -->
+        <div id="classEdit" style="display:none;flex-direction:column;gap:8px">
+          <div>
+            <div style="font-size:11px;color:#8c96a0;margin-bottom:3px">Scientific name</div>
+            <input class="editable-input" style="display:block;font-style:italic" id="editSci2" type="text" placeholder="Scientific name" />
+          </div>
+          <div>
+            <div style="font-size:11px;color:#8c96a0;margin-bottom:3px">Plant family</div>
+            <input class="editable-input" style="display:block" id="editFamily" type="text" placeholder="e.g. Asteraceae (Sunflower/Daisy Family)" />
+          </div>
+          <div class="editable-save-row visible">
+            <button class="editable-save-btn" onclick="saveField('classification')"><i class="ti ti-device-floppy"></i> Save</button>
+            <button class="editable-cancel-btn" onclick="cancelEdit('classification')">Cancel</button>
+          </div>
+        </div>
       </div>
 
       <!-- Community-verified photo gallery -->
@@ -402,8 +525,18 @@
       </div>
 
       <div class="info-section">
-        <div class="info-section-title"><i class="ti ti-map-pin"></i> Location</div>
+        <div class="info-section-title">
+          <i class="ti ti-map-pin"></i> Location
+          <button class="admin-edit-btn" id="editLocBtn" onclick="startEdit('location')">
+            <i class="ti ti-pencil"></i> Edit
+          </button>
+        </div>
         <div class="info-val" id="location" style="margin-bottom:10px"></div>
+        <input class="editable-input" id="locationInput" type="text" placeholder="e.g. Commonly found in Lemery, Iloilo" style="margin-bottom:10px" />
+        <div class="editable-save-row" id="locationSaveRow" style="margin-bottom:10px">
+          <button class="editable-save-btn" onclick="saveField('location')"><i class="ti ti-device-floppy"></i> Save</button>
+          <button class="editable-cancel-btn" onclick="cancelEdit('location')">Cancel</button>
+        </div>
         <a class="loc-map-preview" id="mapLink" href="#">
           <i class="ti ti-map-2"></i>
           <div class="loc-map-text">
@@ -444,7 +577,7 @@
   } from './js/firebase-config.js';
 
   import {
-    addDoc, deleteDoc, updateDoc, serverTimestamp
+    addDoc, deleteDoc, serverTimestamp
   } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
   import {
@@ -458,20 +591,19 @@
 
   // ── Admin emails — same list as firestore.rules ──────────
   const ADMIN_EMAILS = [
-   "marklouiepanares7@gmail.com",
-        "bilbaobenjamin11@gmail.com",
-        "jermilynazuela073@gmail.com",
-        "kurtmatthewjunealborote@gmail.com",
-        "maeloufaithluminate@gmail.com",
-        "agolitorenerose5@gmail.com",
-        "agolitorenerose07@gmail.com"
+    'marklouiepanares7@gmail.com',
+    'bilbaobenjamin11@gmail.com',
+    'jermilynazuela073@gmail.com',
+    'kurtmatthewjunealborote@gmail.com',
+    'maeloufaithluminate@gmail.com',
+    'agolitorenerose07@gmail.com',
+    'agolitorenerose05@gmail.com',
   ];
 
   const params = new URLSearchParams(location.search);
   const herbId = params.get('id');
 
   let currentHerbName = '';
-  let currentPreparation = '';
   let selectedVideoFile = null;
   let isAdmin = false;
 
@@ -487,18 +619,225 @@
   getAuth().onAuthStateChanged(user => {
     isAdmin = !!(user && ADMIN_EMAILS.includes(user.email));
     if (isAdmin) {
-      // Show admin preparation editor
-      document.getElementById('preparationAdminPanel').classList.add('visible');
-      document.getElementById('preparationEditor').value = currentPreparation;
-
       // Show admin upload panel
       document.getElementById('videoAdminPanel').classList.add('visible');
       // Show delete buttons on all existing video cards
       document.querySelectorAll('.video-delete-btn').forEach(btn => {
         btn.style.display = 'flex';
       });
+      // Show all admin edit buttons
+      document.querySelectorAll('.admin-edit-btn, .prep-edit-btn').forEach(btn => {
+        btn.classList.add('visible');
+      });
     }
   });
+
+  // ══════════════════════════════════════════════════════════
+  //  UNIFIED ADMIN INLINE EDIT SYSTEM
+  //  Each field has a "display" element and an "input/textarea" element.
+  //  startEdit(field) — hides display, shows input pre-filled with current value
+  //  cancelEdit(field) — hides input, shows display unchanged
+  //  saveField(field) — saves to Firestore, updates display, cancels edit mode
+  // ══════════════════════════════════════════════════════════
+
+  // Field config — maps field name to its display/input element IDs and Firestore key
+  const FIELD_CONFIG = {
+    parts: {
+      displayId: 'parts', inputId: 'partsInput', saveRowId: 'partsSaveRow',
+      firestoreKey: 'parts', type: 'input',
+    },
+    location: {
+      displayId: 'location', inputId: 'locationInput', saveRowId: 'locationSaveRow',
+      firestoreKey: 'location', type: 'input',
+    },
+    description: {
+      displayId: 'description', inputId: 'descTextarea', saveRowId: 'descSaveRow',
+      firestoreKey: 'description', type: 'textarea',
+    },
+  };
+
+  window.startEdit = function(field) {
+    if (field === 'titles') {
+      document.getElementById('titlesDisplay').style.display = 'none';
+      document.getElementById('titlesEdit').style.display    = 'block';
+      document.getElementById('editLocalName').value   = document.getElementById('titleLocal').textContent;
+      document.getElementById('editEnglishName').value = document.getElementById('titleEnglish').textContent;
+      document.getElementById('editSciName').value     = document.getElementById('titleSci').textContent;
+      document.getElementById('editTitlesBtn').style.display = 'none';
+      document.getElementById('editLocalName').focus();
+      return;
+    }
+    if (field === 'classification') {
+      document.getElementById('classDisplay').style.display = 'none';
+      document.getElementById('classEdit').style.display    = 'flex';
+      document.getElementById('editSci2').value    = document.getElementById('sci2').textContent;
+      document.getElementById('editFamily').value  = document.getElementById('family').textContent;
+      document.getElementById('editClassBtn').style.display = 'none';
+      document.getElementById('editSci2').focus();
+      return;
+    }
+    const cfg = FIELD_CONFIG[field];
+    if (!cfg) return;
+    const display = document.getElementById(cfg.displayId);
+    const input   = document.getElementById(cfg.inputId);
+    const saveRow = document.getElementById(cfg.saveRowId);
+    input.value            = display.textContent === '—' || display.textContent === 'No description available yet.' ? '' : display.textContent;
+    display.style.display  = 'none';
+    input.style.display    = 'block';
+    if (saveRow) saveRow.classList.add('visible');
+    // Auto-resize textarea
+    if (cfg.type === 'textarea') {
+      input.style.height = 'auto';
+      input.style.height = Math.max(100, input.scrollHeight) + 'px';
+      input.addEventListener('input', () => {
+        input.style.height = 'auto';
+        input.style.height = Math.max(100, input.scrollHeight) + 'px';
+      });
+    }
+    input.focus();
+  };
+
+  window.cancelEdit = function(field) {
+    if (field === 'titles') {
+      document.getElementById('titlesDisplay').style.display = '';
+      document.getElementById('titlesEdit').style.display    = 'none';
+      document.getElementById('editTitlesBtn').style.display = '';
+      return;
+    }
+    if (field === 'classification') {
+      document.getElementById('classDisplay').style.display = '';
+      document.getElementById('classEdit').style.display    = 'none';
+      document.getElementById('editClassBtn').style.display = '';
+      return;
+    }
+    const cfg = FIELD_CONFIG[field];
+    if (!cfg) return;
+    document.getElementById(cfg.displayId).style.display = '';
+    document.getElementById(cfg.inputId).style.display   = 'none';
+    const saveRow = document.getElementById(cfg.saveRowId);
+    if (saveRow) saveRow.classList.remove('visible');
+  };
+
+  window.saveField = async function(field) {
+    if (!isAdmin) return;
+
+    const { updateDoc, doc: firestoreDoc } = await import(
+      'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js'
+    );
+
+    // ── Titles (localName, englishName, scientificName) ──
+    if (field === 'titles') {
+      const localName   = document.getElementById('editLocalName').value.trim();
+      const englishName = document.getElementById('editEnglishName').value.trim();
+      const sciName     = document.getElementById('editSciName').value.trim();
+      if (!localName) { showToast('Local name cannot be empty.', 'warn'); return; }
+      try {
+        await updateDoc(firestoreDoc(db, 'herbs', herbId), { localName, englishName, scientificName: sciName });
+        document.getElementById('titleLocal').textContent   = localName;
+        document.getElementById('titleEnglish').textContent = englishName;
+        document.getElementById('titleSci').textContent     = sciName;
+        document.getElementById('bc-name').textContent      = localName;
+        document.title = `${localName} — HerbID Iloilo`;
+        currentHerbName = localName;
+        cancelEdit('titles');
+        showToast('✅ Names updated!');
+      } catch(e) { showToast('Could not save: ' + e.message, 'error'); }
+      return;
+    }
+
+    // ── Classification (sci2, family) ──
+    if (field === 'classification') {
+      const sci    = document.getElementById('editSci2').value.trim();
+      const family = document.getElementById('editFamily').value.trim();
+      try {
+        await updateDoc(firestoreDoc(db, 'herbs', herbId), { scientificName: sci, family });
+        document.getElementById('sci2').textContent   = sci;
+        document.getElementById('family').textContent = family;
+        // Also sync the title sci name
+        document.getElementById('titleSci').textContent = sci;
+        cancelEdit('classification');
+        showToast('✅ Classification updated!');
+      } catch(e) { showToast('Could not save: ' + e.message, 'error'); }
+      return;
+    }
+
+    // ── Simple fields (parts, location, description) ──
+    const cfg = FIELD_CONFIG[field];
+    if (!cfg) return;
+    const input   = document.getElementById(cfg.inputId);
+    const newText = input.value.trim();
+    if (!newText) { showToast('Field cannot be empty.', 'warn'); return; }
+    try {
+      await updateDoc(firestoreDoc(db, 'herbs', herbId), { [cfg.firestoreKey]: newText });
+      document.getElementById(cfg.displayId).textContent = newText;
+      cancelEdit(field);
+      showToast('✅ Saved!');
+    } catch(e) { showToast('Could not save: ' + e.message, 'error'); }
+  };
+
+  // ── Preparation method edit (admin only) ────────────────
+  window.startEditPrep = function() {
+    const display  = document.getElementById('preparation');
+    const textarea = document.getElementById('prepTextarea');
+    const saveRow  = document.getElementById('prepSaveRow');
+    // Copy current text into textarea preserving all whitespace/line breaks
+    textarea.value = display.textContent === '—' ? '' : display.textContent;
+    display.style.display   = 'none';
+    textarea.style.display  = 'block';
+    saveRow.classList.add('visible');
+    document.getElementById('prepEditBtn').innerHTML = '<i class="ti ti-x"></i> Cancel';
+    document.getElementById('prepEditBtn').onclick = cancelEditPrep;
+    textarea.focus();
+    // Auto-resize textarea to fit content
+    textarea.style.height = 'auto';
+    textarea.style.height = Math.max(120, textarea.scrollHeight) + 'px';
+    textarea.addEventListener('input', () => {
+      textarea.style.height = 'auto';
+      textarea.style.height = Math.max(120, textarea.scrollHeight) + 'px';
+    });
+  };
+
+  window.cancelEditPrep = function() {
+    const display  = document.getElementById('preparation');
+    const textarea = document.getElementById('prepTextarea');
+    const saveRow  = document.getElementById('prepSaveRow');
+    display.style.display  = '';
+    textarea.style.display = 'none';
+    saveRow.classList.remove('visible');
+    document.getElementById('prepEditBtn').innerHTML = '<i class="ti ti-pencil"></i> Edit';
+    document.getElementById('prepEditBtn').onclick = startEditPrep;
+  };
+
+  window.savePrep = async function() {
+    if (!isAdmin) return;
+    const textarea = document.getElementById('prepTextarea');
+    const newText  = textarea.value.trim();
+    if (!newText) { showToast('Preparation method cannot be empty.', 'warn'); return; }
+
+    const saveBtn = document.getElementById('prepSaveBtn');
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="ti ti-loader"></i> Saving…';
+
+    try {
+      // Update the preparation field in the herbs Firestore document
+      const { updateDoc, doc: firestoreDoc } = await import(
+        'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js'
+      );
+      await updateDoc(firestoreDoc(db, 'herbs', herbId), {
+        preparation: newText
+      });
+
+      // Update the display with new text — pre-wrap preserves formatting
+      document.getElementById('preparation').textContent = newText;
+      cancelEditPrep();
+      showToast('✅ Preparation method updated!');
+    } catch(e) {
+      showToast('Could not save: ' + e.message, 'error');
+    }
+
+    saveBtn.disabled = false;
+    saveBtn.innerHTML = '<i class="ti ti-device-floppy"></i> Save';
+  };
 
   // ── Load herb data ────────────────────────────────────────
   async function load() {
@@ -524,10 +863,9 @@
       document.getElementById('sci2').textContent         = h.scientificName;
       document.getElementById('family').textContent       = h.family || '—';
       document.getElementById('parts').textContent        = h.parts || '—';
-      currentPreparation = h.preparation || '';
-      document.getElementById('preparation').textContent  = currentPreparation || '—';
-      document.getElementById('preparationEditor').value  = currentPreparation;
+      document.getElementById('preparation').textContent  = h.preparation || '—';
       document.getElementById('location').textContent     = h.location || '—';
+      document.getElementById('description').textContent  = h.description || 'No description available yet.';
       document.getElementById('mapLink').href             = `map.html?herb=${herbId}`;
 
       const photoBox = document.getElementById('photoBox');
@@ -552,38 +890,6 @@
         '<p style="color:var(--text-muted)">Error loading herb data.</p>';
     }
   }
-
-  // ── Save preparation method (admin only) ───────────────────
-  window.savePreparation = async function() {
-    if (!isAdmin) {
-      showToast('Admin access required.', 'warn');
-      return;
-    }
-
-    const editor = document.getElementById('preparationEditor');
-    const btn = document.getElementById('preparationSaveBtn');
-    const preparation = editor.value;
-
-    if (!herbId) return;
-
-    btn.disabled = true;
-    btn.innerHTML = '<i class="ti ti-loader"></i> Saving…';
-
-    try {
-      // Save the text exactly as entered, including line breaks and blank lines.
-      await updateDoc(doc(db, 'herbs', herbId), { preparation });
-
-      currentPreparation = preparation;
-      document.getElementById('preparation').textContent = preparation || '—';
-      showToast('✅ Preparation method updated!');
-    } catch(e) {
-      console.error('Preparation update failed:', e);
-      showToast('Could not save preparation method: ' + e.message, 'error');
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="ti ti-device-floppy"></i> Save Preparation Method';
-    }
-  };
 
   // ── Load video tutorials ──────────────────────────────────
   async function loadVideos(herbId) {
@@ -624,10 +930,9 @@
         const playerHTML = v.youtubeEmbedUrl
           ? `<iframe
                class="video-player"
-               src="${youtubeEmbedForCurrentPage(v.youtubeEmbedUrl)}"
+               src="${v.youtubeEmbedUrl}"
                style="aspect-ratio:16/9;width:100%;border:none;display:block"
                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-               referrerpolicy="strict-origin-when-cross-origin"
                allowfullscreen
                loading="lazy">
              </iframe>`
@@ -695,17 +1000,6 @@
   document.getElementById('videoTitle').addEventListener('input', window.checkUploadReady);
 
   // ── Convert any YouTube URL to embed URL ─────────────────
-  function youtubeEmbedForCurrentPage(url) {
-    try {
-      const u = new URL(url);
-      if (!u.hostname.includes('youtube.com') && !u.hostname.includes('youtube-nocookie.com')) return url;
-      // YouTube Error 153 can occur when the embed request has no usable referrer.
-      // Supplying the current HTTPS site origin also gives the player its host context.
-      u.searchParams.set('origin', window.location.origin);
-      return u.toString();
-    } catch(e) { return url; }
-  }
-
   function toYouTubeEmbed(url) {
     try {
       const u = new URL(url);
@@ -720,9 +1014,7 @@
         }
       }
       if (!videoId) return null;
-      videoId = videoId.split(/[?&#]/)[0].trim();
-      if (!/^[A-Za-z0-9_-]{11}$/.test(videoId)) return null;
-      return `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&origin=${encodeURIComponent(window.location.origin)}`;
+      return `https://www.youtube.com/embed/${videoId}?rel=0`;
     } catch(e) { return null; }
   }
 
@@ -769,10 +1061,9 @@
           </div>
           <iframe
             class="video-player"
-            src="${youtubeEmbedForCurrentPage(embedUrl)}"
+            src="${embedUrl}"
             style="aspect-ratio:16/9;width:100%;border:none;display:block"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            referrerpolicy="strict-origin-when-cross-origin"
             allowfullscreen loading="lazy">
           </iframe>`;
         listEl.prepend(card);
@@ -1002,6 +1293,5 @@
 
   load();
 </script>
-<script type="module" src="./js/translator.js"></script>
 </body>
 </html>
