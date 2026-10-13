@@ -351,6 +351,42 @@
         </div>
       </div>
 
+      <div class="info-section">
+        <div class="info-section-title">
+          <i class="ti ti-dna"></i> Plant classification
+          <button class="admin-edit-btn" id="editClassBtn" onclick="startEdit('classification')">
+            <i class="ti ti-pencil"></i> Edit
+          </button>
+        </div>
+        <!-- Display -->
+        <table style="width:100%;font-size:13px;border-collapse:collapse" id="classDisplay">
+          <tr>
+            <td style="padding:5px 0;color:var(--text-muted);width:120px">Scientific name</td>
+            <td style="font-style:italic" id="sci2"></td>
+          </tr>
+          <tr>
+            <td style="padding:5px 0;color:var(--text-muted)">Plant family</td>
+            <td id="family"></td>
+          </tr>
+        </table>
+        <!-- Edit -->
+        <div id="classEdit" style="display:none;flex-direction:column;gap:8px">
+          <div>
+            <div style="font-size:11px;color:#8c96a0;margin-bottom:3px">Scientific name</div>
+            <input class="editable-input" style="display:block;font-style:italic" id="editSci2" type="text" placeholder="Scientific name" />
+          </div>
+          <div>
+            <div style="font-size:11px;color:#8c96a0;margin-bottom:3px">Plant family</div>
+            <input class="editable-input" style="display:block" id="editFamily" type="text" placeholder="e.g. Asteraceae (Sunflower/Daisy Family)" />
+          </div>
+          <div class="editable-save-row visible">
+            <button class="editable-save-btn" onclick="saveField('classification')"><i class="ti ti-device-floppy"></i> Save</button>
+            <button class="editable-cancel-btn" onclick="cancelEdit('classification')">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+
       <!-- Description (new field) -->
       <div class="info-section">
         <div class="info-section-title">
@@ -369,19 +405,8 @@
       </div>
 
       <div class="info-section">
-        <div class="info-section-title">
-          <i class="ti ti-pill"></i> Medicinal uses
-          <button class="admin-edit-btn" id="editUsesBtn" onclick="startEdit('usesTags')">
-            <i class="ti ti-pencil"></i> Edit
-          </button>
-        </div>
+        <div class="info-section-title"><i class="ti ti-pill"></i> Medicinal uses</div>
         <div class="info-tags" id="usesTags"></div>
-        <textarea class="editable-input" id="usesTagsInput" style="min-height:90px;resize:vertical" placeholder="Enter medicinal uses separated by commas (e.g. fever, wound, pain)"></textarea>
-        <div class="editable-save-row" id="usesTagsSaveRow">
-          <button class="editable-save-btn" onclick="saveField('usesTags')"><i class="ti ti-device-floppy"></i> Save</button>
-          <button class="editable-cancel-btn" onclick="cancelEdit('usesTags')">Cancel</button>
-          <span class="editable-hint">Separate each use with a comma</span>
-        </div>
       </div>
 
       <div class="info-section">
@@ -486,41 +511,6 @@ Use Enter for new lines — formatting will be preserved exactly as you type."><
             <button class="video-upload-btn" id="videoUploadBtn" onclick="uploadVideo()" disabled>
               <i class="ti ti-upload"></i> Save Video
             </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="info-section">
-        <div class="info-section-title">
-          <i class="ti ti-dna"></i> Plant classification
-          <button class="admin-edit-btn" id="editClassBtn" onclick="startEdit('classification')">
-            <i class="ti ti-pencil"></i> Edit
-          </button>
-        </div>
-        <!-- Display -->
-        <table style="width:100%;font-size:13px;border-collapse:collapse" id="classDisplay">
-          <tr>
-            <td style="padding:5px 0;color:var(--text-muted);width:120px">Scientific name</td>
-            <td style="font-style:italic" id="sci2"></td>
-          </tr>
-          <tr>
-            <td style="padding:5px 0;color:var(--text-muted)">Plant family</td>
-            <td id="family"></td>
-          </tr>
-        </table>
-        <!-- Edit -->
-        <div id="classEdit" style="display:none;flex-direction:column;gap:8px">
-          <div>
-            <div style="font-size:11px;color:#8c96a0;margin-bottom:3px">Scientific name</div>
-            <input class="editable-input" style="display:block;font-style:italic" id="editSci2" type="text" placeholder="Scientific name" />
-          </div>
-          <div>
-            <div style="font-size:11px;color:#8c96a0;margin-bottom:3px">Plant family</div>
-            <input class="editable-input" style="display:block" id="editFamily" type="text" placeholder="e.g. Asteraceae (Sunflower/Daisy Family)" />
-          </div>
-          <div class="editable-save-row visible">
-            <button class="editable-save-btn" onclick="saveField('classification')"><i class="ti ti-device-floppy"></i> Save</button>
-            <button class="editable-cancel-btn" onclick="cancelEdit('classification')">Cancel</button>
           </div>
         </div>
       </div>
@@ -667,18 +657,6 @@ Use Enter for new lines — formatting will be preserved exactly as you type."><
   };
 
   window.startEdit = function(field) {
-    if (field === 'usesTags') {
-      if (!isAdmin) return;
-      const display = document.getElementById('usesTags');
-      const input = document.getElementById('usesTagsInput');
-      input.value = Array.from(display.querySelectorAll('span')).map(tag => tag.textContent.trim()).join(', ');
-      display.style.display = 'none';
-      input.style.display = 'block';
-      document.getElementById('usesTagsSaveRow').classList.add('visible');
-      document.getElementById('editUsesBtn').style.display = 'none';
-      input.focus();
-      return;
-    }
     if (field === 'titles') {
       document.getElementById('titlesDisplay').style.display = 'none';
       document.getElementById('titlesEdit').style.display    = 'block';
@@ -720,13 +698,6 @@ Use Enter for new lines — formatting will be preserved exactly as you type."><
   };
 
   window.cancelEdit = function(field) {
-    if (field === 'usesTags') {
-      document.getElementById('usesTags').style.display = '';
-      document.getElementById('usesTagsInput').style.display = 'none';
-      document.getElementById('usesTagsSaveRow').classList.remove('visible');
-      document.getElementById('editUsesBtn').style.display = '';
-      return;
-    }
     if (field === 'titles') {
       document.getElementById('titlesDisplay').style.display = '';
       document.getElementById('titlesEdit').style.display    = 'none';
@@ -753,29 +724,6 @@ Use Enter for new lines — formatting will be preserved exactly as you type."><
     const { updateDoc, doc: firestoreDoc } = await import(
       'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js'
     );
-
-    // ── Medicinal uses (usesTags array) ──
-    if (field === 'usesTags') {
-      const uses = document.getElementById('usesTagsInput').value
-        .split(',')
-        .map(use => use.trim())
-        .filter(Boolean);
-      if (!uses.length) { showToast('Enter at least one medicinal use.', 'warn'); return; }
-      try {
-        await updateDoc(firestoreDoc(db, 'herbs', herbId), { usesTags: uses });
-        const tagsEl = document.getElementById('usesTags');
-        tagsEl.innerHTML = '';
-        uses.forEach(use => {
-          const tag = document.createElement('span');
-          tag.className = 'tag ' + (tagClass[use.toLowerCase()] || 'tag-anti-inflammatory');
-          tag.textContent = use;
-          tagsEl.appendChild(tag);
-        });
-        cancelEdit('usesTags');
-        showToast('✅ Medicinal uses updated!');
-      } catch(e) { showToast('Could not save: ' + e.message, 'error'); }
-      return;
-    }
 
     // ── Titles (localName, englishName, scientificName) ──
     if (field === 'titles') {
