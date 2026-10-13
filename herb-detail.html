@@ -103,83 +103,6 @@
     .lightbox img { max-width: 100%; max-height: 90vh; border-radius: var(--radius-md); }
 
     /* ── VIDEO TUTORIAL SECTION ───────────────────────────── */
-    /* ── Admin inline edit — shared styles for all editable fields ── */
-    .admin-edit-btn {
-      margin-left: auto; background: none; border: 1px solid var(--border);
-      border-radius: 8px; padding: 4px 10px; font-size: 11px; font-weight: 600;
-      color: var(--green-main); cursor: pointer; display: none;
-      align-items: center; gap: 4px; font-family: 'DM Sans', sans-serif;
-      transition: background 0.15s; white-space: nowrap;
-    }
-    .admin-edit-btn:hover { background: var(--green-pale); }
-    .admin-edit-btn.visible { display: inline-flex; }
-    .editable-input {
-      width: 100%; border: 1.5px solid var(--green-main); border-radius: var(--radius-md);
-      padding: 8px 12px; font-size: 14px; font-family: 'DM Sans', sans-serif;
-      color: var(--text-primary); box-sizing: border-box; background: #f8fffc;
-      display: none; transition: border-color 0.15s;
-    }
-    .editable-input:focus { outline: none; box-shadow: 0 0 0 3px rgba(34,160,107,0.1); }
-    .editable-save-row {
-      display: none; gap: 8px; margin-top: 8px; align-items: center; flex-wrap: wrap;
-    }
-    .editable-save-row.visible { display: flex; }
-    .editable-save-btn {
-      padding: 7px 14px; background: var(--green-main); color: #fff;
-      border: none; border-radius: var(--radius-md); font-size: 12px; font-weight: 600;
-      font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s;
-      display: flex; align-items: center; gap: 5px;
-    }
-    .editable-save-btn:hover:not(:disabled) { background: var(--green-mid); }
-    .editable-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .editable-cancel-btn {
-      padding: 7px 12px; background: #fff; color: var(--text-muted);
-      border: 1px solid var(--border); border-radius: var(--radius-md);
-      font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer;
-    }
-    .editable-cancel-btn:hover { background: #f4f6f5; }
-    .editable-hint { font-size: 11px; color: #8c96a0; }
-
-    /* ── Preparation method editable by admin ── */
-    .prep-display { white-space: pre-wrap; font-size: 14px; color: var(--text-primary); line-height: 1.7; }
-    .prep-edit-btn {
-      margin-left: auto; background: none; border: 1px solid var(--border);
-      border-radius: 8px; padding: 4px 10px; font-size: 11px; font-weight: 600;
-      color: var(--green-main); cursor: pointer; display: none;
-      align-items: center; gap: 4px; font-family: 'DM Sans', sans-serif;
-      transition: background 0.15s;
-    }
-    .prep-edit-btn:hover { background: var(--green-pale); }
-    .prep-edit-btn.visible { display: inline-flex; }
-    .prep-textarea {
-      width: 100%; border: 1.5px solid var(--green-main); border-radius: var(--radius-md);
-      padding: 10px 13px; font-size: 14px; font-family: 'DM Sans', sans-serif;
-      color: var(--text-primary); line-height: 1.7; resize: vertical;
-      min-height: 120px; box-sizing: border-box; display: none;
-      transition: border-color 0.15s; background: #f8fffc;
-    }
-    .prep-textarea:focus { outline: none; box-shadow: 0 0 0 3px rgba(34,160,107,0.1); }
-    .prep-save-row {
-      display: none; gap: 8px; margin-top: 8px; align-items: center;
-    }
-    .prep-save-row.visible { display: flex; }
-    .prep-save-btn {
-      padding: 8px 16px; background: var(--green-main); color: #fff;
-      border: none; border-radius: var(--radius-md); font-size: 13px; font-weight: 600;
-      font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s;
-      display: flex; align-items: center; gap: 6px;
-    }
-    .prep-save-btn:hover:not(:disabled) { background: var(--green-mid); }
-    .prep-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .prep-cancel-btn {
-      padding: 8px 14px; background: #fff; color: var(--text-muted);
-      border: 1px solid var(--border); border-radius: var(--radius-md);
-      font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer;
-      transition: background 0.15s;
-    }
-    .prep-cancel-btn:hover { background: #f4f6f5; }
-    .prep-hint { font-size: 11px; color: #8c96a0; margin-left: auto; }
-
     .video-list { display: flex; flex-direction: column; gap: 14px; }
 
     .video-card {
@@ -317,96 +240,29 @@
 
     <!-- RIGHT -->
     <div class="detail-right">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:0.5rem">
-        <div class="herb-num-badge" id="herbNum"></div>
-        <button class="admin-edit-btn" id="editTitlesBtn" onclick="startEdit('titles')">
-          <i class="ti ti-pencil"></i> Edit names
-        </button>
-      </div>
-      <!-- Display -->
-      <div id="titlesDisplay">
-        <h1 class="herb-title-local" id="titleLocal"></h1>
-        <div class="herb-title-english" id="titleEnglish"></div>
-        <div class="herb-title-sci" id="titleSci"></div>
-      </div>
-      <!-- Edit -->
-      <div id="titlesEdit" style="display:none;margin-bottom:1rem">
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <div>
-            <div style="font-size:11px;color:#8c96a0;margin-bottom:3px">Local name</div>
-            <input class="editable-input" style="display:block;font-size:18px;font-weight:700" id="editLocalName" type="text" placeholder="Local name" />
-          </div>
-          <div>
-            <div style="font-size:11px;color:#8c96a0;margin-bottom:3px">English name</div>
-            <input class="editable-input" style="display:block" id="editEnglishName" type="text" placeholder="English name" />
-          </div>
-          <div>
-            <div style="font-size:11px;color:#8c96a0;margin-bottom:3px">Scientific name</div>
-            <input class="editable-input" style="display:block;font-style:italic" id="editSciName" type="text" placeholder="Scientific name" />
-          </div>
-        </div>
-        <div class="editable-save-row visible" style="margin-top:10px">
-          <button class="editable-save-btn" onclick="saveField('titles')"><i class="ti ti-device-floppy"></i> Save</button>
-          <button class="editable-cancel-btn" onclick="cancelEdit('titles')">Cancel</button>
-        </div>
-      </div>
-
-      <!-- Description (new field) -->
-      <div class="info-section">
-        <div class="info-section-title">
-          <i class="ti ti-file-description"></i> Description
-          <button class="admin-edit-btn" id="editDescBtn" onclick="startEdit('description')">
-            <i class="ti ti-pencil"></i> Edit
-          </button>
-        </div>
-        <div class="prep-display" id="description" style="white-space:pre-wrap;font-size:14px;color:var(--text-primary);line-height:1.7"></div>
-        <textarea class="prep-textarea" id="descTextarea" style="display:none;width:100%;border:1.5px solid var(--green-main);border-radius:var(--radius-md);padding:10px 13px;font-size:14px;font-family:'DM Sans',sans-serif;resize:vertical;min-height:100px;box-sizing:border-box;background:#f8fffc" placeholder="Enter herb description…&#10;Line breaks will be preserved."></textarea>
-        <div class="editable-save-row" id="descSaveRow">
-          <button class="editable-save-btn" onclick="saveField('description')"><i class="ti ti-device-floppy"></i> Save</button>
-          <button class="editable-cancel-btn" onclick="cancelEdit('description')">Cancel</button>
-          <span class="editable-hint">Line breaks are preserved</span>
-        </div>
-      </div>
+      <div class="herb-num-badge" id="herbNum"></div>
+      <h1 class="herb-title-local" id="titleLocal"></h1>
+      <div class="herb-title-english" id="titleEnglish"></div>
+      <div class="herb-title-sci" id="titleSci"></div>
 
       <div class="info-section">
         <div class="info-section-title"><i class="ti ti-pill"></i> Medicinal uses</div>
         <div class="info-tags" id="usesTags"></div>
+        <div id="medicinalUsesEditor" style="display:none;margin-top:12px;padding:12px;border:1px solid var(--border);border-radius:10px">
+          <label for="medicinalUsesInput" style="display:block;margin-bottom:6px;font-weight:600">Admin — Edit medicinal uses</label>
+          <textarea id="medicinalUsesInput" rows="3" placeholder="Enter uses separated by commas" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)"></textarea>
+          <button id="saveMedicinalUsesBtn" type="button" onclick="saveMedicinalUses()" style="margin-top:8px;padding:8px 14px;border:0;border-radius:7px;cursor:pointer">Save medicinal uses</button>
+        </div>
       </div>
 
       <div class="info-section">
-        <div class="info-section-title">
-          <i class="ti ti-flask"></i> Parts used
-          <button class="admin-edit-btn" id="editPartsBtn" onclick="startEdit('parts')">
-            <i class="ti ti-pencil"></i> Edit
-          </button>
-        </div>
+        <div class="info-section-title"><i class="ti ti-flask"></i> Parts used</div>
         <div class="info-val" id="parts"></div>
-        <input class="editable-input" id="partsInput" type="text" placeholder="e.g. Leaves, Roots, Bark" />
-        <div class="editable-save-row" id="partsSaveRow">
-          <button class="editable-save-btn" onclick="saveField('parts')"><i class="ti ti-device-floppy"></i> Save</button>
-          <button class="editable-cancel-btn" onclick="cancelEdit('parts')">Cancel</button>
-        </div>
       </div>
 
       <div class="info-section">
-        <div class="info-section-title">
-          <i class="ti ti-kettle"></i> Preparation method
-          <button class="prep-edit-btn" id="prepEditBtn" onclick="startEditPrep()">
-            <i class="ti ti-pencil"></i> Edit
-          </button>
-        </div>
-        <!-- Display mode: white-space:pre-wrap preserves line breaks and spacing -->
-        <div class="prep-display" id="preparation"></div>
-        <!-- Edit mode: only visible to admins when editing -->
-        <textarea class="prep-textarea" id="prepTextarea" placeholder="Enter preparation method…
-Use Enter for new lines — formatting will be preserved exactly as you type."></textarea>
-        <div class="prep-save-row" id="prepSaveRow">
-          <button class="prep-save-btn" id="prepSaveBtn" onclick="savePrep()">
-            <i class="ti ti-device-floppy"></i> Save
-          </button>
-          <button class="prep-cancel-btn" onclick="cancelEditPrep()">Cancel</button>
-          <span class="prep-hint">Line breaks and spacing will be preserved</span>
-        </div>
+        <div class="info-section-title"><i class="ti ti-kettle"></i> Preparation method</div>
+        <div class="info-val" id="preparation"></div>
       </div>
 
       <!-- ── VIDEO TUTORIALS — placed right after preparation ── -->
@@ -480,14 +336,8 @@ Use Enter for new lines — formatting will be preserved exactly as you type."><
       </div>
 
       <div class="info-section">
-        <div class="info-section-title">
-          <i class="ti ti-dna"></i> Plant classification
-          <button class="admin-edit-btn" id="editClassBtn" onclick="startEdit('classification')">
-            <i class="ti ti-pencil"></i> Edit
-          </button>
-        </div>
-        <!-- Display -->
-        <table style="width:100%;font-size:13px;border-collapse:collapse" id="classDisplay">
+        <div class="info-section-title"><i class="ti ti-dna"></i> Plant classification</div>
+        <table style="width:100%;font-size:13px;border-collapse:collapse">
           <tr>
             <td style="padding:5px 0;color:var(--text-muted);width:120px">Scientific name</td>
             <td style="font-style:italic" id="sci2"></td>
@@ -497,21 +347,6 @@ Use Enter for new lines — formatting will be preserved exactly as you type."><
             <td id="family"></td>
           </tr>
         </table>
-        <!-- Edit -->
-        <div id="classEdit" style="display:none;flex-direction:column;gap:8px">
-          <div>
-            <div style="font-size:11px;color:#8c96a0;margin-bottom:3px">Scientific name</div>
-            <input class="editable-input" style="display:block;font-style:italic" id="editSci2" type="text" placeholder="Scientific name" />
-          </div>
-          <div>
-            <div style="font-size:11px;color:#8c96a0;margin-bottom:3px">Plant family</div>
-            <input class="editable-input" style="display:block" id="editFamily" type="text" placeholder="e.g. Asteraceae (Sunflower/Daisy Family)" />
-          </div>
-          <div class="editable-save-row visible">
-            <button class="editable-save-btn" onclick="saveField('classification')"><i class="ti ti-device-floppy"></i> Save</button>
-            <button class="editable-cancel-btn" onclick="cancelEdit('classification')">Cancel</button>
-          </div>
-        </div>
       </div>
 
       <!-- Community-verified photo gallery -->
@@ -525,18 +360,8 @@ Use Enter for new lines — formatting will be preserved exactly as you type."><
       </div>
 
       <div class="info-section">
-        <div class="info-section-title">
-          <i class="ti ti-map-pin"></i> Location
-          <button class="admin-edit-btn" id="editLocBtn" onclick="startEdit('location')">
-            <i class="ti ti-pencil"></i> Edit
-          </button>
-        </div>
+        <div class="info-section-title"><i class="ti ti-map-pin"></i> Location</div>
         <div class="info-val" id="location" style="margin-bottom:10px"></div>
-        <input class="editable-input" id="locationInput" type="text" placeholder="e.g. Commonly found in Lemery, Iloilo" style="margin-bottom:10px" />
-        <div class="editable-save-row" id="locationSaveRow" style="margin-bottom:10px">
-          <button class="editable-save-btn" onclick="saveField('location')"><i class="ti ti-device-floppy"></i> Save</button>
-          <button class="editable-cancel-btn" onclick="cancelEdit('location')">Cancel</button>
-        </div>
         <a class="loc-map-preview" id="mapLink" href="#">
           <i class="ti ti-map-2"></i>
           <div class="loc-map-text">
@@ -577,7 +402,7 @@ Use Enter for new lines — formatting will be preserved exactly as you type."><
   } from './js/firebase-config.js';
 
   import {
-    addDoc, deleteDoc, serverTimestamp
+    addDoc, deleteDoc, updateDoc, serverTimestamp
   } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
   import {
@@ -620,223 +445,13 @@ Use Enter for new lines — formatting will be preserved exactly as you type."><
     if (isAdmin) {
       // Show admin upload panel
       document.getElementById('videoAdminPanel').classList.add('visible');
+      document.getElementById('medicinalUsesEditor').style.display = 'block';
       // Show delete buttons on all existing video cards
       document.querySelectorAll('.video-delete-btn').forEach(btn => {
         btn.style.display = 'flex';
       });
-      // Show all admin edit buttons
-      document.querySelectorAll('.admin-edit-btn, .prep-edit-btn').forEach(btn => {
-        btn.classList.add('visible');
-      });
     }
   });
-
-  // ══════════════════════════════════════════════════════════
-  //  UNIFIED ADMIN INLINE EDIT SYSTEM
-  //  Each field has a "display" element and an "input/textarea" element.
-  //  startEdit(field) — hides display, shows input pre-filled with current value
-  //  cancelEdit(field) — hides input, shows display unchanged
-  //  saveField(field) — saves to Firestore, updates display, cancels edit mode
-  // ══════════════════════════════════════════════════════════
-
-  // Field config — maps field name to its display/input element IDs and Firestore key
-  const FIELD_CONFIG = {
-    parts: {
-      displayId: 'parts', inputId: 'partsInput', saveRowId: 'partsSaveRow',
-      firestoreKey: 'parts', type: 'input',
-    },
-    location: {
-      displayId: 'location', inputId: 'locationInput', saveRowId: 'locationSaveRow',
-      firestoreKey: 'location', type: 'input',
-    },
-    description: {
-      displayId: 'description', inputId: 'descTextarea', saveRowId: 'descSaveRow',
-      firestoreKey: 'description', type: 'textarea',
-    },
-  };
-
-  window.startEdit = function(field) {
-    if (field === 'titles') {
-      document.getElementById('titlesDisplay').style.display = 'none';
-      document.getElementById('titlesEdit').style.display    = 'block';
-      document.getElementById('editLocalName').value   = document.getElementById('titleLocal').textContent;
-      document.getElementById('editEnglishName').value = document.getElementById('titleEnglish').textContent;
-      document.getElementById('editSciName').value     = document.getElementById('titleSci').textContent;
-      document.getElementById('editTitlesBtn').style.display = 'none';
-      document.getElementById('editLocalName').focus();
-      return;
-    }
-    if (field === 'classification') {
-      document.getElementById('classDisplay').style.display = 'none';
-      document.getElementById('classEdit').style.display    = 'flex';
-      document.getElementById('editSci2').value    = document.getElementById('sci2').textContent;
-      document.getElementById('editFamily').value  = document.getElementById('family').textContent;
-      document.getElementById('editClassBtn').style.display = 'none';
-      document.getElementById('editSci2').focus();
-      return;
-    }
-    const cfg = FIELD_CONFIG[field];
-    if (!cfg) return;
-    const display = document.getElementById(cfg.displayId);
-    const input   = document.getElementById(cfg.inputId);
-    const saveRow = document.getElementById(cfg.saveRowId);
-    input.value            = display.textContent === '—' || display.textContent === 'No description available yet.' ? '' : display.textContent;
-    display.style.display  = 'none';
-    input.style.display    = 'block';
-    if (saveRow) saveRow.classList.add('visible');
-    // Auto-resize textarea
-    if (cfg.type === 'textarea') {
-      input.style.height = 'auto';
-      input.style.height = Math.max(100, input.scrollHeight) + 'px';
-      input.addEventListener('input', () => {
-        input.style.height = 'auto';
-        input.style.height = Math.max(100, input.scrollHeight) + 'px';
-      });
-    }
-    input.focus();
-  };
-
-  window.cancelEdit = function(field) {
-    if (field === 'titles') {
-      document.getElementById('titlesDisplay').style.display = '';
-      document.getElementById('titlesEdit').style.display    = 'none';
-      document.getElementById('editTitlesBtn').style.display = '';
-      return;
-    }
-    if (field === 'classification') {
-      document.getElementById('classDisplay').style.display = '';
-      document.getElementById('classEdit').style.display    = 'none';
-      document.getElementById('editClassBtn').style.display = '';
-      return;
-    }
-    const cfg = FIELD_CONFIG[field];
-    if (!cfg) return;
-    document.getElementById(cfg.displayId).style.display = '';
-    document.getElementById(cfg.inputId).style.display   = 'none';
-    const saveRow = document.getElementById(cfg.saveRowId);
-    if (saveRow) saveRow.classList.remove('visible');
-  };
-
-  window.saveField = async function(field) {
-    if (!isAdmin) return;
-
-    const { updateDoc, doc: firestoreDoc } = await import(
-      'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js'
-    );
-
-    // ── Titles (localName, englishName, scientificName) ──
-    if (field === 'titles') {
-      const localName   = document.getElementById('editLocalName').value.trim();
-      const englishName = document.getElementById('editEnglishName').value.trim();
-      const sciName     = document.getElementById('editSciName').value.trim();
-      if (!localName) { showToast('Local name cannot be empty.', 'warn'); return; }
-      try {
-        await updateDoc(firestoreDoc(db, 'herbs', herbId), { localName, englishName, scientificName: sciName });
-        document.getElementById('titleLocal').textContent   = localName;
-        document.getElementById('titleEnglish').textContent = englishName;
-        document.getElementById('titleSci').textContent     = sciName;
-        document.getElementById('bc-name').textContent      = localName;
-        document.title = `${localName} — HerbID Iloilo`;
-        currentHerbName = localName;
-        cancelEdit('titles');
-        showToast('✅ Names updated!');
-      } catch(e) { showToast('Could not save: ' + e.message, 'error'); }
-      return;
-    }
-
-    // ── Classification (sci2, family) ──
-    if (field === 'classification') {
-      const sci    = document.getElementById('editSci2').value.trim();
-      const family = document.getElementById('editFamily').value.trim();
-      try {
-        await updateDoc(firestoreDoc(db, 'herbs', herbId), { scientificName: sci, family });
-        document.getElementById('sci2').textContent   = sci;
-        document.getElementById('family').textContent = family;
-        // Also sync the title sci name
-        document.getElementById('titleSci').textContent = sci;
-        cancelEdit('classification');
-        showToast('✅ Classification updated!');
-      } catch(e) { showToast('Could not save: ' + e.message, 'error'); }
-      return;
-    }
-
-    // ── Simple fields (parts, location, description) ──
-    const cfg = FIELD_CONFIG[field];
-    if (!cfg) return;
-    const input   = document.getElementById(cfg.inputId);
-    const newText = input.value.trim();
-    if (!newText) { showToast('Field cannot be empty.', 'warn'); return; }
-    try {
-      await updateDoc(firestoreDoc(db, 'herbs', herbId), { [cfg.firestoreKey]: newText });
-      document.getElementById(cfg.displayId).textContent = newText;
-      cancelEdit(field);
-      showToast('✅ Saved!');
-    } catch(e) { showToast('Could not save: ' + e.message, 'error'); }
-  };
-
-  // ── Preparation method edit (admin only) ────────────────
-  window.startEditPrep = function() {
-    const display  = document.getElementById('preparation');
-    const textarea = document.getElementById('prepTextarea');
-    const saveRow  = document.getElementById('prepSaveRow');
-    // Copy current text into textarea preserving all whitespace/line breaks
-    textarea.value = display.textContent === '—' ? '' : display.textContent;
-    display.style.display   = 'none';
-    textarea.style.display  = 'block';
-    saveRow.classList.add('visible');
-    document.getElementById('prepEditBtn').innerHTML = '<i class="ti ti-x"></i> Cancel';
-    document.getElementById('prepEditBtn').onclick = cancelEditPrep;
-    textarea.focus();
-    // Auto-resize textarea to fit content
-    textarea.style.height = 'auto';
-    textarea.style.height = Math.max(120, textarea.scrollHeight) + 'px';
-    textarea.addEventListener('input', () => {
-      textarea.style.height = 'auto';
-      textarea.style.height = Math.max(120, textarea.scrollHeight) + 'px';
-    });
-  };
-
-  window.cancelEditPrep = function() {
-    const display  = document.getElementById('preparation');
-    const textarea = document.getElementById('prepTextarea');
-    const saveRow  = document.getElementById('prepSaveRow');
-    display.style.display  = '';
-    textarea.style.display = 'none';
-    saveRow.classList.remove('visible');
-    document.getElementById('prepEditBtn').innerHTML = '<i class="ti ti-pencil"></i> Edit';
-    document.getElementById('prepEditBtn').onclick = startEditPrep;
-  };
-
-  window.savePrep = async function() {
-    if (!isAdmin) return;
-    const textarea = document.getElementById('prepTextarea');
-    const newText  = textarea.value.trim();
-    if (!newText) { showToast('Preparation method cannot be empty.', 'warn'); return; }
-
-    const saveBtn = document.getElementById('prepSaveBtn');
-    saveBtn.disabled = true;
-    saveBtn.innerHTML = '<i class="ti ti-loader"></i> Saving…';
-
-    try {
-      // Update the preparation field in the herbs Firestore document
-      const { updateDoc, doc: firestoreDoc } = await import(
-        'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js'
-      );
-      await updateDoc(firestoreDoc(db, 'herbs', herbId), {
-        preparation: newText
-      });
-
-      // Update the display with new text — pre-wrap preserves formatting
-      document.getElementById('preparation').textContent = newText;
-      cancelEditPrep();
-      showToast('✅ Preparation method updated!');
-    } catch(e) {
-      showToast('Could not save: ' + e.message, 'error');
-    }
-
-    saveBtn.disabled = false;
-    saveBtn.innerHTML = '<i class="ti ti-device-floppy"></i> Save';
-  };
 
   // ── Load herb data ────────────────────────────────────────
   async function load() {
@@ -864,7 +479,6 @@ Use Enter for new lines — formatting will be preserved exactly as you type."><
       document.getElementById('parts').textContent        = h.parts || '—';
       document.getElementById('preparation').textContent  = h.preparation || '—';
       document.getElementById('location').textContent     = h.location || '—';
-      document.getElementById('description').textContent  = h.description || 'No description available yet.';
       document.getElementById('mapLink').href             = `map.html?herb=${herbId}`;
 
       const photoBox = document.getElementById('photoBox');
@@ -878,6 +492,7 @@ Use Enter for new lines — formatting will be preserved exactly as you type."><
         (h.usesTags || [])
           .map(t => `<span class="tag ${tagClass[t] || 'tag-anti-inflammatory'}">${t}</span>`)
           .join('');
+      document.getElementById('medicinalUsesInput').value = (h.usesTags || []).join(', ');
 
       document.getElementById('loadingState').style.display = 'none';
       document.getElementById('detailLayout').style.display = 'grid';
@@ -889,6 +504,30 @@ Use Enter for new lines — formatting will be preserved exactly as you type."><
         '<p style="color:var(--text-muted)">Error loading herb data.</p>';
     }
   }
+
+  // ── Save medicinal uses (admin only) ───────────────────────
+  window.saveMedicinalUses = async function() {
+    if (!isAdmin) { showToast('Admin access required.', 'warn'); return; }
+    if (!herbId) { showToast('No herb selected.', 'warn'); return; }
+
+    const input = document.getElementById('medicinalUsesInput');
+    const btn = document.getElementById('saveMedicinalUsesBtn');
+    const usesTags = input.value.split(',').map(item => item.trim()).filter(Boolean);
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    try {
+      await updateDoc(doc(db, 'herbs', herbId), { usesTags });
+      document.getElementById('usesTags').innerHTML = usesTags
+        .map(t => `<span class="tag ${tagClass[t.toLowerCase()] || 'tag-anti-inflammatory'}">${escapeHTML(t)}</span>`)
+        .join('');
+      showToast('Medicinal uses saved.');
+    } catch (e) {
+      showToast('Could not save medicinal uses: ' + e.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save medicinal uses';
+    }
+  };
 
   // ── Load video tutorials ──────────────────────────────────
   async function loadVideos(herbId) {
@@ -924,44 +563,39 @@ Use Enter for new lines — formatting will be preserved exactly as you type."><
         card.className = 'video-card';
         card.id = `vcard-${v.id}`;
 
-        // Build header separately so it renders correctly
-        const header = document.createElement('div');
-        header.className = 'video-card-header';
-        header.innerHTML = `
-          <i class="ti ti-player-play"></i>
-          <span class="video-card-title">${escapeHTML(v.title || 'Untitled video')}</span>
-          <button
-            class="video-delete-btn"
-            title="Delete video"
-            style="display:${isAdmin ? 'flex' : 'none'};align-items:center"
-            onclick="deleteVideo('${v.id}', '${v.storagePath || ''}')">
-            <i class="ti ti-trash"></i>
-          </button>`;
-        card.appendChild(header);
+        // If admin saved a YouTube URL, embed it — loads instantly via YouTube CDN.
+        // Otherwise fall back to the Firebase Storage video file.
+        const playerHTML = v.youtubeEmbedUrl
+          ? `<iframe
+               class="video-player"
+               src="${v.youtubeEmbedUrl}"
+               style="aspect-ratio:16/9;width:100%;border:none;display:block"
+               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+               allowfullscreen
+               loading="lazy">
+             </iframe>`
+          : `<video
+               class="video-player"
+               controls
+               preload="auto"
+               playsinline
+               src="${v.videoUrl || ''}">
+               Your browser does not support video playback.
+             </video>`;
 
-        // ── Build player using createElement so iframe is NOT stripped ──
-        // innerHTML blocks <iframe> injection for security — createElement bypasses this.
-        if (v.youtubeEmbedUrl) {
-          const iframe = document.createElement('iframe');
-          iframe.className   = 'video-player';
-          iframe.src         = v.youtubeEmbedUrl;
-          iframe.allow       = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
-          iframe.allowFullscreen = true;
-          iframe.loading     = 'lazy';
-          iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
-          iframe.style.cssText = 'aspect-ratio:16/9;width:100%;border:none;display:block';
-          card.appendChild(iframe);
-        } else {
-          const video = document.createElement('video');
-          video.className = 'video-player';
-          video.controls  = true;
-          video.preload   = 'auto';
-          video.setAttribute('playsinline', '');
-          video.src       = v.videoUrl || '';
-          video.innerHTML = 'Your browser does not support video playback.';
-          card.appendChild(video);
-        }
-
+        card.innerHTML = `
+          <div class="video-card-header">
+            <i class="ti ti-player-play"></i>
+            <span class="video-card-title">${escapeHTML(v.title || 'Untitled video')}</span>
+            <button
+              class="video-delete-btn"
+              title="Delete video"
+              style="display:${isAdmin ? 'flex' : 'none'};align-items:center"
+              onclick="deleteVideo('${v.id}', '${v.storagePath || ''}')">
+              <i class="ti ti-trash"></i>
+            </button>
+          </div>
+          ${playerHTML}`;
         listEl.appendChild(card);
       });
     } catch(e) {
@@ -1053,31 +687,23 @@ Use Enter for new lines — formatting will be preserved exactly as you type."><
         const card = document.createElement('div');
         card.className = 'video-card';
         card.id = `vcard-${docRef.id}`;
-
-        // Build header
-        const header = document.createElement('div');
-        header.className = 'video-card-header';
-        header.innerHTML = `
-          <i class="ti ti-player-play"></i>
-          <span class="video-card-title">${escapeHTML(title)}</span>
-          <button class="video-delete-btn" title="Delete video"
-            style="display:flex;align-items:center"
-            onclick="deleteVideo('${docRef.id}', '')">
-            <i class="ti ti-trash"></i>
-          </button>`;
-        card.appendChild(header);
-
-        // Build iframe via createElement — innerHTML strips iframes
-        const iframe = document.createElement('iframe');
-        iframe.className   = 'video-player';
-        iframe.src         = embedUrl;
-        iframe.allow       = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
-        iframe.allowFullscreen = true;
-        iframe.loading     = 'lazy';
-        iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
-        iframe.style.cssText = 'aspect-ratio:16/9;width:100%;border:none;display:block';
-        card.appendChild(iframe);
-
+        card.innerHTML = `
+          <div class="video-card-header">
+            <i class="ti ti-player-play"></i>
+            <span class="video-card-title">${escapeHTML(title)}</span>
+            <button class="video-delete-btn" title="Delete video"
+              style="display:flex;align-items:center"
+              onclick="deleteVideo('${docRef.id}', '')">
+              <i class="ti ti-trash"></i>
+            </button>
+          </div>
+          <iframe
+            class="video-player"
+            src="${embedUrl}"
+            style="aspect-ratio:16/9;width:100%;border:none;display:block"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen loading="lazy">
+          </iframe>`;
         listEl.prepend(card);
 
         document.getElementById('videoTitle').value = '';
