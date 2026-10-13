@@ -596,8 +596,6 @@ Use Enter for new lines — formatting will be preserved exactly as you type."><
     'jermilynazuela073@gmail.com',
     'kurtmatthewjunealborote@gmail.com',
     'maeloufaithluminate@gmail.com',
-    'agolitorenerose07@gmail.com',
-    'agolitorenerose05@gmail.com',
   ];
 
   const params = new URLSearchParams(location.search);
@@ -925,39 +923,44 @@ Use Enter for new lines — formatting will be preserved exactly as you type."><
         card.className = 'video-card';
         card.id = `vcard-${v.id}`;
 
-        // If admin saved a YouTube URL, embed it — loads instantly via YouTube CDN.
-        // Otherwise fall back to the Firebase Storage video file.
-        const playerHTML = v.youtubeEmbedUrl
-          ? `<iframe
-               class="video-player"
-               src="${v.youtubeEmbedUrl}"
-               style="aspect-ratio:16/9;width:100%;border:none;display:block"
-               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-               allowfullscreen
-               loading="lazy">
-             </iframe>`
-          : `<video
-               class="video-player"
-               controls
-               preload="auto"
-               playsinline
-               src="${v.videoUrl || ''}">
-               Your browser does not support video playback.
-             </video>`;
+        // Build header separately so it renders correctly
+        const header = document.createElement('div');
+        header.className = 'video-card-header';
+        header.innerHTML = `
+          <i class="ti ti-player-play"></i>
+          <span class="video-card-title">${escapeHTML(v.title || 'Untitled video')}</span>
+          <button
+            class="video-delete-btn"
+            title="Delete video"
+            style="display:${isAdmin ? 'flex' : 'none'};align-items:center"
+            onclick="deleteVideo('${v.id}', '${v.storagePath || ''}')">
+            <i class="ti ti-trash"></i>
+          </button>`;
+        card.appendChild(header);
 
-        card.innerHTML = `
-          <div class="video-card-header">
-            <i class="ti ti-player-play"></i>
-            <span class="video-card-title">${escapeHTML(v.title || 'Untitled video')}</span>
-            <button
-              class="video-delete-btn"
-              title="Delete video"
-              style="display:${isAdmin ? 'flex' : 'none'};align-items:center"
-              onclick="deleteVideo('${v.id}', '${v.storagePath || ''}')">
-              <i class="ti ti-trash"></i>
-            </button>
-          </div>
-          ${playerHTML}`;
+        // ── Build player using createElement so iframe is NOT stripped ──
+        // innerHTML blocks <iframe> injection for security — createElement bypasses this.
+        if (v.youtubeEmbedUrl) {
+          const iframe = document.createElement('iframe');
+          iframe.className   = 'video-player';
+          iframe.src         = v.youtubeEmbedUrl;
+          iframe.allow       = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+          iframe.allowFullscreen = true;
+          iframe.loading     = 'lazy';
+          iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+          iframe.style.cssText = 'aspect-ratio:16/9;width:100%;border:none;display:block';
+          card.appendChild(iframe);
+        } else {
+          const video = document.createElement('video');
+          video.className = 'video-player';
+          video.controls  = true;
+          video.preload   = 'auto';
+          video.setAttribute('playsinline', '');
+          video.src       = v.videoUrl || '';
+          video.innerHTML = 'Your browser does not support video playback.';
+          card.appendChild(video);
+        }
+
         listEl.appendChild(card);
       });
     } catch(e) {
@@ -1049,23 +1052,31 @@ Use Enter for new lines — formatting will be preserved exactly as you type."><
         const card = document.createElement('div');
         card.className = 'video-card';
         card.id = `vcard-${docRef.id}`;
-        card.innerHTML = `
-          <div class="video-card-header">
-            <i class="ti ti-player-play"></i>
-            <span class="video-card-title">${escapeHTML(title)}</span>
-            <button class="video-delete-btn" title="Delete video"
-              style="display:flex;align-items:center"
-              onclick="deleteVideo('${docRef.id}', '')">
-              <i class="ti ti-trash"></i>
-            </button>
-          </div>
-          <iframe
-            class="video-player"
-            src="${embedUrl}"
-            style="aspect-ratio:16/9;width:100%;border:none;display:block"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen loading="lazy">
-          </iframe>`;
+
+        // Build header
+        const header = document.createElement('div');
+        header.className = 'video-card-header';
+        header.innerHTML = `
+          <i class="ti ti-player-play"></i>
+          <span class="video-card-title">${escapeHTML(title)}</span>
+          <button class="video-delete-btn" title="Delete video"
+            style="display:flex;align-items:center"
+            onclick="deleteVideo('${docRef.id}', '')">
+            <i class="ti ti-trash"></i>
+          </button>`;
+        card.appendChild(header);
+
+        // Build iframe via createElement — innerHTML strips iframes
+        const iframe = document.createElement('iframe');
+        iframe.className   = 'video-player';
+        iframe.src         = embedUrl;
+        iframe.allow       = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+        iframe.allowFullscreen = true;
+        iframe.loading     = 'lazy';
+        iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+        iframe.style.cssText = 'aspect-ratio:16/9;width:100%;border:none;display:block';
+        card.appendChild(iframe);
+
         listEl.prepend(card);
 
         document.getElementById('videoTitle').value = '';
