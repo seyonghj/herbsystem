@@ -363,16 +363,25 @@
 
     // ── STEP 2: GEMINI ───────────────────────
     setLoadingText('Verifying result…', 'Cross-checking with AI vision');
+    let geminiUnavailable = false;
     try {
       geminiResult = await runGeminiVerification(cnnResult);
+      // Check if all keys are quota-exhausted
+      if (geminiResult?.quota_exhausted) {
+        console.warn('Gemini quota exhausted — falling back to CNN only');
+        geminiUnavailable = true;
+        geminiResult = null;
+      }
     } catch(e) {
       console.warn('Gemini error:', e.message);
+      geminiUnavailable = true;
     }
 
     // ── STEP 3: CROSS-CHECK ──────────────────
     setLoadingText('Almost done…', 'Finalizing your result');
 
     if (cnnResult?.matched && geminiResult?.confirmed) {
+      // ── Both CNN and Gemini agree ──
       const cnnName    = (cnnResult.localName || '').toLowerCase().trim();
       const geminiName = (geminiResult.plantName || '').toLowerCase().trim();
       const namesMatch = cnnName && geminiName && (
@@ -388,14 +397,12 @@
         noMatch = true;
       }
     } else if (!cnnResult?.matched && geminiResult?.confirmed) {
+      // ── CNN missed but Gemini confirmed ──
       const herb = herbDatabase.find(h =>
         (h.localName||'').toLowerCase().includes((geminiResult.plantName||'').toLowerCase()) ||
         (geminiResult.plantName||'').toLowerCase().includes((h.localName||'').toLowerCase())
       );
       if (herb) {
-        // Use real CNN confidence if available (it just missed the threshold),
-        // otherwise map Gemini's High/Medium/Low label to a realistic number.
-        // This fixes every Gemini-identified scan showing exactly 65%.
         let confPct, confRaw;
         if (cnnResult?.confidencePercent && cnnResult.confidencePercent > 0) {
           confPct = Math.round(cnnResult.confidencePercent);
@@ -420,6 +427,15 @@
       } else {
         noMatch = true;
       }
+    } else if (cnnResult?.matched && (geminiUnavailable || !geminiResult)) {
+      // ── Gemini unavailable (quota/error) — trust CNN alone ──
+      finalHerb = {
+        ...cnnResult,
+        geminiVerified: false,
+        geminiAnalysis: null,
+        cnnOnly: true,
+      };
+      finalHerb.confidenceLabel = computeConfidenceLabel(finalHerb.confidencePercent);
     } else {
       noMatch = true;
     }
@@ -826,6 +842,5 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
     setTimeout(() => t.remove(), 3500);
   }
 </script>
-<script type="module" src="./js/translator.js"></script>
 </body>
 </html>
