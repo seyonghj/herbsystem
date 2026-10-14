@@ -863,11 +863,14 @@
       noMatch = true;
     }
 
-await saveScan(finalHerb || { matched: false }, noMatch);
-
-    document.getElementById('loadingPanel').classList.remove('active');
-
-    document.getElementById('identifyBtn').disabled = false;
+try {
+      await saveScan(finalHerb || { matched: false }, noMatch);
+    } catch (saveError) {
+      console.warn('Could not save scan history:', saveError);
+    } finally {
+      document.getElementById('loadingPanel').classList.remove('active');
+      document.getElementById('identifyBtn').disabled = false;
+    }
 
 
 
@@ -885,9 +888,62 @@ await saveScan(finalHerb || { matched: false }, noMatch);
 
 
 
-  // ── GEMINI VERIFICATION ──────────────────────
+  // Parse Gemini JSON and repair literal line breaks/control characters inside strings.
+  function parseGeminiResult(rawText) {
+    if (typeof rawText !== 'string') throw new Error('Gemini response was not text.');
+    let text = rawText.trim();
+    if (text.startsWith('```')) {
+      text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+    }
 
-  async function runGeminiVerification(cnnResult) {
+    try {
+      const parsed = JSON.parse(text);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed;
+    } catch (_) {
+      // Try repairing unescaped control characters below.
+    }
+
+    let repaired = '';
+    let inString = false;
+    let escaped = false;
+    for (const char of text) {
+      if (inString) {
+        if (escaped) {
+          repaired += char;
+          escaped = false;
+        } else if (char === '\\') {
+          repaired += char;
+          escaped = true;
+        } else if (char === '"') {
+          repaired += char;
+          inString = false;
+        } else if (char === '\n') {
+          repaired += '\\n';
+        } else if (char === '\r') {
+          repaired += '\\r';
+        } else if (char === '\t') {
+          repaired += '\\t';
+        } else if (char.charCodeAt(0) < 32) {
+          repaired += ' ';
+        } else {
+          repaired += char;
+        }
+      } else {
+        repaired += char;
+        if (char === '"') inString = true;
+      }
+    }
+
+    const parsed = JSON.parse(repaired);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      throw new Error('Gemini JSON must be an object.');
+    }
+    return parsed;
+  }
+
+  // ── GEMINI VERIFICATION ──────────────────────
+
+  async function runGeminiVerification(cnnResult) {
 
     const base64   = await fileToBase64(currentFile);
 
@@ -957,15 +1013,29 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
 
 
 
-    if (!res.ok) {
+    // Read as text first so a proxy HTTP 500 can still be recovered when it
+    // includes Gemini's usable response in a "raw" field.
+    const responseText = await res.text();
+    let responseData = null;
+    try {
+      responseData = JSON.parse(responseText);
+    } catch (_) {
+      responseData = null;
+    }
 
-      const errText = await res.text();
+    if (!res.ok) {
+      if (responseData && typeof responseData.raw === 'string') {
+        try {
+          return parseGeminiResult(responseData.raw);
+        } catch (_) {
+          // Fall through and report the original proxy error.
+        }
+      }
+      throw new Error(`Gemini proxy ${res.status}: ${responseText}`);
+    }
 
-      throw new Error(`Gemini proxy ${res.status}: ${errText}`);
-
-    }
-
-    return await res.json();
+    if (responseData && typeof responseData === 'object') return responseData;
+    return parseGeminiResult(responseText);
 
   }
 
