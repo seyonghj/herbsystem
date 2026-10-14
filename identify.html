@@ -1,3542 +1,1017 @@
 <!DOCTYPE html>
-
-
-
 <html lang="en">
-
-
-
 <head>
-
-
-
-  <meta charset="UTF-8" />
-
-
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-
-
-  <title>Identify Herb — HerbID Iloilo</title>
-
-
-
-  <link rel="stylesheet" href="css/style.css" />
-
-
-
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css" />
-
-
-
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
-
-
-
-  <style>
-
-
-
-    :root {
-
-
-
-      --green-mid:   #1a7a55;
-
-
-
-      --green-light: #d4f0e4;
-
-
-
-    }
-
-
-
-
-
-
-
-    .upload-section { max-width: 680px; margin: 0 auto; padding: 2.5rem 1.5rem 0; }
-
-
-
-
-
-
-
-    .start-card {
-
-
-
-      background: var(--white); border: 1.5px dashed var(--border);
-
-
-
-      border-radius: var(--radius-lg); padding: 3rem 2rem;
-
-
-
-      display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px;
-
-
-
-    }
-
-
-
-    .start-card-icon {
-
-
-
-      width: 64px; height: 64px; border-radius: 50%; background: var(--green-pale);
-
-
-
-      display: flex; align-items: center; justify-content: center;
-
-
-
-      font-size: 28px; color: var(--green-main); margin-bottom: 4px;
-
-
-
-    }
-
-
-
-    .start-card h3 { font-size: 16px; font-weight: 600; color: var(--green-dark); }
-
-
-
-    .start-card p  { font-size: 13px; color: var(--text-muted); max-width: 340px; }
-
-
-
-
-
-
-
-    .preview-card {
-
-
-
-      background: var(--white); border: 1px solid var(--border);
-
-
-
-      border-radius: var(--radius-lg); padding: 1rem; overflow: hidden;
-
-
-
-    }
-
-
-
-    .preview-box { position: relative; border-radius: var(--radius-md); overflow: hidden; }
-
-
-
-    .preview-img { width: 100%; max-height: 380px; object-fit: cover; display: block; }
-
-
-
-    .preview-change {
-
-
-
-      position: absolute; bottom: 10px; right: 10px;
-
-
-
-      background: rgba(10,74,53,0.75); color: #fff; border: none;
-
-
-
-      font-size: 12px; font-weight: 500; padding: 7px 14px; border-radius: 99px;
-
-
-
-      cursor: pointer; display: flex; align-items: center; gap: 6px;
-
-
-
-      font-family: 'DM Sans', sans-serif;
-
-
-
-    }
-
-
-
-    .preview-change:hover { background: rgba(10,74,53,0.9); }
-
-
-
-
-
-
-
-    .action-bar { max-width: 680px; margin: 1rem auto 0; padding: 0 1.5rem; display: none; gap: 10px; flex-wrap: wrap; }
-
-
-
-    .action-bar.visible { display: flex; }
-
-
-
-    .btn-identify {
-
-
-
-      flex: 1; padding: 13px 20px; background: var(--green-main); color: #fff; border: none;
-
-
-
-      border-radius: var(--radius-md); font-size: 15px; font-weight: 600;
-
-
-
-      font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s;
-
-
-
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-
-
-
-    }
-
-
-
-    .btn-identify:hover:not(:disabled) { background: var(--green-mid); }
-
-
-
-    .btn-identify:disabled { opacity: 0.5; cursor: not-allowed; }
-
-
-
-    .btn-clear {
-
-
-
-      padding: 13px 14px; background: var(--white); color: #e53e3e; border: 1.5px solid #fecaca;
-
-
-
-      border-radius: var(--radius-md); font-size: 15px; cursor: pointer; transition: background 0.15s;
-
-
-
-      display: flex; align-items: center; gap: 6px; font-family: 'DM Sans', sans-serif; font-weight: 500;
-
-
-
-    }
-
-
-
-    .btn-clear:hover { background: #fff5f5; }
-
-
-
-
-
-
-
-    .tips { max-width: 680px; margin: 1.5rem auto 0; padding: 0 1.5rem; display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
-
-
-
-    .tip { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; display: flex; gap: 10px; align-items: flex-start; }
-
-
-
-    .tip i { font-size: 18px; color: var(--green-main); flex-shrink: 0; margin-top: 1px; }
-
-
-
-    .tip p { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin: 0; }
-
-
-
-    .tip strong { display: block; font-size: 12px; font-weight: 600; color: var(--green-dark); margin-bottom: 2px; }
-
-
-
-
-
-
-
-    /* ── Loading panel — no steps, just spinner + text ── */
-
-
-
-    .loading-panel { display: none; max-width: 680px; margin: 2rem auto 0; padding: 0 1.5rem; }
-
-
-
-    .loading-panel.active { display: block; }
-
-
-
-    .loading-card {
-
-
-
-      background: var(--green-dark); border-radius: var(--radius-lg);
-
-
-
-      padding: 2.5rem 2rem; text-align: center; color: #fff;
-
-
-
-    }
-
-
-
-    .leaf-spinner {
-
-
-
-      width: 60px; height: 60px; margin: 0 auto 1.25rem; border-radius: 50%;
-
-
-
-      border: 3px solid rgba(255,255,255,0.15);
-
-
-
-      border-top-color: var(--green-main);
-
-
-
-      animation: spin 0.8s linear infinite;
-
-
-
-    }
-
-
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-
-
-    .loading-card h3 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
-
-
-
-    .loading-card p  { font-size: 13px; color: rgba(255,255,255,0.6); }
-
-
-
-
-
-
-
-    .result-panel { display: none; max-width: 680px; margin: 2rem auto 3rem; padding: 0 1.5rem; }
-
-
-
-    .result-panel.active { display: block; }
-
-
-
-
-
-
-
-    /* ── Only the confirmed (green) and rejected (red) banners remain ── */
-
-
-
-    .verification-banner { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--radius-md); font-size: 13px; font-weight: 500; margin-bottom: 10px; }
-
-
-
-    .verification-banner.confirmed { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
-
-
-
-    .verification-banner.rejected  { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
-
-
-
-    .verification-banner i { font-size: 18px; flex-shrink: 0; }
-
-
-
-
-
-
-
-    .match-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 1rem; }
-
-
-
-    .match-header { background: var(--green-dark); padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 14px; }
-
-
-
-    .match-confidence { background: var(--green-main); color: #fff; font-size: 13px; font-weight: 700; padding: 4px 12px; border-radius: 99px; margin-left: auto; white-space: nowrap; }
-
-
-
-    .match-emoji { font-size: 42px; }
-
-
-
-    .match-names h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: #fff; line-height: 1.2; }
-
-
-
-    .match-names p { font-size: 13px; color: rgba(255,255,255,0.6); font-style: italic; margin-top: 3px; }
-
-
-
-    .match-english { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 2px; font-style: normal !important; }
-
-
-
-    .match-body { padding: 1.25rem 1.5rem; }
-
-
-
-    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
-
-
-
-    .info-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 4px; }
-
-
-
-    .info-val { font-size: 13px; color: var(--text-primary); line-height: 1.6; }
-
-
-
-    .use-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
-
-
-
-    .use-tags span { font-size: 12px; padding: 4px 12px; border-radius: 99px; }
-
-
-
-    .loc-row { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
-
-
-
-    .loc-row i { color: var(--green-main); font-size: 15px; }
-
-
-
-    .match-actions { display: flex; gap: 8px; margin-top: 1rem; }
-
-
-
-    .match-actions a { flex: 1; padding: 10px; border-radius: var(--radius-md); text-align: center; font-size: 13px; font-weight: 500; text-decoration: none; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
-
-
-
-    .btn-detail { background: var(--green-main); color: #fff; }
-
-
-
-    .btn-detail:hover { background: var(--green-mid); }
-
-
-
-    .btn-map { background: var(--white); color: var(--green-dark); border: 1px solid var(--border); }
-
-
-
-    .btn-map:hover { background: var(--green-pale); }
-
-
-
-
-
-
-
-    .gemini-box { background: #f8fffe; border: 1px solid #b8e8d8; border-radius: var(--radius-md); padding: 1rem 1.25rem; margin-top: 10px; }
-
-
-
-    .gemini-box-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--green-mid); margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
-
-
-
-    .gemini-box p { font-size: 13px; color: var(--text-primary); line-height: 1.7; margin: 0; }
-
-
-
-
-
-
-
-    .top3-box { background: var(--green-pale); border: 1px solid var(--green-light); border-radius: var(--radius-md); padding: 1rem 1.25rem; margin-top: 10px; }
-
-
-
-    .top3-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--green-mid); margin-bottom: 8px; }
-
-
-
-    .top3-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--green-light); font-size: 13px; }
-
-
-
-    .top3-row:last-child { border-bottom: none; }
-
-
-
-    .top3-bar-wrap { flex: 1; margin: 0 12px; height: 5px; background: var(--green-light); border-radius: 3px; overflow: hidden; }
-
-
-
-    .top3-bar { height: 100%; background: var(--green-main); border-radius: 3px; }
-
-
-
-    .top3-pct { font-size: 12px; color: var(--green-mid); font-weight: 600; min-width: 38px; text-align: right; }
-
-
-
-
-
-
-
-    .not-found { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2.5rem; text-align: center; }
-
-
-
-    .not-found-icon { font-size: 48px; margin-bottom: 1rem; }
-
-
-
-    .not-found h3 { font-size: 17px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
-
-
-
-    .not-found p { font-size: 13px; color: var(--text-muted); line-height: 1.7; max-width: 400px; margin: 0 auto; }
-
-
-
-
-
-
-
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(6,20,15,0.6); z-index: 500; align-items: center; justify-content: center; padding: 1rem; }
-
-
-
-    .modal-overlay.open { display: flex; }
-
-
-
-    .modal-box { background: var(--white); border-radius: var(--radius-lg); width: 100%; max-width: 400px; padding: 1.5rem; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
-
-
-
-    .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-
-
-
-    .modal-head h3 { font-size: 17px; font-weight: 700; color: var(--green-dark); }
-
-
-
-    .modal-close { background: var(--green-pale); border: none; cursor: pointer; color: var(--green-dark); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-
-
-
-    .modal-options { display: flex; flex-direction: column; gap: 10px; }
-
-
-
-    .modal-option { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border: 1.5px solid var(--border); border-radius: var(--radius-md); background: var(--white); cursor: pointer; text-align: left; font-family: 'DM Sans', sans-serif; transition: border-color 0.15s, background 0.15s; }
-
-
-
-    .modal-option:hover { border-color: var(--green-main); background: var(--green-pale); }
-
-
-
-    .modal-option-icon { width: 44px; height: 44px; border-radius: 50%; background: var(--green-pale); display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--green-main); flex-shrink: 0; }
-
-
-
-    .modal-option strong { display: block; font-size: 14px; color: var(--green-dark); }
-
-
-
-    .modal-option span { font-size: 12px; color: var(--text-muted); }
-
-
-
-
-
-
-
-    .cam-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 550; align-items: center; justify-content: center; padding: 1rem; }
-
-
-
-    .cam-modal.open { display: flex; }
-
-
-
-    .cam-box { background: #000; border-radius: var(--radius-lg); overflow: hidden; width: 100%; max-width: 480px; position: relative; }
-
-
-
-    video { width: 100%; display: block; }
-
-
-
-    .cam-controls { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to top, rgba(0,0,0,0.7), transparent); }
-
-
-
-    .cam-capture { width: 60px; height: 60px; border-radius: 50%; background: #fff; border: 4px solid rgba(255,255,255,0.4); cursor: pointer; transition: transform 0.1s; display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--text-primary); }
-
-
-
-    .cam-capture:active { transform: scale(0.93); }
-
-
-
-    .cam-close { background: rgba(255,255,255,0.15); border: none; cursor: pointer; color: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-
-
-
-    canvas { display: none; }
-
-
-
-
-
-
-
-    .disclaimer { max-width: 680px; margin: 0 auto 3rem; padding: 0 1.5rem; }
-
-
-
-    .disclaimer-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius-md); padding: 10px 14px; display: flex; gap: 8px; align-items: flex-start; }
-
-
-
-    .disclaimer-box i { color: #92400e; font-size: 15px; flex-shrink: 0; margin-top: 2px; }
-
-
-
-    .disclaimer-box p { font-size: 12px; color: #78350f; line-height: 1.6; margin: 0; }
-
-
-
-
-
-
-
-    @media (max-width: 580px) {
-
-
-
-      .tips { grid-template-columns: 1fr; }
-
-
-
-      .info-grid { grid-template-columns: 1fr; }
-
-
-
-      .action-bar { flex-direction: column; }
-
-
-
-      .btn-identify, .btn-clear { width: 100%; justify-content: center; min-height: 48px; }
-
-
-
-      .start-card { padding: 2.25rem 1.25rem; }
-
-
-
-    }
-
-
-
-  
-
-    /* Identify Herb page layout repair */
-    .page-hero {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 12px; min-height: 190px; padding: 38px 24px; text-align: center;
-      color: #fff; background: linear-gradient(135deg, #075e43, #16845d);
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Identify Herb — HerbID Iloilo</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green-mid:   #1a7a55;
+      --green-light: #d4f0e4;
     }
-    .page-hero h1 { margin: 0; color: #fff; font-size: clamp(28px, 4vw, 42px); line-height: 1.2; }
-    .page-hero p { max-width: 620px; margin: 0; color: rgba(255,255,255,.9); line-height: 1.7; }
-    .page-hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 7px 13px;
-      border: 1px solid rgba(255,255,255,.25); border-radius: 30px; background: rgba(255,255,255,.12);
-      color: #fff; font-size: 12px; }
-    .upload-section { width: min(100% - 32px, 760px); max-width: 760px; margin: 32px auto 0; padding: 0; }
-    .start-card { padding: 40px 24px; border: 2px dashed #b8d9c9; border-radius: 20px;
-      background: #fff; box-shadow: 0 8px 28px rgba(20,80,55,.06); }
-    .start-card h3 { margin: 8px 0 0; color: #174c38; font-size: 20px; }
-    .start-card p { margin: 0; line-height: 1.7; }
-    .start-card-icon { width: 68px; height: 68px; background: #e2f5eb; color: #16845d; }
-    .preview-card { padding: 20px; border: 1px solid #e0ebe5; border-radius: 20px; background: #fff;
-      box-shadow: 0 8px 28px rgba(20,80,55,.07); }
-    .preview-box { display: flex; flex-direction: column; align-items: center; gap: 16px; position: relative; }
-    .preview-img { display: block; width: 100%; max-width: 520px; max-height: 420px; aspect-ratio: 4/3;
-      object-fit: contain; border-radius: 14px; background: #f3f7f4; }
-    .preview-change { position: static; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      padding: 10px 16px; border: 1px solid #c9e2d5; border-radius: 10px; background: #f0faf4;
-      color: #176c4d; font: inherit; cursor: pointer; }
-    .action-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;
-      width: min(100% - 32px, 760px); margin: 22px auto; }
-    .btn-identify, .btn-clear { display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      min-height: 44px; padding: 11px 20px; border-radius: 10px; font: inherit; font-weight: 600; cursor: pointer;
-      transition: background .2s, transform .2s; }
-    .btn-identify { border: 1px solid #16845d; background: #16845d; color: #fff; }
-    .btn-identify:hover:not(:disabled) { background: #096847; transform: translateY(-1px); }
-    .btn-identify:disabled { opacity: .55; cursor: not-allowed; }
-    .btn-clear { border: 1px solid #d6e3dc; background: #fff; color: #43564b; }
-    .btn-clear:hover { background: #f1f7f3; }
-    .tips { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px;
-      width: min(100% - 32px, 900px); margin: 28px auto 56px; }
-    .tip { display: flex; align-items: flex-start; gap: 12px; padding: 20px; border: 1px solid #e0ebe5;
-      border-radius: 14px; background: #fff; }
-    .tip > i { flex-shrink: 0; display: grid; place-items: center; width: 38px; height: 38px;
-      border-radius: 10px; background: #e5f5ec; color: #16845d; font-size: 20px; }
-    .tip strong { display: block; margin: 2px 0 6px; color: #174c38; font-size: 14px; }
-    .tip p { margin: 0; color: #66756d; font-size: 13px; line-height: 1.65; }
+
+    .upload-section { max-width: 680px; margin: 0 auto; padding: 2.5rem 1.5rem 0; }
+
+    .start-card {
+      background: var(--white); border: 1.5px dashed var(--border);
+      border-radius: var(--radius-lg); padding: 3rem 2rem;
+      display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px;
+    }
+    .start-card-icon {
+      width: 64px; height: 64px; border-radius: 50%; background: var(--green-pale);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; color: var(--green-main); margin-bottom: 4px;
+    }
+    .start-card h3 { font-size: 16px; font-weight: 600; color: var(--green-dark); }
+    .start-card p  { font-size: 13px; color: var(--text-muted); max-width: 340px; }
+
+    .preview-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1rem; overflow: hidden;
+    }
+    .preview-box { position: relative; border-radius: var(--radius-md); overflow: hidden; }
+    .preview-img { width: 100%; max-height: 380px; object-fit: cover; display: block; }
+    .preview-change {
+      position: absolute; bottom: 10px; right: 10px;
+      background: rgba(10,74,53,0.75); color: #fff; border: none;
+      font-size: 12px; font-weight: 500; padding: 7px 14px; border-radius: 99px;
+      cursor: pointer; display: flex; align-items: center; gap: 6px;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .preview-change:hover { background: rgba(10,74,53,0.9); }
+
+    .action-bar { max-width: 680px; margin: 1rem auto 0; padding: 0 1.5rem; display: none; gap: 10px; flex-wrap: wrap; }
+    .action-bar.visible { display: flex; }
+    .btn-identify {
+      flex: 1; padding: 13px 20px; background: var(--green-main); color: #fff; border: none;
+      border-radius: var(--radius-md); font-size: 15px; font-weight: 600;
+      font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-identify:hover:not(:disabled) { background: var(--green-mid); }
+    .btn-identify:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-clear {
+      padding: 13px 14px; background: var(--white); color: #e53e3e; border: 1.5px solid #fecaca;
+      border-radius: var(--radius-md); font-size: 15px; cursor: pointer; transition: background 0.15s;
+      display: flex; align-items: center; gap: 6px; font-family: 'DM Sans', sans-serif; font-weight: 500;
+    }
+    .btn-clear:hover { background: #fff5f5; }
+
+    .tips { max-width: 680px; margin: 1.5rem auto 0; padding: 0 1.5rem; display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+    .tip { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; display: flex; gap: 10px; align-items: flex-start; }
+    .tip i { font-size: 18px; color: var(--green-main); flex-shrink: 0; margin-top: 1px; }
+    .tip p { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin: 0; }
+    .tip strong { display: block; font-size: 12px; font-weight: 600; color: var(--green-dark); margin-bottom: 2px; }
+
+    /* ── Loading panel — no steps, just spinner + text ── */
+    .loading-panel { display: none; max-width: 680px; margin: 2rem auto 0; padding: 0 1.5rem; }
+    .loading-panel.active { display: block; }
+    .loading-card {
+      background: var(--green-dark); border-radius: var(--radius-lg);
+      padding: 2.5rem 2rem; text-align: center; color: #fff;
+    }
+    .leaf-spinner {
+      width: 60px; height: 60px; margin: 0 auto 1.25rem; border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.15);
+      border-top-color: var(--green-main);
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-card h3 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+    .loading-card p  { font-size: 13px; color: rgba(255,255,255,0.6); }
+
+    .result-panel { display: none; max-width: 680px; margin: 2rem auto 3rem; padding: 0 1.5rem; }
+    .result-panel.active { display: block; }
+
+    /* ── Only the confirmed (green) and rejected (red) banners remain ── */
+    .verification-banner { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--radius-md); font-size: 13px; font-weight: 500; margin-bottom: 10px; }
+    .verification-banner.confirmed { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+    .verification-banner.rejected  { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    .verification-banner i { font-size: 18px; flex-shrink: 0; }
+
+    .match-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 1rem; }
+    .match-header { background: var(--green-dark); padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 14px; }
+    .match-confidence { background: var(--green-main); color: #fff; font-size: 13px; font-weight: 700; padding: 4px 12px; border-radius: 99px; margin-left: auto; white-space: nowrap; }
+    .match-emoji { font-size: 42px; }
+    .match-names h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: #fff; line-height: 1.2; }
+    .match-names p { font-size: 13px; color: rgba(255,255,255,0.6); font-style: italic; margin-top: 3px; }
+    .match-english { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 2px; font-style: normal !important; }
+    .match-body { padding: 1.25rem 1.5rem; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .info-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 4px; }
+    .info-val { font-size: 13px; color: var(--text-primary); line-height: 1.6; }
+    .use-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+    .use-tags span { font-size: 12px; padding: 4px 12px; border-radius: 99px; }
+    .loc-row { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .loc-row i { color: var(--green-main); font-size: 15px; }
+    .match-actions { display: flex; gap: 8px; margin-top: 1rem; }
+    .match-actions a { flex: 1; padding: 10px; border-radius: var(--radius-md); text-align: center; font-size: 13px; font-weight: 500; text-decoration: none; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn-detail { background: var(--green-main); color: #fff; }
+    .btn-detail:hover { background: var(--green-mid); }
+    .btn-map { background: var(--white); color: var(--green-dark); border: 1px solid var(--border); }
+    .btn-map:hover { background: var(--green-pale); }
+
+    .gemini-box { background: #f8fffe; border: 1px solid #b8e8d8; border-radius: var(--radius-md); padding: 1rem 1.25rem; margin-top: 10px; }
+    .gemini-box-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--green-mid); margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+    .gemini-box p { font-size: 13px; color: var(--text-primary); line-height: 1.7; margin: 0; }
+
+    .top3-box { background: var(--green-pale); border: 1px solid var(--green-light); border-radius: var(--radius-md); padding: 1rem 1.25rem; margin-top: 10px; }
+    .top3-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--green-mid); margin-bottom: 8px; }
+    .top3-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--green-light); font-size: 13px; }
+    .top3-row:last-child { border-bottom: none; }
+    .top3-bar-wrap { flex: 1; margin: 0 12px; height: 5px; background: var(--green-light); border-radius: 3px; overflow: hidden; }
+    .top3-bar { height: 100%; background: var(--green-main); border-radius: 3px; }
+    .top3-pct { font-size: 12px; color: var(--green-mid); font-weight: 600; min-width: 38px; text-align: right; }
+
+    .not-found { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2.5rem; text-align: center; }
+    .not-found-icon { font-size: 48px; margin-bottom: 1rem; }
+    .not-found h3 { font-size: 17px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+    .not-found p { font-size: 13px; color: var(--text-muted); line-height: 1.7; max-width: 400px; margin: 0 auto; }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(6,20,15,0.6); z-index: 500; align-items: center; justify-content: center; padding: 1rem; }
+    .modal-overlay.open { display: flex; }
+    .modal-box { background: var(--white); border-radius: var(--radius-lg); width: 100%; max-width: 400px; padding: 1.5rem; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .modal-head h3 { font-size: 17px; font-weight: 700; color: var(--green-dark); }
+    .modal-close { background: var(--green-pale); border: none; cursor: pointer; color: var(--green-dark); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .modal-options { display: flex; flex-direction: column; gap: 10px; }
+    .modal-option { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border: 1.5px solid var(--border); border-radius: var(--radius-md); background: var(--white); cursor: pointer; text-align: left; font-family: 'DM Sans', sans-serif; transition: border-color 0.15s, background 0.15s; }
+    .modal-option:hover { border-color: var(--green-main); background: var(--green-pale); }
+    .modal-option-icon { width: 44px; height: 44px; border-radius: 50%; background: var(--green-pale); display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--green-main); flex-shrink: 0; }
+    .modal-option strong { display: block; font-size: 14px; color: var(--green-dark); }
+    .modal-option span { font-size: 12px; color: var(--text-muted); }
+
+    .cam-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 550; align-items: center; justify-content: center; padding: 1rem; }
+    .cam-modal.open { display: flex; }
+    .cam-box { background: #000; border-radius: var(--radius-lg); overflow: hidden; width: 100%; max-width: 480px; position: relative; }
+    video { width: 100%; display: block; }
+    .cam-controls { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to top, rgba(0,0,0,0.7), transparent); }
+    .cam-capture { width: 60px; height: 60px; border-radius: 50%; background: #fff; border: 4px solid rgba(255,255,255,0.4); cursor: pointer; transition: transform 0.1s; display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--text-primary); }
+    .cam-capture:active { transform: scale(0.93); }
+    .cam-close { background: rgba(255,255,255,0.15); border: none; cursor: pointer; color: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+    canvas { display: none; }
+
+    .disclaimer { max-width: 680px; margin: 0 auto 3rem; padding: 0 1.5rem; }
+    .disclaimer-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius-md); padding: 10px 14px; display: flex; gap: 8px; align-items: flex-start; }
+    .disclaimer-box i { color: #92400e; font-size: 15px; flex-shrink: 0; margin-top: 2px; }
+    .disclaimer-box p { font-size: 12px; color: #78350f; line-height: 1.6; margin: 0; }
+
+    @media (max-width: 580px) {
+      .tips { grid-template-columns: 1fr; }
+      .info-grid { grid-template-columns: 1fr; }
+      .action-bar { flex-direction: column; }
+      .btn-identify, .btn-clear { width: 100%; justify-content: center; min-height: 48px; }
+      .start-card { padding: 2.25rem 1.25rem; }
+    }
+
+
+    /* Design alignment and layout repair — keeps existing functionality intact */
+    body { background: var(--bg, #f6f9f7); }
+    .page-hero {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      min-height: 210px;
+      padding: 38px 20px;
+      text-align: center;
+      background: linear-gradient(135deg, #0b5b40 0%, #1a7a55 58%, #23966b 100%);
+      color: #fff;
+      overflow: hidden;
+    }
+    .page-hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image: radial-gradient(rgba(255,255,255,.09) 1px, transparent 1px);
+      background-size: 22px 22px;
+      opacity: .5;
+    }
+    .page-hero > * { position: relative; z-index: 1; }
+    .page-hero h1 {
+      margin: 0;
+      color: #fff;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(28px, 4vw, 40px);
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .page-hero p {
+      max-width: 620px;
+      margin: 0;
+      color: rgba(255,255,255,.9);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+    .page-hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 13px;
+      border: 1px solid rgba(255,255,255,.3);
+      border-radius: 999px;
+      background: rgba(255,255,255,.12);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .02em;
+    }
+    .upload-section {
+      width: calc(100% - 32px);
+      max-width: 760px;
+      margin: 30px auto 0;
+      padding: 0;
+    }
+    .start-card {
+      padding: 42px 24px;
+      border: 1.5px dashed #b8d9c9;
+      border-radius: var(--radius-lg, 18px);
+      background: #fff;
+      box-shadow: 0 8px 28px rgba(20,80,55,.055);
+    }
+    .start-card h3 { margin: 5px 0 0; font-size: 18px; }
+    .start-card p { line-height: 1.7; margin: 0; }
+    .start-card-icon { width: 68px; height: 68px; font-size: 29px; }
+    .preview-card {
+      padding: 18px;
+      border: 1px solid #dfebe4;
+      border-radius: var(--radius-lg, 18px);
+      background: #fff;
+      box-shadow: 0 8px 28px rgba(20,80,55,.06);
+    }
+    .preview-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      overflow: visible;
+      border-radius: var(--radius-md, 12px);
+    }
+    .preview-img {
+      width: 100%;
+      max-width: 560px;
+      max-height: 420px;
+      aspect-ratio: 4 / 3;
+      object-fit: contain;
+      border-radius: 12px;
+      background: #f3f7f4;
+    }
+    .preview-change {
+      position: static;
+      align-self: center;
+      padding: 10px 16px;
+      border: 1px solid #c8e2d4;
+      border-radius: 10px;
+      background: #f0faf4;
+      color: #176c4d;
+      font-size: 13px;
+    }
+    .preview-change:hover { background: #e3f5eb; }
+    .action-bar {
+      width: calc(100% - 32px);
+      max-width: 760px;
+      margin: 18px auto 0;
+      padding: 0;
+      gap: 12px;
+    }
+    .btn-identify, .btn-clear {
+      min-height: 46px;
+      border-radius: 10px;
+      font-size: 14px;
+      transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+    .btn-identify { box-shadow: 0 4px 12px rgba(26,122,85,.14); }
+    .btn-identify:hover:not(:disabled) { transform: translateY(-1px); }
+    .btn-clear { border-color: #e5caca; }
+    .tips {
+      width: calc(100% - 32px);
+      max-width: 900px;
+      margin: 26px auto 48px;
+      padding: 0;
+      gap: 14px;
+    }
+    .tip {
+      min-width: 0;
+      padding: 18px;
+      gap: 12px;
+      border: 1px solid #e0ebe5;
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: 0 4px 16px rgba(20,80,55,.035);
+    }
+    .tip > i {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      margin-top: 0;
+      border-radius: 10px;
+      background: #e6f5ed;
+      font-size: 18px;
+    }
+    .tip strong { font-size: 13px; margin-bottom: 5px; }
+    .tip p { font-size: 12px; line-height: 1.65; }
+    .disclaimer { width: calc(100% - 32px); max-width: 900px; padding: 0; }
+    .disclaimer-box { border-radius: 12px; padding: 14px 16px; }
+
     @media (max-width: 700px) {
-      .page-hero { min-height: 170px; padding: 30px 18px; }
+      .page-hero { min-height: 185px; padding: 30px 18px; }
       .upload-section { margin-top: 22px; }
-      .tips { grid-template-columns: 1fr; gap: 12px; margin-top: 22px; }
-      .tip { padding: 16px; }
+      .tips { grid-template-columns: 1fr; gap: 10px; margin-top: 20px; }
+      .tip { padding: 15px; }
     }
     @media (max-width: 480px) {
+      .page-hero h1 { font-size: 28px; }
+      .page-hero p { font-size: 13px; }
       .start-card { padding: 30px 18px; }
       .preview-card { padding: 12px; }
       .preview-img { max-height: 320px; }
       .action-bar { flex-direction: column; }
-      .action-bar button { width: 100%; }
+      .btn-identify, .btn-clear { width: 100%; justify-content: center; }
     }
 
-</style>
-
-
-
+  </style>
 </head>
-
-
-
 <body>
 
-
-
-
-
-
-
 <nav class="nav">
-
-
-
-  <a href="index.html" class="nav-brand">
-
-
-
-    <div class="nav-brand-icon"><i class="ti ti-leaf"></i></div>
-
-
-
-    <div class="nav-brand-text"><strong>HerbID Iloilo</strong><span>NISU Lemery Campus</span></div>
-
-
-
-  </a>
-
-
-
-  <ul class="nav-links" id="navLinks">
-
-
-
-    <li><a href="index.html">Home</a></li>
-
-
-
-    <li><a href="feed.html">Community</a></li>
-
-
-
-    <li><a href="herbs.html">Herb Database</a></li>
-
-
-
-    <li><a href="identify.html" class="active">Identify Herb</a></li>
-
-
-
-    <li><a href="map.html">Map</a></li>
-
-
-
-    <li><a href="about.html">About</a></li>
-
-
-
-  </ul>
-
-
-
-  <button class="nav-hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Menu">
-
-
-
-    <i class="ti ti-menu-2"></i>
-
-
-
-  </button>
-
-
-
+  <a href="index.html" class="nav-brand">
+    <div class="nav-brand-icon"><i class="ti ti-leaf"></i></div>
+    <div class="nav-brand-text"><strong>HerbID Iloilo</strong><span>NISU Lemery Campus</span></div>
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="feed.html">Community</a></li>
+    <li><a href="herbs.html">Herb Database</a></li>
+    <li><a href="identify.html" class="active">Identify Herb</a></li>
+    <li><a href="map.html">Map</a></li>
+    <li><a href="about.html">About</a></li>
+  </ul>
+  <button class="nav-hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Menu">
+    <i class="ti ti-menu-2"></i>
+  </button>
 </nav>
 
-
-
-
-
-
-
 <div class="page-hero">
-
-
-
-  <div class="page-hero-badge"><i class="ti ti-camera"></i> CNN + Gemini AI</div>
-
-
-
-  <h1>Identify a Medicinal Herb</h1>
-
-
-
-  <p>Add a photo — CNN model identifies it, then Gemini AI confirms the result</p>
-
-
-
+  <div class="page-hero-badge"><i class="ti ti-camera"></i> CNN + Gemini AI</div>
+  <h1>Identify a Medicinal Herb</h1>
+  <p>Add a photo — CNN model identifies it, then Gemini AI confirms the result</p>
 </div>
-
-
-
-
-
-
 
 <div class="upload-section">
+  <div class="start-card" id="startCard">
+    <div class="start-card-icon"><i class="ti ti-photo-plus"></i></div>
+    <h3>Add a photo to get started</h3>
+    <p>Take a clear photo of the leaves, stem, and flowers, or upload one from your device</p>
+    <button class="btn-identify" style="margin-top:6px;padding:12px 24px" onclick="openSourceModal()">
+      <i class="ti ti-plus"></i> Add Photo
+    </button>
+  </div>
 
+  <div class="preview-card" id="previewCard" style="display:none">
+    <div class="preview-box">
+      <img class="preview-img" id="previewImg" alt="Herb preview" />
+      <button class="preview-change" onclick="openSourceModal()"><i class="ti ti-refresh"></i> Change photo</button>
+    </div>
+  </div>
 
-
-  <div class="start-card" id="startCard">
-
-
-
-    <div class="start-card-icon"><i class="ti ti-photo-plus"></i></div>
-
-
-
-    <h3>Add a photo to get started</h3>
-
-
-
-    <p>Take a clear photo of the leaves, stem, and flowers, or upload one from your device</p>
-
-
-
-    <button class="btn-identify" style="margin-top:6px;padding:12px 24px" onclick="openSourceModal()">
-
-
-
-      <i class="ti ti-plus"></i> Add Photo
-
-
-
-    </button>
-
-
-
-  </div>
-
-
-
-
-
-
-
-  <div class="preview-card" id="previewCard" style="display:none">
-
-
-
-    <div class="preview-box">
-
-
-
-      <img class="preview-img" id="previewImg" alt="Herb preview" />
-
-
-
-      <button class="preview-change" onclick="openSourceModal()"><i class="ti ti-refresh"></i> Change photo</button>
-
-
-
-    </div>
-
-
-
-  </div>
-
-
-
-
-
-
-
-  <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="onFileSelect(event)" />
-
-
-
+  <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="onFileSelect(event)" />
 </div>
-
-
-
-
-
-
 
 <div class="action-bar" id="actionBar">
-
-
-
-  <button class="btn-identify" id="identifyBtn" onclick="identifyHerb()" disabled>
-
-
-
-    <i class="ti ti-plant-2"></i> Identify this herb
-
-
-
-  </button>
-
-
-
-  <button class="btn-clear" id="clearBtn" onclick="clearImage()">
-
-
-
-    <i class="ti ti-trash"></i> Clear
-
-
-
-  </button>
-
-
-
+  <button class="btn-identify" id="identifyBtn" onclick="identifyHerb()" disabled>
+    <i class="ti ti-plant-2"></i> Identify this herb
+  </button>
+  <button class="btn-clear" id="clearBtn" onclick="clearImage()">
+    <i class="ti ti-trash"></i> Clear
+  </button>
 </div>
-
-
-
-
-
-
 
 <div class="tips">
-
-
-
-  <div class="tip"><i class="ti ti-sun"></i><div><strong>Good lighting</strong><p>Take the photo in natural daylight for best results</p></div></div>
-
-
-
-  <div class="tip"><i class="ti ti-focus-2"></i><div><strong>Clear focus</strong><p>Make sure the leaves and stem are sharp</p></div></div>
-
-
-
-  <div class="tip"><i class="ti ti-leaf"></i><div><strong>Show the whole plant</strong><p>Include leaves, stem, and flowers if present</p></div></div>
-
-
-
+  <div class="tip"><i class="ti ti-sun"></i><div><strong>Good lighting</strong><p>Take the photo in natural daylight for best results</p></div></div>
+  <div class="tip"><i class="ti ti-focus-2"></i><div><strong>Clear focus</strong><p>Make sure the leaves and stem are sharp</p></div></div>
+  <div class="tip"><i class="ti ti-leaf"></i><div><strong>Show the whole plant</strong><p>Include leaves, stem, and flowers if present</p></div></div>
 </div>
-
-
-
-
-
-
 
 <!-- ✅ Loading panel — spinner + text only, no step indicators -->
-
-
-
 <div class="loading-panel" id="loadingPanel">
-
-
-
-  <div class="loading-card">
-
-
-
-    <div class="leaf-spinner"></div>
-
-
-
-    <h3 id="loadingTitle">Analyzing your photo…</h3>
-
-
-
-    <p id="loadingMsg">Please wait while we identify the herb</p>
-
-
-
-  </div>
-
-
-
+  <div class="loading-card">
+    <div class="leaf-spinner"></div>
+    <h3 id="loadingTitle">Analyzing your photo…</h3>
+    <p id="loadingMsg">Please wait while we identify the herb</p>
+  </div>
 </div>
-
-
-
-
-
-
 
 <div class="result-panel" id="resultPanel"></div>
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 <div class="modal-overlay" id="sourceModal">
-
-
-
-  <div class="modal-box">
-
-
-
-    <div class="modal-head">
-
-
-
-      <h3>Add a photo</h3>
-
-
-
-      <button class="modal-close" onclick="closeSourceModal()"><i class="ti ti-x"></i></button>
-
-
-
-    </div>
-
-
-
-    <div class="modal-options">
-
-
-
-      <button class="modal-option" onclick="chooseCamera()">
-
-
-
-        <div class="modal-option-icon"><i class="ti ti-camera"></i></div>
-
-
-
-        <div><strong>Use Camera</strong><span>Take a photo right now</span></div>
-
-
-
-      </button>
-
-
-
-      <button class="modal-option" onclick="chooseUpload()">
-
-
-
-        <div class="modal-option-icon"><i class="ti ti-upload"></i></div>
-
-
-
-        <div><strong>Add Photo</strong><span>Choose one from your device</span></div>
-
-
-
-      </button>
-
-
-
-    </div>
-
-
-
-  </div>
-
-
-
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Add a photo</h3>
+      <button class="modal-close" onclick="closeSourceModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-options">
+      <button class="modal-option" onclick="chooseCamera()">
+        <div class="modal-option-icon"><i class="ti ti-camera"></i></div>
+        <div><strong>Use Camera</strong><span>Take a photo right now</span></div>
+      </button>
+      <button class="modal-option" onclick="chooseUpload()">
+        <div class="modal-option-icon"><i class="ti ti-upload"></i></div>
+        <div><strong>Add Photo</strong><span>Choose one from your device</span></div>
+      </button>
+    </div>
+  </div>
 </div>
-
-
-
-
-
-
 
 <div class="cam-modal" id="camModal">
-
-
-
-  <div class="cam-box">
-
-
-
-    <video id="camVideo" autoplay playsinline></video>
-
-
-
-    <canvas id="camCanvas"></canvas>
-
-
-
-    <div class="cam-controls">
-
-
-
-      <button class="cam-close" onclick="closeCamera()"><i class="ti ti-x"></i></button>
-
-
-
-      <button class="cam-capture" onclick="capturePhoto()"><i class="ti ti-camera"></i></button>
-
-
-
-      <div style="width:40px"></div>
-
-
-
-    </div>
-
-
-
-  </div>
-
-
-
+  <div class="cam-box">
+    <video id="camVideo" autoplay playsinline></video>
+    <canvas id="camCanvas"></canvas>
+    <div class="cam-controls">
+      <button class="cam-close" onclick="closeCamera()"><i class="ti ti-x"></i></button>
+      <button class="cam-capture" onclick="capturePhoto()"><i class="ti ti-camera"></i></button>
+      <div style="width:40px"></div>
+    </div>
+  </div>
 </div>
 
-
-
-
-
-
-
 <footer class="footer">
-
-
-
-  <p><strong>HerbID Iloilo</strong> — BSIT Capstone Project · NISU Lemery Campus · 2024–2025</p>
-
-
-
+  <p><strong>HerbID Iloilo</strong> — BSIT Capstone Project · NISU Lemery Campus · 2024–2025</p>
 </footer>
 
-
-
-
-
-
-
 <script type="module">
-
-
-
-  import { db, collection, getDocs } from './js/firebase-config.js';
-
-
-
-  import { addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-
-
-  import { getAuth }                 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-
-
-  import { onAuthChange }            from './js/auth.js';
-
-
-
-  import { initNavAuth }             from './js/nav-auth.js';
-
-
-
-
-
-
-
-  initNavAuth();
-
-
-
-
-
-
-
-  const CNN_API_URL              = "https://herbid-api-production.up.railway.app";
-
-
-
-  const CNN_THRESHOLD            = 0.60;
-
-
-
-  const HIGH_CONFIDENCE_THRESHOLD = 75;
-
-
-
-  const MED_CONFIDENCE_THRESHOLD  = 50;
-
-
-
-
-
-
-
-  function computeConfidenceLabel(percent) {
-
-
-
-    if (percent == null || isNaN(percent)) return null;
-
-
-
-    if (percent >= HIGH_CONFIDENCE_THRESHOLD) return 'High';
-
-
-
-    if (percent >= MED_CONFIDENCE_THRESHOLD)  return 'Medium';
-
-
-
-    return 'Low';
-
-
-
-  }
-
-
-
-
-
-
-
-  const tagClass = {
-
-
-
-    fever:'tag-fever', wound:'tag-wound', pain:'tag-pain',
-
-
-
-    digestive:'tag-digestive', respiratory:'tag-respiratory',
-
-
-
-    skin:'tag-skin', urinary:'tag-urinary', 'anti-inflammatory':'tag-anti-inflammatory'
-
-
-
-  };
-
-
-
-
-
-
-
-  let currentUser        = null;
-
-
-
-  let currentFile        = null;
-
-
-
-  let herbDatabase       = [];
-
-
-
-  let camStream          = null;
-
-
-
-  let lastResultForShare = null;
-
-
-
-
-
-
-
-  onAuthChange(user => { currentUser = user; });
-
-
-
-
-
-
-
-    async function loadHerbs() {
-
-    try {
-
-      const snap = await getDocs(collection(db, 'herbs'));
-
-      herbDatabase = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-      console.info(`HerbID: loaded ${herbDatabase.length} herbs from Firebase.`);
-
-    } catch (e) {
-
-      console.error('Could not load herbs from Firebase:', e);
-
-      showToast('Could not load the herb database. Please refresh and try again.', 'error');
-
-    }
-
-  }
-
-
-
-  // Wait for Firebase records before running CNN/Gemini matching.
-
-  const herbsLoaded = loadHerbs();
-
-
-
-
-
-
-
-  // ── SOURCE MODAL ────────────────────────────
-
-
-
-  window.openSourceModal  = () => document.getElementById('sourceModal').classList.add('open');
-
-
-
-  window.closeSourceModal = () => document.getElementById('sourceModal').classList.remove('open');
-
-
-
-  window.chooseCamera     = function() { closeSourceModal(); openCamera(); };
-
-
-
-  window.chooseUpload     = function() { closeSourceModal(); document.getElementById('fileInput').click(); };
-
-
-
-
-
-
-
-  // ── LOADING TEXT ────────────────────────────
-
-
-
-  // Step dots are gone — we just update the title/msg text to give
-
-
-
-  // the user a sense of progress without showing technical steps.
-
-
-
-  function setLoadingText(title, msg) {
-
-
-
-    document.getElementById('loadingTitle').textContent = title;
-
-
-
-    document.getElementById('loadingMsg').textContent   = msg;
-
-
-
-  }
-
-
-
-
-
-
-
-  // ── MAIN IDENTIFY FLOW ──────────────────────
-
-
-
-  window.identifyHerb = async function() {
-
-
-
-    if (!currentFile) return;
-
-
-
-    // Ensure Firebase herb records are available before Gemini matching.
-
-    await herbsLoaded;
-
-    if (!herbDatabase.length) {
-
-      showToast('The herb database could not be loaded. Please refresh and try again.', 'error');
-
-      return;
-
-    }
-
-
-
-
-
-
-
-    document.getElementById('loadingPanel').classList.add('active');
-
-
-
-    document.getElementById('resultPanel').classList.remove('active');
-
-
-
-    document.getElementById('identifyBtn').disabled = true;
-
-
-
-
-
-
-
-    let cnnResult    = null;
-
-
-
-    let geminiResult = null;
-
-
-
-    let finalHerb    = null;
-
-
-
-    let noMatch      = false;
-
-
-
-
-
-
-
-    // ── STEP 1: CNN ──────────────────────────
-
-
-
-    setLoadingText('Scanning your photo…', 'Identifying the herb from your image');
-
-
-
-    try {
-
-
-
-      const formData   = new FormData();
-
-
-
-      formData.append('image', currentFile);
-
-
-
-      const controller = new AbortController();
-
-
-
-      const tId        = setTimeout(() => controller.abort(), 90000);
-
-
-
-      const res        = await fetch(`${CNN_API_URL}/identify`, {
-
-
-
-        method: 'POST', body: formData, signal: controller.signal
-
-
-
-      });
-
-
-
-      clearTimeout(tId);
-
-
-
-      if (res.ok) cnnResult = await res.json();
-
-
-
-    } catch(e) { console.warn('CNN unavailable:', e.message); }
-
-
-
-
-
-
-
-    // ── STEP 2: GEMINI ───────────────────────
-
-
-
-    setLoadingText('Verifying result…', 'Cross-checking with AI vision');
-
-
-
-    let geminiUnavailable = false;
-
-
-
-    try {
-
-
-
-      geminiResult = await runGeminiVerification(cnnResult);
-
-
-
-      // Check if all keys are quota-exhausted
-
-
-
-      if (geminiResult?.quota_exhausted) {
-
-
-
-        console.warn('Gemini quota exhausted — falling back to CNN only');
-
-
-
-        geminiUnavailable = true;
-
-
-
-        geminiResult = null;
-
-
-
-      }
-
-
-
-    } catch(e) {
-
-
-
-      console.warn('Gemini error:', e.message);
-
-
-
-      geminiUnavailable = true;
-
-
-
-    }
-
-
-
-
-
-
-
-        // ── STEP 3: CROSS-CHECK WITH FIREBASE ──
-
-    setLoadingText('Almost done…', 'Matching the AI result with the herb database');
-
-
-
-    // Normalize capitalization, punctuation, and extra spaces in plant names.
-
-    function normalizePlantName(name) {
-
-      return String(name || '')
-
-        .toLowerCase()
-
-        .replace(/[×✕]/g, 'x')
-
-        .replace(/[^a-z0-9]+/g, ' ')
-
-        .trim()
-
-        .replace(/\s+/g, ' ');
-
-    }
-
-
-
-    function findHerbInDatabase(...names) {
-
-      const targets = names.map(normalizePlantName).filter(Boolean);
-
-      if (!targets.length) return null;
-
-
-
-      const fields = ['localName', 'englishName', 'scientificName'];
-
-
-
-      // Prefer exact matches across all three names.
-
-      for (const target of targets) {
-
-        const exact = herbDatabase.find(h => fields.some(field =>
-
-          normalizePlantName(h[field]) === target
-
-        ));
-
-        if (exact) return exact;
-
-      }
-
-
-
-      // Then allow a partial match, but only when both names have
-
-      // at least four characters to avoid matching empty/very short names.
-
-      for (const target of targets) {
-
-        if (target.length < 4) continue;
-
-        const partial = herbDatabase.find(h => fields.some(field => {
-
-          const value = normalizePlantName(h[field]);
-
-          return value.length >= 4 &&
-
-            (value.includes(target) || target.includes(value));
-
-        }));
-
-        if (partial) return partial;
-
-      }
-
-      return null;
-
-    }
-
-
-
-    const geminiHerb = geminiResult?.confirmed
-
-      ? findHerbInDatabase(geminiResult.plantName, geminiResult.scientificName)
-
-      : null;
-
-
-
-    const cnnHerb = cnnResult?.matched
-
-      ? findHerbInDatabase(cnnResult.localName, cnnResult.scientificName)
-
-      : null;
-
-
-
-    if (geminiHerb) {
-
-      // A confirmed Gemini result that matches a Firebase record is usable
-
-      // even when CNN chose a different label.
-
-      const cnnAgrees = Boolean(cnnHerb && cnnHerb.id === geminiHerb.id);
-
-      let confidencePercent;
-
-
-
-      if (cnnAgrees && Number.isFinite(Number(cnnResult.confidencePercent))) {
-
-        confidencePercent = Math.round(Number(cnnResult.confidencePercent));
-
-      } else {
-
-        const confidenceMap = { High: 82, Medium: 68, Low: 52 };
-
-        confidencePercent = confidenceMap[geminiResult.confidence] || 68;
-
-      }
-
-
-
-      finalHerb = {
-
-        ...(cnnResult || {}),
-
-        matched: true,
-
-        herbId: geminiHerb.id,
-
-        localName: geminiHerb.localName || geminiResult.plantName || '',
-
-        englishName: geminiHerb.englishName || '',
-
-        scientificName: geminiHerb.scientificName || geminiResult.scientificName || '',
-
-        confidence: confidencePercent / 100,
-
-        confidencePercent,
-
-        confidenceLabel: computeConfidenceLabel(confidencePercent),
-
-        top3: cnnResult?.top3 || [],
-
-        geminiVerified: true,
-
-        geminiOnly: !cnnAgrees,
-
-        geminiAnalysis: geminiResult.analysis || null
-
-      };
-
-      noMatch = false;
-
-
-
-    } else if (cnnHerb && (geminiUnavailable || !geminiResult)) {
-
-      // Gemini failed/unavailable: fall back to a CNN result that exists in Firebase.
-
-      finalHerb = {
-
-        ...cnnResult,
-
-        matched: true,
-
-        herbId: cnnHerb.id,
-
-        localName: cnnHerb.localName || cnnResult.localName || '',
-
-        englishName: cnnHerb.englishName || '',
-
-        scientificName: cnnHerb.scientificName || cnnResult.scientificName || '',
-
-        geminiVerified: false,
-
-        geminiAnalysis: null,
-
-        cnnOnly: true
-
-      };
-
-      finalHerb.confidenceLabel = computeConfidenceLabel(finalHerb.confidencePercent);
-
-      noMatch = false;
-
-
-
-    } else {
-
-      finalHerb = null;
-
-      noMatch = true;
-
-    }
-
-
-
-try {
-
-      await saveScan(finalHerb || { matched: false }, noMatch);
-
-    } catch (saveError) {
-
-      console.warn('Could not save scan history:', saveError);
-
-    } finally {
-
-      document.getElementById('loadingPanel').classList.remove('active');
-
-      document.getElementById('identifyBtn').disabled = false;
-
-    }
-
-
-
-
-
-
-
-    if (noMatch || !finalHerb) {
-
-
-
-      showNoMatch(cnnResult, geminiResult);
-
-
-
-    } else {
-
-
-
-      showResult(finalHerb);
-
-
-
-    }
-
-
-
-  };
-
-
-
-
-
-
-
-  // Parse Gemini JSON and repair literal line breaks/control characters inside strings.
-
-  function parseGeminiResult(rawText) {
-
-    if (typeof rawText !== 'string') throw new Error('Gemini response was not text.');
-
-    let text = rawText.trim();
-
-    if (text.startsWith('```')) {
-
-      text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-
-    }
-
-
-
-    try {
-
-      const parsed = JSON.parse(text);
-
-      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed;
-
-    } catch (_) {
-
-      // Try repairing unescaped control characters below.
-
-    }
-
-
-
-    let repaired = '';
-
-    let inString = false;
-
-    let escaped = false;
-
-    for (const char of text) {
-
-      if (inString) {
-
-        if (escaped) {
-
-          repaired += char;
-
-          escaped = false;
-
-        } else if (char === '\\') {
-
-          repaired += char;
-
-          escaped = true;
-
-        } else if (char === '"') {
-
-          repaired += char;
-
-          inString = false;
-
-        } else if (char === '\n') {
-
-          repaired += '\\n';
-
-        } else if (char === '\r') {
-
-          repaired += '\\r';
-
-        } else if (char === '\t') {
-
-          repaired += '\\t';
-
-        } else if (char.charCodeAt(0) < 32) {
-
-          repaired += ' ';
-
-        } else {
-
-          repaired += char;
-
-        }
-
-      } else {
-
-        repaired += char;
-
-        if (char === '"') inString = true;
-
-      }
-
-    }
-
-
-
-    const parsed = JSON.parse(repaired);
-
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-
-      throw new Error('Gemini JSON must be an object.');
-
-    }
-
-    return parsed;
-
-  }
-
-
-
-  // ── GEMINI VERIFICATION ──────────────────────
-
-
-
-  async function runGeminiVerification(cnnResult) {
-
-
-
-    const base64   = await fileToBase64(currentFile);
-
-
-
-    const mimeType = currentFile.type || 'image/jpeg';
-
-
-
-
-
-
-
-    const herbList = herbDatabase.length
-
-
-
-      ? herbDatabase.map(h => `${h.localName} (${h.englishName||''}, ${h.scientificName})`).join(', ')
-
-
-
-      : 'Alibhon, Lagundi, Oregano, Tawa-tawa, Tanglad, Yerba Buena, Sambag-sambag, Sampaliya, Pula, Kandi-kandilaan, Kataka-taka, Lapunaya, Paluchina, Elepante, Hagunoy, Kaluoy, Bunlaw, Buyo, Bangkawbangkaw, Sinaw-sinaw';
-
-
-
-
-
-
-
-    const cnnPrediction = cnnResult?.matched
-
-
-
-      ? `CNN predicted: "${cnnResult.localName}" (${cnnResult.scientificName||''}) at ${cnnResult.confidencePercent?.toFixed(0)||'?'}% confidence.`
-
-
-
-      : 'CNN could not confidently identify this plant.';
-
-
-
-
-
-
-
-    const prompt = `You are an expert botanist specializing in Philippine medicinal plants in Iloilo Province.
-
-
-
-
-
-
+  import { db, collection, getDocs } from './js/firebase-config.js';
+  import { addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth }                 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { onAuthChange }            from './js/auth.js';
+  import { initNavAuth }             from './js/nav-auth.js';
+
+  initNavAuth();
+
+  const CNN_API_URL              = "https://herbid-api-production.up.railway.app";
+  const CNN_THRESHOLD            = 0.60;
+  const HIGH_CONFIDENCE_THRESHOLD = 75;
+  const MED_CONFIDENCE_THRESHOLD  = 50;
+
+  function computeConfidenceLabel(percent) {
+    if (percent == null || isNaN(percent)) return null;
+    if (percent >= HIGH_CONFIDENCE_THRESHOLD) return 'High';
+    if (percent >= MED_CONFIDENCE_THRESHOLD)  return 'Medium';
+    return 'Low';
+  }
+
+  const tagClass = {
+    fever:'tag-fever', wound:'tag-wound', pain:'tag-pain',
+    digestive:'tag-digestive', respiratory:'tag-respiratory',
+    skin:'tag-skin', urinary:'tag-urinary', 'anti-inflammatory':'tag-anti-inflammatory'
+  };
+
+  let currentUser        = null;
+  let currentFile        = null;
+  let herbDatabase       = [];
+  let camStream          = null;
+  let lastResultForShare = null;
+
+  onAuthChange(user => { currentUser = user; });
+
+  async function loadHerbs() {
+    try {
+      const snap = await getDocs(collection(db, 'herbs'));
+      snap.forEach(d => herbDatabase.push({ id: d.id, ...d.data() }));
+    } catch(e) { console.warn('Could not load herbs:', e.message); }
+  }
+  loadHerbs();
+
+  // ── SOURCE MODAL ────────────────────────────
+  window.openSourceModal  = () => document.getElementById('sourceModal').classList.add('open');
+  window.closeSourceModal = () => document.getElementById('sourceModal').classList.remove('open');
+  window.chooseCamera     = function() { closeSourceModal(); openCamera(); };
+  window.chooseUpload     = function() { closeSourceModal(); document.getElementById('fileInput').click(); };
+
+  // ── LOADING TEXT ────────────────────────────
+  // Step dots are gone — we just update the title/msg text to give
+  // the user a sense of progress without showing technical steps.
+  function setLoadingText(title, msg) {
+    document.getElementById('loadingTitle').textContent = title;
+    document.getElementById('loadingMsg').textContent   = msg;
+  }
+
+  // ── MAIN IDENTIFY FLOW ──────────────────────
+  window.identifyHerb = async function() {
+    if (!currentFile) return;
+
+    document.getElementById('loadingPanel').classList.add('active');
+    document.getElementById('resultPanel').classList.remove('active');
+    document.getElementById('identifyBtn').disabled = true;
+
+    let cnnResult    = null;
+    let geminiResult = null;
+    let finalHerb    = null;
+    let noMatch      = false;
+
+    // ── STEP 1: CNN ──────────────────────────
+    setLoadingText('Scanning your photo…', 'Identifying the herb from your image');
+    try {
+      const formData   = new FormData();
+      formData.append('image', currentFile);
+      const controller = new AbortController();
+      const tId        = setTimeout(() => controller.abort(), 90000);
+      const res        = await fetch(`${CNN_API_URL}/identify`, {
+        method: 'POST', body: formData, signal: controller.signal
+      });
+      clearTimeout(tId);
+      if (res.ok) cnnResult = await res.json();
+    } catch(e) { console.warn('CNN unavailable:', e.message); }
+
+    // ── STEP 2: GEMINI ───────────────────────
+    setLoadingText('Verifying result…', 'Cross-checking with AI vision');
+    let geminiUnavailable = false;
+    try {
+      geminiResult = await runGeminiVerification(cnnResult);
+      // Check if all keys are quota-exhausted
+      if (geminiResult?.quota_exhausted) {
+        console.warn('Gemini quota exhausted — falling back to CNN only');
+        geminiUnavailable = true;
+        geminiResult = null;
+      }
+    } catch(e) {
+      console.warn('Gemini error:', e.message);
+      geminiUnavailable = true;
+    }
+
+    // ── STEP 3: CROSS-CHECK ──────────────────
+    setLoadingText('Almost done…', 'Finalizing your result');
+
+    if (cnnResult?.matched && geminiResult?.confirmed) {
+      // ── Both CNN and Gemini agree ──
+      const cnnName    = (cnnResult.localName || '').toLowerCase().trim();
+      const geminiName = (geminiResult.plantName || '').toLowerCase().trim();
+      const namesMatch = cnnName && geminiName && (
+        cnnName.includes(geminiName) ||
+        geminiName.includes(cnnName) ||
+        geminiName.includes(cnnName.split(' ')[0]) ||
+        cnnName.includes(geminiName.split(' ')[0])
+      );
+      if (namesMatch) {
+        finalHerb = { ...cnnResult, geminiVerified: true, geminiAnalysis: geminiResult.analysis };
+        finalHerb.confidenceLabel = computeConfidenceLabel(finalHerb.confidencePercent);
+      } else {
+        noMatch = true;
+      }
+    } else if (!cnnResult?.matched && geminiResult?.confirmed) {
+      // ── CNN missed but Gemini confirmed ──
+      const herb = herbDatabase.find(h =>
+        (h.localName||'').toLowerCase().includes((geminiResult.plantName||'').toLowerCase()) ||
+        (geminiResult.plantName||'').toLowerCase().includes((h.localName||'').toLowerCase())
+      );
+      if (herb) {
+        let confPct, confRaw;
+        if (cnnResult?.confidencePercent && cnnResult.confidencePercent > 0) {
+          confPct = Math.round(cnnResult.confidencePercent);
+          confRaw = cnnResult.confidence;
+        } else {
+          const geminiConfMap = { 'High': 82, 'Medium': 68, 'Low': 52 };
+          confPct = geminiConfMap[geminiResult.confidence] || 68;
+          confRaw = confPct / 100;
+        }
+        finalHerb = {
+          matched: true,
+          localName: herb.localName,
+          scientificName: herb.scientificName || geminiResult.scientificName || '',
+          confidence: confRaw,
+          confidencePercent: confPct,
+          confidenceLabel: computeConfidenceLabel(confPct),
+          top3: cnnResult?.top3 || [],
+          geminiVerified: true,
+          geminiOnly: true,
+          geminiAnalysis: geminiResult.analysis,
+        };
+      } else {
+        noMatch = true;
+      }
+    } else if (cnnResult?.matched && (geminiUnavailable || !geminiResult)) {
+      // ── Gemini unavailable (quota/error) — trust CNN alone ──
+      finalHerb = {
+        ...cnnResult,
+        geminiVerified: false,
+        geminiAnalysis: null,
+        cnnOnly: true,
+      };
+      finalHerb.confidenceLabel = computeConfidenceLabel(finalHerb.confidencePercent);
+    } else {
+      noMatch = true;
+    }
+
+    await saveScan(finalHerb || { matched: false }, noMatch);
+    document.getElementById('loadingPanel').classList.remove('active');
+    document.getElementById('identifyBtn').disabled = false;
+
+    if (noMatch || !finalHerb) {
+      showNoMatch(cnnResult, geminiResult);
+    } else {
+      showResult(finalHerb);
+    }
+  };
+
+  // ── GEMINI VERIFICATION ──────────────────────
+  async function runGeminiVerification(cnnResult) {
+    const base64   = await fileToBase64(currentFile);
+    const mimeType = currentFile.type || 'image/jpeg';
+
+    const herbList = herbDatabase.length
+      ? herbDatabase.map(h => `${h.localName} (${h.englishName||''}, ${h.scientificName})`).join(', ')
+      : 'Alibhon/Sambong, Lagundi, Oregano, Tawa-tawa, Tanglad, Yerba Buena, Sambag-sambag, Sampaliya, Pula, Kandi-kandilaan, Kataka-taka, Lapunaya, Paluchina, Elepante, Hagunoy, Kaluoy, Bunlaw, Buyo, Bangkawbangkaw, Sinaw-sinaw';
+
+    const cnnPrediction = cnnResult?.matched
+      ? `CNN predicted: "${cnnResult.localName}" (${cnnResult.scientificName||''}) at ${cnnResult.confidencePercent?.toFixed(0)||'?'}% confidence.`
+      : 'CNN could not confidently identify this plant.';
+
+    const prompt = `You are an expert botanist specializing in Philippine medicinal plants in Iloilo Province.
 
 CNN PREDICTION: ${cnnPrediction}
-
-
-
 DATABASE HERBS: ${herbList}
 
-
-
-
-
-
-
 Examine the plant image and respond ONLY in this JSON (no markdown):
-
-
-
 {
-
-
-
-  "confirmed": true or false,
-
-
-
-  "plantName": "local name if confirmed, else empty string",
-
-
-
-  "scientificName": "scientific name if confirmed, else empty string",
-
-
-
-  "matchesCNN": true or false,
-
-
-
-  "isHerbInDatabase": true or false,
-
-
-
-  "confidence": "High / Medium / Low",
-
-
-
-  "analysis": "2-3 sentences about what you see and why you confirm or reject",
-
-
-
-  "reason": "one sentence explaining rejection if confirmed is false"
-
-
-
+  "confirmed": true or false,
+  "plantName": "local name if confirmed, else empty string",
+  "scientificName": "scientific name if confirmed, else empty string",
+  "matchesCNN": true or false,
+  "isHerbInDatabase": true or false,
+  "confidence": "High / Medium / Low",
+  "analysis": "2-3 sentences about what you see and why you confirm or reject",
+  "reason": "one sentence explaining rejection if confirmed is false"
 }`;
 
-
-
-
-
-
-
-    const res = await fetch(`${CNN_API_URL}/gemini-verify`, {
-
-
-
-      method: 'POST',
-
-
-
-      headers: { 'Content-Type': 'application/json' },
-
-
-
-      body: JSON.stringify({ image: base64, mimeType, prompt })
-
-
-
-    });
-
-
-
-
-
-
-
-    // Read as text first so a proxy HTTP 500 can still be recovered when it
-
-    // includes Gemini's usable response in a "raw" field.
-
-    const responseText = await res.text();
-
-    let responseData = null;
-
-    try {
-
-      responseData = JSON.parse(responseText);
-
-    } catch (_) {
-
-      responseData = null;
-
-    }
-
-
-
-    if (!res.ok) {
-
-      if (responseData && typeof responseData.raw === 'string') {
-
-        try {
-
-          return parseGeminiResult(responseData.raw);
-
-        } catch (_) {
-
-          // Fall through and report the original proxy error.
-
-        }
-
-      }
-
-      throw new Error(`Gemini proxy ${res.status}: ${responseText}`);
-
-    }
-
-
-
-    if (responseData && typeof responseData === 'object') return responseData;
-
-    return parseGeminiResult(responseText);
-
-
-
-  }
-
-
-
-
-
-
-
-  // ── SHOW MATCH RESULT ────────────────────────
-
-
-
-  function showResult(result) {
-
-
-
-    lastResultForShare = result;
-
-
-
-    const panel = document.getElementById('resultPanel');
-
-
-
-    panel.classList.add('active');
-
-
-
-    const herb = herbDatabase.find(h =>
-
-
-
-      (h.localName||'').toLowerCase().includes((result.localName||'').toLowerCase()) ||
-
-
-
-      (result.localName||'').toLowerCase().includes((h.localName||'').toLowerCase())
-
-
-
-    );
-
-
-
-    const confColor = result.confidenceLabel === 'High' ? '#22a06b'
-
-
-
-      : result.confidenceLabel === 'Medium' ? '#c9a84c' : '#e53e3e';
-
-
-
-
-
-
-
-    // ✅ Single green confirmed banner for all matches — no yellow "Gemini only" banner
-
-
-
-    const verBadge = `<div class="verification-banner confirmed">
-
-
-
-      <i class="ti ti-circle-check"></i>
-
-
-
-      <span><strong>Herb identified</strong> — <strong>${result.localName}</strong> confirmed by AI analysis</span>
-
-
-
-    </div>`;
-
-
-
-
-
-
-
-    const useTagsHtml = (herb?.usesTags || herb?.useTags || [])
-
-
-
-      .map(t => `<span class="tag ${tagClass[t] || 'tag-anti-inflammatory'}">${t}</span>`).join('');
-
-
-
-
-
-
-
-    panel.innerHTML = `
-
-
-
-      ${verBadge}
-
-
-
-      <div class="match-card">
-
-
-
-        <div class="match-header">
-
-
-
-          <div class="match-emoji">${herb?.emoji || '🌿'}</div>
-
-
-
-          <div class="match-names">
-
-
-
-            <h2>${result.localName}</h2>
-
-
-
-            <p class="match-english">${herb?.englishName || ''}</p>
-
-
-
-            <p>${herb?.scientificName || result.scientificName || ''}</p>
-
-
-
-          </div>
-
-
-
-          <div class="match-confidence" style="background:${confColor}">
-
-
-
-            ${result.confidencePercent?.toFixed(0) || '—'}% ${result.confidenceLabel || ''}
-
-
-
-          </div>
-
-
-
-        </div>
-
-
-
-        <div class="match-body">
-
-
-
-          ${herb ? `
-
-
-
-          <div class="info-grid">
-
-
-
-            <div><div class="info-label">Plant family</div><div class="info-val">${herb.family||'—'}</div></div>
-
-
-
-            <div><div class="info-label">Parts used</div><div class="info-val">${herb.parts||'—'}</div></div>
-
-
-
-            <div><div class="info-label">Medicinal uses</div>
-
-
-
-              <div class="use-tags">${useTagsHtml}</div>
-
-
-
-            </div>
-
-
-
-            <div><div class="info-label">Preparation</div><div class="info-val">${herb.preparation||'—'}</div></div>
-
-
-
-          </div>
-
-
-
+    const res = await fetch(`${CNN_API_URL}/gemini-verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: base64, mimeType, prompt })
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`Gemini proxy ${res.status}: ${errText}`);
+    }
+    return await res.json();
+  }
+
+  // ── SHOW MATCH RESULT ────────────────────────
+  function showResult(result) {
+    lastResultForShare = result;
+    const panel = document.getElementById('resultPanel');
+    panel.classList.add('active');
+    const herb = herbDatabase.find(h =>
+      (h.localName||'').toLowerCase().includes((result.localName||'').toLowerCase()) ||
+      (result.localName||'').toLowerCase().includes((h.localName||'').toLowerCase())
+    );
+    const confColor = result.confidenceLabel === 'High' ? '#22a06b'
+      : result.confidenceLabel === 'Medium' ? '#c9a84c' : '#e53e3e';
+
+    // ✅ Single green confirmed banner for all matches — no yellow "Gemini only" banner
+    const verBadge = `<div class="verification-banner confirmed">
+      <i class="ti ti-circle-check"></i>
+      <span><strong>Herb identified</strong> — <strong>${result.localName}</strong> confirmed by AI analysis</span>
+    </div>`;
+
+    const useTagsHtml = (herb?.usesTags || herb?.useTags || [])
+      .map(t => `<span class="tag ${tagClass[t] || 'tag-anti-inflammatory'}">${t}</span>`).join('');
+
+    panel.innerHTML = `
+      ${verBadge}
+      <div class="match-card">
+        <div class="match-header">
+          <div class="match-emoji">${herb?.emoji || '🌿'}</div>
+          <div class="match-names">
+            <h2>${result.localName}</h2>
+            <p class="match-english">${herb?.englishName || ''}</p>
+            <p>${herb?.scientificName || result.scientificName || ''}</p>
+          </div>
+          <div class="match-confidence" style="background:${confColor}">
+            ${result.confidencePercent?.toFixed(0) || '—'}% ${result.confidenceLabel || ''}
+          </div>
+        </div>
+        <div class="match-body">
+          ${herb ? `
+          <div class="info-grid">
+            <div><div class="info-label">Plant family</div><div class="info-val">${herb.family||'—'}</div></div>
+            <div><div class="info-label">Parts used</div><div class="info-val">${herb.parts||'—'}</div></div>
+            <div><div class="info-label">Medicinal uses</div>
+              <div class="use-tags">${useTagsHtml}</div>
+            </div>
+            <div><div class="info-label">Preparation</div><div class="info-val">${herb.preparation||'—'}</div></div>
+          </div>
 ` : ''}
-
-
-
-          ${result.geminiAnalysis ? `
-
-
-
-          <div class="gemini-box">
-
-
-
-            <div class="gemini-box-label"><i class="ti ti-sparkles" style="font-size:12px"></i> AI analysis</div>
-
-
-
-            <p>${result.geminiAnalysis}</p>
-
-
-
-          </div>` : ''}
-
-
-
-          ${renderTop3(result.top3)}
-
-
-
-          ${herb ? `
-
-
-
-          <div class="match-actions">
-
-
-
-            <a href="herb-detail.html?id=${herb.id}" class="btn-detail"><i class="ti ti-info-circle"></i> Full herb details</a>
-
-
-
-            <a href="map.html?herb=${herb.id}" class="btn-map"><i class="ti ti-map-pin"></i> View on map</a>
-
-
-
-          </div>` : ''}
-
-
-
-          <div class="match-actions" style="margin-top:8px">
-
-
-
-            <button class="btn-map" style="flex:1;border:1.5px solid var(--green-main);color:var(--green-main);background:var(--white);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:10px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;gap:6px;transition:background 0.15s" onmouseover="this.style.background='var(--green-pale)'" onmouseout="this.style.background='var(--white)'" onclick="shareMatchToCommunity()">
-
-
-
-              <i class="ti ti-share"></i> Share to Community
-
-
-
-            </button>
-
-
-
-          </div>
-
-
-
-        </div>
-
-
-
-      </div>
-
-
-
-      <div style="text-align:center;margin-top:0.75rem">
-
-
-
-        <button onclick="clearImage()" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--text-muted);font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:5px">
-
-
-
-          <i class="ti ti-refresh"></i> Identify another herb
-
-
-
-        </button>
-
-
-
-      </div>`;
-
-
-
-  }
-
-
-
-
-
-
-
-  // ── SHOW NO MATCH ────────────────────────────
-
-
-
-  function showNoMatch(cnnResult, geminiResult) {
-
-
-
-    const panel = document.getElementById('resultPanel');
-
-
-
-    panel.classList.add('active');
-
-
-
-    let reason = '', icon = '🔍';
-
-
-
-    if (cnnResult?.matched && geminiResult && !geminiResult.confirmed) {
-
-
-
-      icon   = '⚠️';
-
-
-
-      reason = geminiResult.reason || `The AI could not confidently confirm a match for this photo.`;
-
-
-
-    } else if (!geminiResult?.isHerbInDatabase) {
-
-
-
-      reason = 'The plant does not appear to be one of the medicinal herbs in the Iloilo database.';
-
-
-
-    } else {
-
-
-
-      reason = 'The AI could not confidently identify a herb from this photo.';
-
-
-
-    }
-
-
-
-    const geminiNote = geminiResult?.analysis
-
-
-
-      ? `<div class="gemini-box" style="margin-top:1rem;text-align:left">
-
-
-
-           <div class="gemini-box-label"><i class="ti ti-sparkles" style="font-size:12px"></i> AI observation</div>
-
-
-
-           <p>${geminiResult.analysis}</p>
-
-
-
-         </div>` : '';
-
-
-
-
-
-
-
-    panel.innerHTML = `
-
-
-
-      <div class="verification-banner rejected">
-
-
-
-        <i class="ti ti-circle-x"></i>
-
-
-
-        <span><strong>No herb matched</strong> — The AI could not identify this plant</span>
-
-
-
-      </div>
-
-
-
-      <div class="not-found">
-
-
-
-        <div class="not-found-icon">${icon}</div>
-
-
-
-        <h3>No herb matched</h3>
-
-
-
-        <p>${reason}</p>
-
-
-
-        ${geminiNote}
-
-
-
-        ${renderTop3(cnnResult?.top3)}
-
-
-
-        <div style="margin-top:1.5rem;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-
-
-
-          <button onclick="clearImage()" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:6px">
-
-
-
-            <i class="ti ti-refresh"></i> Try another photo
-
-
-
-          </button>
-
-
-
-          <a href="herbs.html" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:6px">
-
-
-
-            <i class="ti ti-database"></i> Browse herb database
-
-
-
-          </a>
-
-
-
-          <button onclick="shareNoMatchToCommunity()" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:6px">
-
-
-
-            <i class="ti ti-share"></i> Share to Community
-
-
-
-          </button>
-
-
-
-        </div>
-
-
-
-      </div>`;
-
-
-
-  }
-
-
-
-
-
-
-
-  function renderTop3(top3) {
-
-
-
-    if (!top3 || !top3.length) return '';
-
-
-
-    return `
-
-
-
-      <div class="top3-box" style="margin-top:12px">
-
-
-
-        <div class="top3-label">Top predictions</div>
-
-
-
-        ${top3.map((h,i) => `
-
-
-
-          <div class="top3-row">
-
-
-
-            <span style="min-width:130px;font-weight:${i===0?'600':'400'}">${h.localName}</span>
-
-
-
-            <div class="top3-bar-wrap"><div class="top3-bar" style="width:${h.percent}%"></div></div>
-
-
-
-            <span class="top3-pct">${h.percent}%</span>
-
-
-
-          </div>`).join('')}
-
-
-
-      </div>`;
-
-
-
-  }
-
-
-
-
-
-
-
-  // ── SAVE SCAN ────────────────────────────────
-
-
-
-  async function saveScan(result, noMatch) {
-
-
-
-    try {
-
-
-
-      const user = getAuth().currentUser;
-
-
-
-      if (!user) return;
-
-
-
-      let imageBase64 = null;
-
-
-
-      if (currentFile) {
-
-
-
-        try {
-
-
-
-          imageBase64 = await compressImage(currentFile);
-
-
-
-          if (imageBase64 && imageBase64.length > 700000) imageBase64 = null;
-
-
-
-        } catch(e) { console.warn('Image compression failed:', e.message); }
-
-
-
-      }
-
-
-
-      const matched         = !noMatch && result.matched;
-
-
-
-      const confidenceLabel = result.confidenceLabel || null;
-
-
-
-      const galleryEligible = matched && confidenceLabel === 'High';
-
-
-
-
-
-
-
-      await addDoc(collection(db, 'scans'), {
-
-
-
-        uid:               user.uid,
-
-
-
-        userEmail:         user.email,
-
-
-
-        matched,
-
-
-
-        identifiedHerb:    (!noMatch && result.localName) || null,
-
-
-
-        confidence:        result.confidence        || null,
-
-
-
-        confidencePercent: result.confidencePercent || null,
-
-
-
-        confidenceLabel,
-
-
-
-        top3:              result.top3              || [],
-
-
-
-        geminiVerified:    result.geminiVerified    || false,
-
-
-
-        imageBase64,
-
-
-
-        galleryEligible,
-
-
-
-        galleryApproved:   false,
-
-
-
-        scannedAt:         serverTimestamp(),
-
-
-
-      });
-
-
-
-      showToast(galleryEligible
-
-
-
-        ? '📋 Scan saved — high-confidence match sent for gallery review'
-
-
-
-        : '📋 Scan saved to your history');
-
-
-
-    } catch(e) { console.warn('Save scan failed:', e.message); }
-
-
-
-  }
-
-
-
-
-
-
-
-  // ── FILE HANDLING ────────────────────────────
-
-
-
-  window.onFileSelect = function(e) { const f = e.target.files[0]; if (f) loadFile(f); };
-
-
-
-
-
-
-
-  function loadFile(file) {
-
-
-
-    currentFile = file;
-
-
-
-    const reader = new FileReader();
-
-
-
-    reader.onload = ev => showPreview(ev.target.result);
-
-
-
-    reader.readAsDataURL(file);
-
-
-
-  }
-
-
-
-
-
-
-
-  function showPreview(dataUrl) {
-
-
-
-    document.getElementById('previewImg').src = dataUrl;
-
-
-
-    document.getElementById('startCard').style.display  = 'none';
-
-
-
-    document.getElementById('previewCard').style.display = 'block';
-
-
-
-    document.getElementById('actionBar').classList.add('visible');
-
-
-
-    document.getElementById('identifyBtn').disabled = false;
-
-
-
-    document.getElementById('resultPanel').classList.remove('active');
-
-
-
-    document.getElementById('loadingPanel').classList.remove('active');
-
-
-
-  }
-
-
-
-
-
-
-
-  window.clearImage = function() {
-
-
-
-    currentFile = null;
-
-
-
-    document.getElementById('previewImg').src = '';
-
-
-
-    document.getElementById('startCard').style.display   = 'flex';
-
-
-
-    document.getElementById('previewCard').style.display  = 'none';
-
-
-
-    document.getElementById('actionBar').classList.remove('visible');
-
-
-
-    document.getElementById('identifyBtn').disabled = true;
-
-
-
-    document.getElementById('fileInput').value = '';
-
-
-
-    document.getElementById('resultPanel').classList.remove('active');
-
-
-
-    document.getElementById('loadingPanel').classList.remove('active');
-
-
-
-  };
-
-
-
-
-
-
-
-  // ── CAMERA ───────────────────────────────────
-
-
-
-  window.openCamera = async function() {
-
-
-
-    try {
-
-
-
-      camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-
-
-
-      const video      = document.getElementById('camVideo');
-
-
-
-      const captureBtn = document.querySelector('.cam-capture');
-
-
-
-      video.srcObject  = camStream;
-
-
-
-      captureBtn.disabled     = true;
-
-
-
-      captureBtn.style.opacity = '0.4';
-
-
-
-      video.onloadedmetadata = () => {
-
-
-
-        captureBtn.disabled     = false;
-
-
-
-        captureBtn.style.opacity = '1';
-
-
-
-      };
-
-
-
-      document.getElementById('camModal').classList.add('open');
-
-
-
-    } catch(e) { showToast('Camera not available. Please upload a photo instead.', 'error'); }
-
-
-
-  };
-
-
-
-  window.closeCamera = function() {
-
-
-
-    if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
-
-
-
-    document.getElementById('camModal').classList.remove('open');
-
-
-
-  };
-
-
-
-  window.capturePhoto = function() {
-
-
-
-    const video = document.getElementById('camVideo');
-
-
-
-    if (!video.videoWidth || !video.videoHeight) {
-
-
-
-      showToast('Camera is still starting up — try again in a second', 'warn');
-
-
-
-      return;
-
-
-
-    }
-
-
-
-    const canvas  = document.getElementById('camCanvas');
-
-
-
-    canvas.width  = video.videoWidth;
-
-
-
-    canvas.height = video.videoHeight;
-
-
-
-    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-
-
-
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-
-
-
-    currentFile   = dataURLToFile(dataUrl, 'capture.jpg');
-
-
-
-    showPreview(dataUrl);
-
-
-
-    closeCamera();
-
-
-
-  };
-
-
-
-
-
-
-
-  function dataURLToFile(dataUrl, filename) {
-
-
-
-    const [header, base64] = dataUrl.split(',');
-
-
-
-    const mime   = header.match(/:(.*?);/)?.[1] || 'image/jpeg';
-
-
-
-    const binary = atob(base64);
-
-
-
-    const bytes  = new Uint8Array(binary.length);
-
-
-
-    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-
-
-
-    return new File([bytes], filename, { type: mime });
-
-
-
-  }
-
-
-
-
-
-
-
-  // ── SHARE TO COMMUNITY ───────────────────────
-
-
-
-  window.shareMatchToCommunity = async function() {
-
-
-
-    if (!lastResultForShare) return;
-
-
-
-    const r       = lastResultForShare;
-
-
-
-    const pct     = r.confidencePercent || 0;
-
-
-
-    const label   = r.confidenceLabel   || '';
-
-
-
-    const caption = `🌿 Identified as ${r.localName} — ${pct.toFixed(0)}% ${label} confidence (verified via CNN + Gemini AI on HerbID Iloilo).`;
-
-
-
-    await handOffToFeed({ herbName: r.localName, confidencePercent: pct, confidenceLabel: label, caption });
-
-
-
-  };
-
-
-
-
-
-
-
-  window.shareNoMatchToCommunity = async function() {
-
-
-
-    const caption = `🌿 Tried to identify this plant with HerbID Iloilo, but couldn't get a confident match — does anyone recognize it?`;
-
-
-
-    await handOffToFeed({ herbName: null, confidencePercent: null, confidenceLabel: null, caption });
-
-
-
-  };
-
-
-
-
-
-
-
-  async function handOffToFeed({ herbName, confidencePercent, confidenceLabel, caption }) {
-
-
-
-    if (!currentUser) { showToast('Sign in to share to the community', 'warn'); return; }
-
-
-
-    if (!currentFile) { showToast('No photo to share', 'warn'); return; }
-
-
-
-    try {
-
-
-
-      const imageBase64 = await compressForSharing(currentFile);
-
-
-
-      sessionStorage.setItem('herbid_pending_post', JSON.stringify({
-
-
-
-        imageBase64, herbName, confidencePercent, confidenceLabel, caption,
-
-
-
-      }));
-
-
-
-      window.location.href = 'feed.html';
-
-
-
-    } catch(e) { showToast('Could not prepare photo for sharing', 'error'); }
-
-
-
-  }
-
-
-
-
-
-
-
-  function compressForSharing(file, maxPx = 800, quality = 0.72) {
-
-
-
-    return new Promise((resolve, reject) => {
-
-
-
-      const img = new Image(), reader = new FileReader();
-
-
-
-      reader.onload = e => {
-
-
-
-        img.onload = () => {
-
-
-
-          let w = img.width, h = img.height;
-
-
-
-          if (w > maxPx || h > maxPx) {
-
-
-
-            if (w > h) { h = Math.round(h * maxPx / w); w = maxPx; }
-
-
-
-            else        { w = Math.round(w * maxPx / h); h = maxPx; }
-
-
-
-          }
-
-
-
-          const c = document.createElement('canvas');
-
-
-
-          c.width = w; c.height = h;
-
-
-
-          c.getContext('2d').drawImage(img, 0, 0, w, h);
-
-
-
-          resolve(c.toDataURL('image/jpeg', quality));
-
-
-
-        };
-
-
-
-        img.onerror = () => reject(new Error('Could not read image'));
-
-
-
-        img.src = e.target.result;
-
-
-
-      };
-
-
-
-      reader.onerror = () => reject(new Error('Could not read file'));
-
-
-
-      reader.readAsDataURL(file);
-
-
-
-    });
-
-
-
-  }
-
-
-
-
-
-
-
-  // ── HELPERS ──────────────────────────────────
-
-
-
-  function fileToBase64(file) {
-
-
-
-    return new Promise((resolve, reject) => {
-
-
-
-      const reader = new FileReader();
-
-
-
-      reader.onload  = e => resolve(e.target.result.split(',')[1]);
-
-
-
-      reader.onerror = reject;
-
-
-
-      reader.readAsDataURL(file);
-
-
-
-    });
-
-
-
-  }
-
-
-
-
-
-
-
-  function compressImage(file) {
-
-
-
-    return new Promise((resolve, reject) => {
-
-
-
-      const img = new Image(), reader = new FileReader();
-
-
-
-      reader.onload = e => {
-
-
-
-        img.onload = () => {
-
-
-
-          const maxPx = 300;
-
-
-
-          let w=img.width, h=img.height;
-
-
-
-          if(w>h){h=Math.round(h*maxPx/w);w=maxPx;}else{w=Math.round(w*maxPx/h);h=maxPx;}
-
-
-
-          const c = document.createElement('canvas'); c.width=w; c.height=h;
-
-
-
-          c.getContext('2d').drawImage(img,0,0,w,h);
-
-
-
-          const base64 = c.toDataURL('image/jpeg',0.5);
-
-
-
-          if (base64.length > 500000) {
-
-
-
-            const sw = Math.max(1,Math.round(w*0.6));
-
-
-
-            const sh = Math.max(1,Math.round(h*0.6));
-
-
-
-            c.width=sw; c.height=sh;
-
-
-
-            c.getContext('2d').drawImage(img,0,0,sw,sh);
-
-
-
-            resolve(c.toDataURL('image/jpeg',0.4));
-
-
-
-          } else {
-
-
-
-            resolve(base64);
-
-
-
-          }
-
-
-
-        };
-
-
-
-        img.onerror = () => reject(new Error('Could not read image'));
-
-
-
-        img.src = e.target.result;
-
-
-
-      };
-
-
-
-      reader.onerror = () => reject(new Error('Could not read file'));
-
-
-
-      reader.readAsDataURL(file);
-
-
-
-    });
-
-
-
-  }
-
-
-
-
-
-
-
-  function showToast(msg, type='ok') {
-
-
-
-    let wrap = document.getElementById('toastWrap');
-
-
-
-    if (!wrap) {
-
-
-
-      wrap = document.createElement('div');
-
-
-
-      wrap.id = 'toastWrap';
-
-
-
-      wrap.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;z-index:999;display:flex;flex-direction:column;gap:8px';
-
-
-
-      document.body.appendChild(wrap);
-
-
-
-    }
-
-
-
-    const t = document.createElement('div');
-
-
-
-    const colors = { ok:'#0a4a35', error:'#7f1d1d', warn:'#92400e' };
-
-
-
-    t.style.cssText = `background:${colors[type]||colors.ok};color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;box-shadow:0 4px 20px rgba(0,0,0,0.2)`;
-
-
-
-    t.textContent = msg;
-
-
-
-    wrap.appendChild(t);
-
-
-
-    setTimeout(() => t.remove(), 3500);
-
-
-
-  }
-
-
-
+          ${result.geminiAnalysis ? `
+          <div class="gemini-box">
+            <div class="gemini-box-label"><i class="ti ti-sparkles" style="font-size:12px"></i> AI analysis</div>
+            <p>${result.geminiAnalysis}</p>
+          </div>` : ''}
+          ${renderTop3(result.top3)}
+          ${herb ? `
+          <div class="match-actions">
+            <a href="herb-detail.html?id=${herb.id}" class="btn-detail"><i class="ti ti-info-circle"></i> Full herb details</a>
+            <a href="map.html?herb=${herb.id}" class="btn-map"><i class="ti ti-map-pin"></i> View on map</a>
+          </div>` : ''}
+          <div class="match-actions" style="margin-top:8px">
+            <button class="btn-map" style="flex:1;border:1.5px solid var(--green-main);color:var(--green-main);background:var(--white);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:10px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;gap:6px;transition:background 0.15s" onmouseover="this.style.background='var(--green-pale)'" onmouseout="this.style.background='var(--white)'" onclick="shareMatchToCommunity()">
+              <i class="ti ti-share"></i> Share to Community
+            </button>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:0.75rem">
+        <button onclick="clearImage()" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--text-muted);font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:5px">
+          <i class="ti ti-refresh"></i> Identify another herb
+        </button>
+      </div>`;
+  }
+
+  // ── SHOW NO MATCH ────────────────────────────
+  function showNoMatch(cnnResult, geminiResult) {
+    const panel = document.getElementById('resultPanel');
+    panel.classList.add('active');
+    let reason = '', icon = '🔍';
+    if (cnnResult?.matched && geminiResult && !geminiResult.confirmed) {
+      icon   = '⚠️';
+      reason = geminiResult.reason || `The AI could not confidently confirm a match for this photo.`;
+    } else if (!geminiResult?.isHerbInDatabase) {
+      reason = 'The plant does not appear to be one of the medicinal herbs in the Iloilo database.';
+    } else {
+      reason = 'The AI could not confidently identify a herb from this photo.';
+    }
+    const geminiNote = geminiResult?.analysis
+      ? `<div class="gemini-box" style="margin-top:1rem;text-align:left">
+           <div class="gemini-box-label"><i class="ti ti-sparkles" style="font-size:12px"></i> AI observation</div>
+           <p>${geminiResult.analysis}</p>
+         </div>` : '';
+
+    panel.innerHTML = `
+      <div class="verification-banner rejected">
+        <i class="ti ti-circle-x"></i>
+        <span><strong>No herb matched</strong> — The AI could not identify this plant</span>
+      </div>
+      <div class="not-found">
+        <div class="not-found-icon">${icon}</div>
+        <h3>No herb matched</h3>
+        <p>${reason}</p>
+        ${geminiNote}
+        ${renderTop3(cnnResult?.top3)}
+        <div style="margin-top:1.5rem;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <button onclick="clearImage()" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:6px">
+            <i class="ti ti-refresh"></i> Try another photo
+          </button>
+          <a href="herbs.html" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:6px">
+            <i class="ti ti-database"></i> Browse herb database
+          </a>
+          <button onclick="shareNoMatchToCommunity()" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:6px">
+            <i class="ti ti-share"></i> Share to Community
+          </button>
+        </div>
+      </div>`;
+  }
+
+  function renderTop3(top3) {
+    if (!top3 || !top3.length) return '';
+    return `
+      <div class="top3-box" style="margin-top:12px">
+        <div class="top3-label">Top predictions</div>
+        ${top3.map((h,i) => `
+          <div class="top3-row">
+            <span style="min-width:130px;font-weight:${i===0?'600':'400'}">${h.localName}</span>
+            <div class="top3-bar-wrap"><div class="top3-bar" style="width:${h.percent}%"></div></div>
+            <span class="top3-pct">${h.percent}%</span>
+          </div>`).join('')}
+      </div>`;
+  }
+
+  // ── SAVE SCAN ────────────────────────────────
+  async function saveScan(result, noMatch) {
+    try {
+      const user = getAuth().currentUser;
+      if (!user) return;
+      let imageBase64 = null;
+      if (currentFile) {
+        try {
+          imageBase64 = await compressImage(currentFile);
+          if (imageBase64 && imageBase64.length > 700000) imageBase64 = null;
+        } catch(e) { console.warn('Image compression failed:', e.message); }
+      }
+      const matched         = !noMatch && result.matched;
+      const confidenceLabel = result.confidenceLabel || null;
+      const galleryEligible = matched && confidenceLabel === 'High';
+
+      await addDoc(collection(db, 'scans'), {
+        uid:               user.uid,
+        userEmail:         user.email,
+        matched,
+        identifiedHerb:    (!noMatch && result.localName) || null,
+        confidence:        result.confidence        || null,
+        confidencePercent: result.confidencePercent || null,
+        confidenceLabel,
+        top3:              result.top3              || [],
+        geminiVerified:    result.geminiVerified    || false,
+        imageBase64,
+        galleryEligible,
+        galleryApproved:   false,
+        scannedAt:         serverTimestamp(),
+      });
+      showToast(galleryEligible
+        ? '📋 Scan saved — high-confidence match sent for gallery review'
+        : '📋 Scan saved to your history');
+    } catch(e) { console.warn('Save scan failed:', e.message); }
+  }
+
+  // ── FILE HANDLING ────────────────────────────
+  window.onFileSelect = function(e) { const f = e.target.files[0]; if (f) loadFile(f); };
+
+  function loadFile(file) {
+    currentFile = file;
+    const reader = new FileReader();
+    reader.onload = ev => showPreview(ev.target.result);
+    reader.readAsDataURL(file);
+  }
+
+  function showPreview(dataUrl) {
+    document.getElementById('previewImg').src = dataUrl;
+    document.getElementById('startCard').style.display  = 'none';
+    document.getElementById('previewCard').style.display = 'block';
+    document.getElementById('actionBar').classList.add('visible');
+    document.getElementById('identifyBtn').disabled = false;
+    document.getElementById('resultPanel').classList.remove('active');
+    document.getElementById('loadingPanel').classList.remove('active');
+  }
+
+  window.clearImage = function() {
+    currentFile = null;
+    document.getElementById('previewImg').src = '';
+    document.getElementById('startCard').style.display   = 'flex';
+    document.getElementById('previewCard').style.display  = 'none';
+    document.getElementById('actionBar').classList.remove('visible');
+    document.getElementById('identifyBtn').disabled = true;
+    document.getElementById('fileInput').value = '';
+    document.getElementById('resultPanel').classList.remove('active');
+    document.getElementById('loadingPanel').classList.remove('active');
+  };
+
+  // ── CAMERA ───────────────────────────────────
+  window.openCamera = async function() {
+    try {
+      camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      const video      = document.getElementById('camVideo');
+      const captureBtn = document.querySelector('.cam-capture');
+      video.srcObject  = camStream;
+      captureBtn.disabled     = true;
+      captureBtn.style.opacity = '0.4';
+      video.onloadedmetadata = () => {
+        captureBtn.disabled     = false;
+        captureBtn.style.opacity = '1';
+      };
+      document.getElementById('camModal').classList.add('open');
+    } catch(e) { showToast('Camera not available. Please upload a photo instead.', 'error'); }
+  };
+  window.closeCamera = function() {
+    if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
+    document.getElementById('camModal').classList.remove('open');
+  };
+  window.capturePhoto = function() {
+    const video = document.getElementById('camVideo');
+    if (!video.videoWidth || !video.videoHeight) {
+      showToast('Camera is still starting up — try again in a second', 'warn');
+      return;
+    }
+    const canvas  = document.getElementById('camCanvas');
+    canvas.width  = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    currentFile   = dataURLToFile(dataUrl, 'capture.jpg');
+    showPreview(dataUrl);
+    closeCamera();
+  };
+
+  function dataURLToFile(dataUrl, filename) {
+    const [header, base64] = dataUrl.split(',');
+    const mime   = header.match(/:(.*?);/)?.[1] || 'image/jpeg';
+    const binary = atob(base64);
+    const bytes  = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new File([bytes], filename, { type: mime });
+  }
+
+  // ── SHARE TO COMMUNITY ───────────────────────
+  window.shareMatchToCommunity = async function() {
+    if (!lastResultForShare) return;
+    const r       = lastResultForShare;
+    const pct     = r.confidencePercent || 0;
+    const label   = r.confidenceLabel   || '';
+    const caption = `🌿 Identified as ${r.localName} — ${pct.toFixed(0)}% ${label} confidence (verified via CNN + Gemini AI on HerbID Iloilo).`;
+    await handOffToFeed({ herbName: r.localName, confidencePercent: pct, confidenceLabel: label, caption });
+  };
+
+  window.shareNoMatchToCommunity = async function() {
+    const caption = `🌿 Tried to identify this plant with HerbID Iloilo, but couldn't get a confident match — does anyone recognize it?`;
+    await handOffToFeed({ herbName: null, confidencePercent: null, confidenceLabel: null, caption });
+  };
+
+  async function handOffToFeed({ herbName, confidencePercent, confidenceLabel, caption }) {
+    if (!currentUser) { showToast('Sign in to share to the community', 'warn'); return; }
+    if (!currentFile) { showToast('No photo to share', 'warn'); return; }
+    try {
+      const imageBase64 = await compressForSharing(currentFile);
+      sessionStorage.setItem('herbid_pending_post', JSON.stringify({
+        imageBase64, herbName, confidencePercent, confidenceLabel, caption,
+      }));
+      window.location.href = 'feed.html';
+    } catch(e) { showToast('Could not prepare photo for sharing', 'error'); }
+  }
+
+  function compressForSharing(file, maxPx = 800, quality = 0.72) {
+    return new Promise((resolve, reject) => {
+      const img = new Image(), reader = new FileReader();
+      reader.onload = e => {
+        img.onload = () => {
+          let w = img.width, h = img.height;
+          if (w > maxPx || h > maxPx) {
+            if (w > h) { h = Math.round(h * maxPx / w); w = maxPx; }
+            else        { w = Math.round(w * maxPx / h); h = maxPx; }
+          }
+          const c = document.createElement('canvas');
+          c.width = w; c.height = h;
+          c.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(c.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = () => reject(new Error('Could not read image'));
+        img.src = e.target.result;
+      };
+      reader.onerror = () => reject(new Error('Could not read file'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // ── HELPERS ──────────────────────────────────
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = e => resolve(e.target.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function compressImage(file) {
+    return new Promise((resolve, reject) => {
+      const img = new Image(), reader = new FileReader();
+      reader.onload = e => {
+        img.onload = () => {
+          const maxPx = 300;
+          let w=img.width, h=img.height;
+          if(w>h){h=Math.round(h*maxPx/w);w=maxPx;}else{w=Math.round(w*maxPx/h);h=maxPx;}
+          const c = document.createElement('canvas'); c.width=w; c.height=h;
+          c.getContext('2d').drawImage(img,0,0,w,h);
+          const base64 = c.toDataURL('image/jpeg',0.5);
+          if (base64.length > 500000) {
+            const sw = Math.max(1,Math.round(w*0.6));
+            const sh = Math.max(1,Math.round(h*0.6));
+            c.width=sw; c.height=sh;
+            c.getContext('2d').drawImage(img,0,0,sw,sh);
+            resolve(c.toDataURL('image/jpeg',0.4));
+          } else {
+            resolve(base64);
+          }
+        };
+        img.onerror = () => reject(new Error('Could not read image'));
+        img.src = e.target.result;
+      };
+      reader.onerror = () => reject(new Error('Could not read file'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function showToast(msg, type='ok') {
+    let wrap = document.getElementById('toastWrap');
+    if (!wrap) {
+      wrap = document.createElement('div');
+      wrap.id = 'toastWrap';
+      wrap.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;z-index:999;display:flex;flex-direction:column;gap:8px';
+      document.body.appendChild(wrap);
+    }
+    const t = document.createElement('div');
+    const colors = { ok:'#0a4a35', error:'#7f1d1d', warn:'#92400e' };
+    t.style.cssText = `background:${colors[type]||colors.ok};color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;box-shadow:0 4px 20px rgba(0,0,0,0.2)`;
+    t.textContent = msg;
+    wrap.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
 </script>
-
-
-
 </body>
-
-
-
 </html>
