@@ -458,7 +458,7 @@
 
     const herbList = herbDatabase.length
       ? herbDatabase.map(h => `${h.localName} (${h.englishName||''}, ${h.scientificName})`).join(', ')
-      : 'Alibhon/Sambong, Lagundi, Oregano, Tawa-tawa, Tanglad, Yerba Buena, Sambag-sambag, Sampaliya, Pula, Kandi-kandilaan, Kataka-taka, Lapunaya, Paluchina, Elepante, Hagunoy, Kaluoy, Bunlaw, Buyo, Bangkawbangkaw, Sinaw-sinaw';
+      : 'Alibhon, Lagundi, Oregano, Tawa-tawa, Tanglad, Yerba Buena, Sambag-sambag, Sampaliya, Pula, Kandi-kandilaan, Kataka-taka, Lapunaya, Paluchina, Elepante, Hagunoy, Kaluoy, Bunlaw, Buyo, Bangkawbangkaw, Sinaw-sinaw';
 
     const cnnPrediction = cnnResult?.matched
       ? `CNN predicted: "${cnnResult.localName}" (${cnnResult.scientificName||''}) at ${cnnResult.confidencePercent?.toFixed(0)||'?'}% confidence.`
