@@ -548,66 +548,82 @@
       geminiUnavailable = true;
     }
 
-    // ── STEP 3: CROSS-CHECK ──────────────────
-    setLoadingText('Almost done…', 'Finalizing your result');
+    // ── STEP 3: FINAL DECISION ─────────────────
+    // Gemini is the final authority when it returns a valid confirmation.
+    // The CNN prediction is retained for reference, but it cannot overrule Gemini.
+    setLoadingText('Almost done…', 'Finalizing the AI-verified result');
 
-    if (cnnResult?.matched && geminiResult?.confirmed) {
-      // ── Both CNN and Gemini agree ──
-      const cnnName    = (cnnResult.localName || '').toLowerCase().trim();
-      const geminiName = (geminiResult.plantName || '').toLowerCase().trim();
-      const namesMatch = cnnName && geminiName && (
-        cnnName.includes(geminiName) ||
-        geminiName.includes(cnnName) ||
-        geminiName.includes(cnnName.split(' ')[0]) ||
-        cnnName.includes(geminiName.split(' ')[0])
-      );
-      if (namesMatch) {
-        finalHerb = { ...cnnResult, geminiVerified: true, geminiAnalysis: geminiResult.analysis };
-        finalHerb.confidenceLabel = computeConfidenceLabel(finalHerb.confidencePercent);
-      } else {
-        noMatch = true;
-      }
-    } else if (!cnnResult?.matched && geminiResult?.confirmed) {
-      // ── CNN missed but Gemini confirmed ──
-      const herb = herbDatabase.find(h =>
-        (h.localName||'').toLowerCase().includes((geminiResult.plantName||'').toLowerCase()) ||
-        (geminiResult.plantName||'').toLowerCase().includes((h.localName||'').toLowerCase())
-      );
-      if (herb) {
-        let confPct, confRaw;
-        if (cnnResult?.confidencePercent && cnnResult.confidencePercent > 0) {
-          confPct = Math.round(cnnResult.confidencePercent);
-          confRaw = cnnResult.confidence;
-        } else {
-          const geminiConfMap = { 'High': 82, 'Medium': 68, 'Low': 52 };
-          confPct = geminiConfMap[geminiResult.confidence] || 68;
-          confRaw = confPct / 100;
-        }
+    if (geminiResult?.confirmed) {
+      const normalizeName = value => String(value || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim();
+
+      const geminiLocal = normalizeName(geminiResult.plantName);
+      const geminiScientific = normalizeName(geminiResult.scientificName);
+
+      // Resolve Gemini's identification against the local herb database.
+      // Prefer exact scientific/local-name matches before partial name matches.
+      const exactHerb = herbDatabase.find(h => {
+        const local = normalizeName(h.localName);
+        const english = normalizeName(h.englishName);
+        const scientific = normalizeName(h.scientificName);
+        return (geminiLocal && (geminiLocal === local || geminiLocal === english)) ||
+               (geminiScientific && geminiScientific === scientific);
+      });
+
+      const partialHerb = exactHerb || herbDatabase.find(h => {
+        const local = normalizeName(h.localName);
+        const english = normalizeName(h.englishName);
+        const scientific = normalizeName(h.scientificName);
+        return (geminiLocal && (local.includes(geminiLocal) || geminiLocal.includes(local) ||
+                                english.includes(geminiLocal) || geminiLocal.includes(english))) ||
+               (geminiScientific && scientific &&
+                (scientific.includes(geminiScientific) || geminiScientific.includes(scientific)));
+      });
+
+      if (partialHerb && geminiResult.isHerbInDatabase !== false) {
+        // Use the database record matching Gemini, never the CNN's possibly wrong label.
+        const geminiConfMap = { High: 85, Medium: 70, Low: 55 };
+        const confPct = geminiConfMap[geminiResult.confidence] || 70;
         finalHerb = {
           matched: true,
-          localName: herb.localName,
-          scientificName: herb.scientificName || geminiResult.scientificName || '',
-          confidence: confRaw,
+          localName: partialHerb.localName || geminiResult.plantName,
+          scientificName: partialHerb.scientificName || geminiResult.scientificName || '',
+          confidence: confPct / 100,
           confidencePercent: confPct,
           confidenceLabel: computeConfidenceLabel(confPct),
           top3: cnnResult?.top3 || [],
           geminiVerified: true,
-          geminiOnly: true,
+          geminiOnly: !cnnResult?.matched ||
+            normalizeName(cnnResult.localName) !== normalizeName(partialHerb.localName),
           geminiAnalysis: geminiResult.analysis,
+          cnnPrediction: cnnResult?.localName || null,
+          decisionSource: 'Gemini'
         };
+      } else {
+        // Gemini may recognize a plant, but only herbs present in the local database
+        // can be shown as a database match.
+        noMatch = true;
+      }
+    } else if (geminiUnavailable || !geminiResult) {
+      // Only fall back to CNN when Gemini could not provide a decision at all.
+      if (cnnResult?.matched) {
+        finalHerb = {
+          ...cnnResult,
+          geminiVerified: false,
+          geminiAnalysis: null,
+          cnnOnly: true,
+          decisionSource: 'CNN (Gemini unavailable)'
+        };
+        finalHerb.confidenceLabel = computeConfidenceLabel(finalHerb.confidencePercent);
       } else {
         noMatch = true;
       }
-    } else if (cnnResult?.matched && (geminiUnavailable || !geminiResult)) {
-      // ── Gemini unavailable (quota/error) — trust CNN alone ──
-      finalHerb = {
-        ...cnnResult,
-        geminiVerified: false,
-        geminiAnalysis: null,
-        cnnOnly: true,
-      };
-      finalHerb.confidenceLabel = computeConfidenceLabel(finalHerb.confidencePercent);
     } else {
+      // Gemini explicitly rejected or could not confirm the image. Do not accept CNN alone.
       noMatch = true;
     }
 
