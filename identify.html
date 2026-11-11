@@ -478,18 +478,59 @@
   let currentUser        = null;
   let currentFile        = null;
   let herbDatabase       = [];
+  let herbDatabaseLoaded = false;
+  let herbDatabaseLoadPromise = null;
   let camStream          = null;
   let lastResultForShare = null;
 
   onAuthChange(user => { currentUser = user; });
 
   async function loadHerbs() {
-    try {
+    if (herbDatabaseLoaded) return herbDatabase;
+    if (herbDatabaseLoadPromise) return herbDatabaseLoadPromise;
+
+    herbDatabaseLoadPromise = (async () => {
       const snap = await getDocs(collection(db, 'herbs'));
-      snap.forEach(d => herbDatabase.push({ id: d.id, ...d.data() }));
-    } catch(e) { console.warn('Could not load herbs:', e.message); }
+      const records = [];
+      snap.forEach(d => records.push({ id: d.id, ...d.data() }));
+      herbDatabase = records;
+      herbDatabaseLoaded = true;
+      return herbDatabase;
+    })();
+
+    try {
+      return await herbDatabaseLoadPromise;
+    } catch (e) {
+      herbDatabaseLoadPromise = null;
+      console.error('Could not load herbs from Firebase:', e);
+      throw e;
+    }
   }
-  loadHerbs();
+
+  // Names must match a real Firestore record. No Gemini-only or CNN-only
+  // identification is allowed to bypass this check.
+  function normalizeHerbName(value) {
+    return String(value || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
+  }
+
+  function findHerbInDatabase(...candidateNames) {
+    const candidates = candidateNames.map(normalizeHerbName).filter(Boolean);
+    if (!candidates.length) return null;
+
+    return herbDatabase.find(herb => {
+      const storedNames = [herb.localName, herb.englishName, herb.scientificName]
+        .map(normalizeHerbName)
+        .filter(Boolean);
+      return candidates.some(candidate => storedNames.includes(candidate));
+    }) || null;
+  }
+
+  loadHerbs().catch(() => {});
 
   // ── SOURCE MODAL ────────────────────────────
   window.openSourceModal  = () => document.getElementById('sourceModal').classList.add('open');
@@ -512,6 +553,20 @@
     document.getElementById('loadingPanel').classList.add('active');
     document.getElementById('resultPanel').classList.remove('active');
     document.getElementById('identifyBtn').disabled = true;
+
+    // Firebase must be available before any model result can be accepted.
+    try {
+      await loadHerbs();
+      if (!herbDatabase.length) {
+        throw new Error('The Firebase herbs collection is empty.');
+      }
+    } catch (e) {
+      console.error('Firebase herb database check failed:', e);
+      document.getElementById('loadingPanel').classList.remove('active');
+      document.getElementById('identifyBtn').disabled = false;
+      showDatabaseUnavailable();
+      return;
+    }
 
     let cnnResult    = null;
     let geminiResult = null;
@@ -554,76 +609,57 @@
     setLoadingText('Almost done…', 'Finalizing the AI-verified result');
 
     if (geminiResult?.confirmed) {
-      const normalizeName = value => String(value || '')
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9]+/g, ' ')
-        .trim();
+      // Gemini's claim is not sufficient. Its plant name must resolve to an
+      // actual document in the already-loaded Firebase herbs collection.
+      const matchedHerb = findHerbInDatabase(
+        geminiResult.plantName,
+        geminiResult.scientificName
+      );
 
-      const geminiLocal = normalizeName(geminiResult.plantName);
-      const geminiScientific = normalizeName(geminiResult.scientificName);
-
-      // Resolve Gemini's identification against the local herb database.
-      // Prefer exact scientific/local-name matches before partial name matches.
-      const exactHerb = herbDatabase.find(h => {
-        const local = normalizeName(h.localName);
-        const english = normalizeName(h.englishName);
-        const scientific = normalizeName(h.scientificName);
-        return (geminiLocal && (geminiLocal === local || geminiLocal === english)) ||
-               (geminiScientific && geminiScientific === scientific);
-      });
-
-      const partialHerb = exactHerb || herbDatabase.find(h => {
-        const local = normalizeName(h.localName);
-        const english = normalizeName(h.englishName);
-        const scientific = normalizeName(h.scientificName);
-        return (geminiLocal && (local.includes(geminiLocal) || geminiLocal.includes(local) ||
-                                english.includes(geminiLocal) || geminiLocal.includes(english))) ||
-               (geminiScientific && scientific &&
-                (scientific.includes(geminiScientific) || geminiScientific.includes(scientific)));
-      });
-
-      if (partialHerb && geminiResult.isHerbInDatabase !== false) {
-        // Use the database record matching Gemini, never the CNN's possibly wrong label.
+      if (geminiResult.isHerbInDatabase !== false && matchedHerb) {
         const geminiConfMap = { High: 85, Medium: 70, Low: 55 };
         const confPct = geminiConfMap[geminiResult.confidence] || 70;
         finalHerb = {
           matched: true,
-          localName: partialHerb.localName || geminiResult.plantName,
-          scientificName: partialHerb.scientificName || geminiResult.scientificName || '',
+          herbId: matchedHerb.id,
+          localName: matchedHerb.localName,
+          scientificName: matchedHerb.scientificName || '',
           confidence: confPct / 100,
           confidencePercent: confPct,
           confidenceLabel: computeConfidenceLabel(confPct),
           top3: cnnResult?.top3 || [],
           geminiVerified: true,
           geminiOnly: !cnnResult?.matched ||
-            normalizeName(cnnResult.localName) !== normalizeName(partialHerb.localName),
+            normalizeHerbName(cnnResult.localName) !== normalizeHerbName(matchedHerb.localName),
           geminiAnalysis: geminiResult.analysis,
           cnnPrediction: cnnResult?.localName || null,
-          decisionSource: 'Gemini'
+          decisionSource: 'Gemini + Firebase'
         };
       } else {
-        // Gemini may recognize a plant, but only herbs present in the local database
-        // can be shown as a database match.
         noMatch = true;
       }
     } else if (geminiUnavailable || !geminiResult) {
-      // Only fall back to CNN when Gemini could not provide a decision at all.
-      if (cnnResult?.matched) {
+      // CNN can be used only if its predicted name also exists in Firestore.
+      const matchedHerb = cnnResult?.matched
+        ? findHerbInDatabase(cnnResult.localName, cnnResult.scientificName)
+        : null;
+
+      if (matchedHerb) {
         finalHerb = {
           ...cnnResult,
+          herbId: matchedHerb.id,
+          localName: matchedHerb.localName,
+          scientificName: matchedHerb.scientificName || '',
           geminiVerified: false,
           geminiAnalysis: null,
           cnnOnly: true,
-          decisionSource: 'CNN (Gemini unavailable)'
+          decisionSource: 'CNN + Firebase (Gemini unavailable)'
         };
         finalHerb.confidenceLabel = computeConfidenceLabel(finalHerb.confidencePercent);
       } else {
         noMatch = true;
       }
     } else {
-      // Gemini explicitly rejected or could not confirm the image. Do not accept CNN alone.
       noMatch = true;
     }
 
@@ -643,9 +679,13 @@
     const base64   = await fileToBase64(currentFile);
     const mimeType = currentFile.type || 'image/jpeg';
 
-    const herbList = herbDatabase.length
-      ? herbDatabase.map(h => `${h.localName} (${h.englishName||''}, ${h.scientificName})`).join(', ')
-      : 'Alibhon/Sambong, Lagundi, Oregano, Tawa-tawa, Tanglad, Yerba Buena, Sambag-sambag, Sampaliya, Pula, Kandi-kandilaan, Kataka-taka, Lapunaya, Paluchina, Elepante, Hagunoy, Kaluoy, Bunlaw, Buyo, Bangkawbangkaw, Sinaw-sinaw';
+    // This list comes only from Firestore; never substitute a hard-coded list.
+    if (!herbDatabaseLoaded || !herbDatabase.length) {
+      throw new Error('Firebase herb database is not loaded.');
+    }
+    const herbList = herbDatabase
+      .map(h => `${h.localName || ''} (${h.englishName || ''}, ${h.scientificName || ''})`)
+      .join(', ');
 
     const cnnPrediction = cnnResult?.matched
       ? `CNN predicted: "${cnnResult.localName}" (${cnnResult.scientificName||''}) at ${cnnResult.confidencePercent?.toFixed(0)||'?'}% confidence.`
@@ -686,10 +726,14 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
     lastResultForShare = result;
     const panel = document.getElementById('resultPanel');
     panel.classList.add('active');
-    const herb = herbDatabase.find(h =>
-      (h.localName||'').toLowerCase().includes((result.localName||'').toLowerCase()) ||
-      (result.localName||'').toLowerCase().includes((h.localName||'').toLowerCase())
-    );
+    // A result card is rendered only for the exact Firestore document that
+    // was validated during the decision step.
+    const herb = herbDatabase.find(h => h.id === result.herbId);
+    if (!herb) {
+      panel.classList.remove('active');
+      showNoMatch(null, null);
+      return;
+    }
     const confColor = result.confidenceLabel === 'High' ? '#22a06b'
       : result.confidenceLabel === 'Medium' ? '#c9a84c' : '#e53e3e';
 
@@ -752,6 +796,23 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
       </div>`;
   }
 
+  function showDatabaseUnavailable() {
+    const panel = document.getElementById('resultPanel');
+    panel.classList.add('active');
+    panel.innerHTML = `
+      <div class="verification-banner rejected">
+        <i class="ti ti-database-off"></i>
+        <span><strong>Herb database unavailable</strong> — No identification was displayed.</span>
+      </div>
+      <div class="not-found">
+        <h3>Unable to verify against Firebase</h3>
+        <p>Please check your connection and try again. Herb identification is blocked until the Firebase herb database can be loaded.</p>
+        <button onclick="clearImage()" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:6px">
+          <i class="ti ti-refresh"></i> Try again
+        </button>
+      </div>`;
+  }
+
   // ── SHOW NO MATCH ────────────────────────────
   function showNoMatch(cnnResult, geminiResult) {
     const panel = document.getElementById('resultPanel');
@@ -765,11 +826,8 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
     } else {
       reason = 'The AI could not confidently identify a herb from this photo.';
     }
-    const geminiNote = geminiResult?.analysis
-      ? `<div class="gemini-box" style="margin-top:1rem;text-align:left">
-           <div class="gemini-box-label"><i class="ti ti-sparkles" style="font-size:12px"></i> AI observation</div>
-           <p>${geminiResult.analysis}</p>
-         </div>` : '';
+    // Do not display Gemini's unverified plant analysis or CNN candidate names.
+    // Only a Firestore-matched herb may be shown as an identification.
 
     panel.innerHTML = `
       <div class="verification-banner rejected">
@@ -780,8 +838,6 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
         <div class="not-found-icon">${icon}</div>
         <h3>No herb matched</h3>
         <p>${reason}</p>
-        ${geminiNote}
-        ${renderTop3(cnnResult?.top3)}
         <div style="margin-top:1.5rem;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
           <button onclick="clearImage()" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:6px">
             <i class="ti ti-refresh"></i> Try another photo
@@ -1030,4 +1086,4 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
   }
 </script>
 </body>
-</html>
+</html> 

@@ -424,6 +424,34 @@
   </div>
 </div>
 
+<!-- REPORT POST MODAL -->
+<div class="modal-overlay" id="reportModal" onclick="onReportOverlayClick(event)">
+  <div class="compose-sheet">
+    <div class="modal-header">
+      <span class="modal-title"><i class="ti ti-flag"></i> Report post</span>
+      <button class="modal-close" onclick="closeReportModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:#5a6472;margin-bottom:12px">Reports are sent privately to the administrators for review.</p>
+      <label for="reportReason" style="display:block;font-size:12px;font-weight:600;color:#5a6472;margin-bottom:5px">Reason</label>
+      <select id="reportReason" class="post-caption" style="height:auto;resize:none;margin-bottom:12px">
+        <option value="">Select a reason</option>
+        <option value="Spam or misleading">Spam or misleading</option>
+        <option value="Harassment or hate">Harassment or hate</option>
+        <option value="Inappropriate content">Inappropriate content</option>
+        <option value="False or misleading herb information">False or misleading herb information</option>
+        <option value="Other">Other</option>
+      </select>
+      <label for="reportDetails" style="display:block;font-size:12px;font-weight:600;color:#5a6472;margin-bottom:5px">Additional details (optional)</label>
+      <textarea id="reportDetails" class="post-caption" maxlength="1000" placeholder="Add context for the administrator…"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="share-btn-secondary" onclick="closeReportModal()">Cancel</button>
+      <button class="post-submit" id="reportSubmitBtn" onclick="submitPostReport()"><i class="ti ti-flag"></i> Send report</button>
+    </div>
+  </div>
+</div>
+
 <!-- POST DETAIL MODAL -->
 <div class="post-detail-overlay" id="postDetailModal" onclick="onDetailOverlayClick(event)">
   <div class="post-detail-window" id="postDetailWindow">
@@ -465,7 +493,7 @@
   import { onAuthChange } from './js/auth.js';
   import { initNavAuth }  from './js/nav-auth.js';
   import {
-    collection, addDoc, getDocs, deleteDoc,
+    collection, addDoc, getDocs, getDoc, setDoc, deleteDoc,
     updateDoc, doc, query, orderBy, limit,
     onSnapshot, serverTimestamp, arrayUnion, arrayRemove,
     increment, where
@@ -492,6 +520,7 @@
   let userCache       = new Map();
   let mentionCleanups = [];
   let shareSourcePost = null;
+  let reportPostId    = null;
 
   // ══════════════════════════════════════════════
   //  PENDING SCAN SHARE (from history.html)
@@ -664,6 +693,7 @@
         userEmail: currentUser.email,
         caption: myCaption || null, imageBase64: null,
         herbName: null, confidence: null, confidenceLabel: null,
+        status: 'pending',
         likes: [], likeCount: 0, commentCount: 0,
         sharedPost: shareSourcePost,
         createdAt: serverTimestamp(),
@@ -680,7 +710,7 @@
         }).catch(()=>{});
       }
       closeShareModal();
-      showToast('🔁 Shared to your feed!');
+      showToast('Your share was sent for admin review.');
     } catch(e) { showToast('Could not share: '+e.message,'error'); }
     btn.disabled = false; btn.innerHTML = '<i class="ti ti-share"></i> Share to Feed';
   };
@@ -949,6 +979,7 @@
         herbName: postHerbData?.identifiedHerb || null,
         confidence: postHerbData?.confidencePercent || null,
         confidenceLabel: postHerbData?.confidenceLabel || null,
+        status: 'pending',
         likes: [], likeCount: 0, commentCount: 0,
         createdAt: serverTimestamp(),
       });
@@ -960,7 +991,7 @@
       document.getElementById('postImageInput').value = '';
       document.getElementById('postHerbTag').style.display = 'none';
       closeComposeModal();
-      showToast('🌿 Post shared with the community!');
+      showToast('Your post was sent for admin review. It will appear after approval.');
     } catch(e) { showToast('Could not post: '+e.message,'error'); }
 
     // ── Unlock everything whether success or fail ──
@@ -982,12 +1013,15 @@
   // ══════════════════════════════════════════════
   function listenFeed() {
     if (unsubFeed) unsubFeed();
-    const q = query(collection(db,'posts'), orderBy('createdAt','desc'), limit(30));
+    const q = query(collection(db,'posts'), orderBy('createdAt','desc'), limit(100));
     unsubFeed = onSnapshot(q, snap => {
       const posts = [];
-      snap.forEach(d => posts.push({ id:d.id, ...d.data() }));
-      window._allPosts = posts;
-      renderFeed(posts);
+      snap.forEach(d => {
+        const post = { id:d.id, ...d.data() };
+        if (post.status !== 'pending' && post.status !== 'rejected') posts.push(post);
+      });
+      window._allPosts = posts.slice(0, 30);
+      renderFeed(window._allPosts);
     }, err => {
       document.getElementById('feedPosts').innerHTML =
         `<div class="feed-empty"><p style="color:#e53e3e">Could not load feed: ${err.message}</p></div>`;
@@ -1002,6 +1036,67 @@
     }
     container.innerHTML = posts.map(p => renderPost(p)).join('');
   }
+
+  window.openReportModal = function(postId) {
+    if (!currentUser) { showToast('Sign in to report posts', 'warn'); return; }
+    const post = (window._allPosts || []).find(item => item.id === postId);
+    if (post?.uid === currentUser.uid) { showToast("You can't report your own post", 'warn'); return; }
+    reportPostId = postId;
+    document.getElementById('reportReason').value = '';
+    document.getElementById('reportDetails').value = '';
+    document.getElementById('reportModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closeReportModal = function() {
+    document.getElementById('reportModal').classList.remove('open');
+    document.body.style.overflow = '';
+    reportPostId = null;
+  };
+
+  window.onReportOverlayClick = function(e) {
+    if (e.target === document.getElementById('reportModal')) closeReportModal();
+  };
+
+  window.submitPostReport = async function() {
+    if (!currentUser || !reportPostId) return;
+    const reason = document.getElementById('reportReason').value;
+    const details = document.getElementById('reportDetails').value.trim();
+    if (!reason) { showToast('Choose a reason for the report', 'warn'); return; }
+    const post = (window._allPosts || []).find(item => item.id === reportPostId);
+    if (!post) { showToast('Could not find that post', 'error'); return; }
+    if (post.uid === currentUser.uid) { showToast("You can't report your own post", 'warn'); return; }
+
+    const btn = document.getElementById('reportSubmitBtn');
+    btn.disabled = true;
+    try {
+      const reportRef = doc(db, 'postReports', `${reportPostId}_${currentUser.uid}`);
+      await setDoc(reportRef, {
+        postId: reportPostId,
+        postOwnerUid: post.uid || '',
+        postAuthorName: post.userName || 'User',
+        postCaption: (post.caption || '').slice(0, 1000),
+        postHerbName: post.herbName || '',
+        reporterUid: currentUser.uid,
+        reporterName: currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
+        reason,
+        details: details.slice(0, 1000),
+        status: 'pending',
+        createdAt: serverTimestamp(),
+      });
+      closeReportModal();
+      showToast('Your report was sent to the administrators for review.');
+    } catch(e) {
+      if (e.code === 'permission-denied') {
+        showToast("You've already reported this post. The admins have it.", 'warn');
+        closeReportModal();
+      } else {
+        showToast('Could not submit report: ' + e.message, 'error');
+      }
+    } finally {
+      btn.disabled = false;
+    }
+  };
 
   function renderPost(p) {
     const isOwner   = currentUser && currentUser.uid === p.uid;
@@ -1062,6 +1157,10 @@
             <div class="reaction-divider"></div>
             <button class="reaction-btn" onclick="sharePost('${p.id}')">
               <i class="ti ti-share"></i> Share
+            </button>
+            <div class="reaction-divider"></div>
+            <button class="reaction-btn" onclick="openReportModal('${p.id}')">
+              <i class="ti ti-flag"></i> Report
             </button>
           </div>
         </div>

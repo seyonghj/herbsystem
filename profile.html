@@ -289,6 +289,16 @@
       font-family: inherit; transition: color 0.15s, background 0.15s;
     }
     .admin-post-delete:hover { color: #e53e3e; background: #fff5f5; }
+    .admin-post-status { width: fit-content; padding: 3px 8px; border-radius: 99px; background: #fff7ed; color: #c2410c; font-size: 10px; font-weight: 700; }
+    .post-review-actions { display: flex; gap: 7px; margin-left: auto; }
+    .post-review-btn { border: 0; border-radius: 7px; padding: 6px 10px; font-size: 11px; font-weight: 600; font-family: inherit; cursor: pointer; }
+    .post-review-btn:disabled { opacity: 0.55; cursor: wait; }
+    .post-review-btn.approve { background: #e8f7ef; color: #167447; }
+    .post-review-btn.reject { background: #fff1f1; color: #c53030; }
+    .report-reason { font-size: 12px; font-weight: 700; color: #c53030; }
+    .report-details { font-size: 12px; color: var(--text-soft); white-space: pre-wrap; }
+    .report-preview { font-size: 12px; color: var(--text-soft); white-space: pre-wrap; }
+    .report-preview img { display: block; max-width: 240px; max-height: 180px; object-fit: cover; border-radius: 8px; margin: 6px 0; }
 
     /* ══════════════════════
        ADMIN — GALLERY REVIEW TAB
@@ -514,10 +524,16 @@
         <div><strong>Admin Dashboard</strong><br><span>Manage users, moderate posts, and approve herb gallery photos.</span></div>
       </div>
 
-      <!-- Sub-tabs: Users / All Posts / Gallery Review -->
+      <!-- Sub-tabs: Users / Post Review / Reports / All Posts / Gallery Review -->
       <div class="admin-subtabs">
         <button class="subtab-btn active" id="subtab-users" onclick="switchSubtab('users')">
           <i class="ti ti-users"></i> Users
+        </button>
+        <button class="subtab-btn" id="subtab-review" onclick="switchSubtab('review')">
+          <i class="ti ti-clock"></i> Post Review <span class="subtab-badge" id="postPendingBadge" style="display:none">0</span>
+        </button>
+        <button class="subtab-btn" id="subtab-reports" onclick="switchSubtab('reports')">
+          <i class="ti ti-flag"></i> Reports <span class="subtab-badge" id="reportPendingBadge" style="display:none">0</span>
         </button>
         <button class="subtab-btn" id="subtab-allposts" onclick="switchSubtab('allposts')">
           <i class="ti ti-layout-cards"></i> All Posts
@@ -558,6 +574,28 @@
         </div>
         <div class="results-count" id="usersResultCount"></div>
         <div id="userList"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+      </div>
+
+      <!-- POST REVIEW PANEL -->
+      <div id="adminPostReview" style="display:none">
+        <p style="font-size:13px;color:var(--text-soft);margin-bottom:1rem;line-height:1.6">
+          New community posts stay hidden until an administrator approves them.
+        </p>
+        <div class="results-count" id="postReviewCount"></div>
+        <div id="postReviewList">
+          <div class="spinner-wrap"><div class="spinner"></div><p style="color:var(--text-muted);font-size:13px">Loading posts for review…</p></div>
+        </div>
+      </div>
+
+      <!-- COMMUNITY REPORTS -->
+      <div id="adminPostReports" style="display:none">
+        <p style="font-size:13px;color:var(--text-soft);margin-bottom:1rem;line-height:1.6">
+          Review community reports. Approving a report removes the reported post from the public feed.
+        </p>
+        <div class="results-count" id="postReportsCount"></div>
+        <div id="postReportsList">
+          <div class="spinner-wrap"><div class="spinner"></div><p style="color:var(--text-muted);font-size:13px">Loading reports…</p></div>
+        </div>
       </div>
 
       <!-- ALL POSTS PANEL -->
@@ -695,7 +733,7 @@
   import { initNavAuth }  from './js/nav-auth.js';
   import {
     collection, getDocs, deleteDoc, doc, addDoc, getDoc,
-    query, orderBy, limit, where, setDoc, updateDoc, serverTimestamp
+    query, orderBy, limit, where, setDoc, updateDoc, serverTimestamp, writeBatch
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import {
     getAuth, updateProfile, updateEmail, updatePassword,
@@ -725,6 +763,7 @@
   let newPhotoB64   = null;
   let allUsers      = [];
   let allPosts      = [];      // all posts from every user
+  let postReports   = [];
   let editingUser   = null;
   let modalPhotoB64 = null;
   let drawerUser    = null;
@@ -753,7 +792,7 @@
     renderHeader(user);
     setupAdminUI();
     await Promise.all([loadScans(user.uid), loadPosts(user.uid)]);
-    if (isAdmin) { loadUsers(); loadAllPosts(); loadGalleryReview(); }
+    if (isAdmin) { loadUsers(); loadAllPosts(); loadPostReports(); loadGalleryReview(); }
   });
 
   function setupAdminUI() {
@@ -882,8 +921,12 @@
     document.querySelectorAll('.subtab-btn').forEach(b=>b.classList.remove('active'));
     document.getElementById(`subtab-${sub}`)?.classList.add('active');
     document.getElementById('adminUsers').style.display    = sub==='users'    ? '' : 'none';
+    document.getElementById('adminPostReview').style.display = sub==='review' ? '' : 'none';
+    document.getElementById('adminPostReports').style.display = sub==='reports' ? '' : 'none';
     document.getElementById('adminAllPosts').style.display = sub==='allposts' ? '' : 'none';
     document.getElementById('adminGallery').style.display  = sub==='gallery'  ? '' : 'none';
+    if (sub === 'review')   renderPendingPosts();
+    if (sub === 'reports')  renderPostReports();
     if (sub === 'allposts') filterAllPosts();
     if (sub === 'gallery')  applyGalleryFilter();
   };
@@ -1083,10 +1126,210 @@
       const snap = await getDocs(query(collection(db,'posts'), orderBy('createdAt','desc'), limit(200)));
       allPosts = [];
       snap.forEach(d => allPosts.push({ id:d.id, ...d.data() }));
+      renderPendingPosts();
     } catch(e) {
       document.getElementById('allPostsList').innerHTML = `<div class="empty"><p style="color:#e53e3e">Could not load posts: ${e.message}</p></div>`;
+      document.getElementById('postReviewList').innerHTML = `<div class="empty"><p style="color:#e53e3e">Could not load posts for review: ${e.message}</p></div>`;
     }
   }
+
+  async function loadPostReports() {
+    try {
+      const snap = await getDocs(query(collection(db,'postReports'), orderBy('createdAt','desc'), limit(200)));
+      postReports = [];
+      snap.forEach(d => postReports.push({ id:d.id, ...d.data() }));
+      renderPostReports();
+    } catch(e) {
+      document.getElementById('postReportsList').innerHTML =
+        `<div class="empty"><p style="color:#e53e3e">Could not load reports: ${escHTML(e.message)}</p></div>`;
+    }
+  }
+
+  function renderPendingPosts() {
+    const pending = allPosts.filter(p => p.status === 'pending');
+    const badge = document.getElementById('postPendingBadge');
+    badge.textContent = pending.length;
+    badge.style.display = pending.length ? '' : 'none';
+    document.getElementById('postReviewCount').textContent =
+      `${pending.length} post${pending.length !== 1 ? 's' : ''} waiting for review`;
+
+    const wrap = document.getElementById('postReviewList');
+    if (!pending.length) {
+      wrap.innerHTML = `<div class="empty"><div class="empty-icon">✅</div><h3>No posts waiting for review</h3><p>New community submissions will appear here.</p></div>`;
+      return;
+    }
+
+    wrap.innerHTML = `<div class="post-list">${pending.map(p => {
+      const date = p.createdAt?.toDate?.()?.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}) || '';
+      const authorAv = p.userPhoto
+        ? `<img src="${escHTML(p.userPhoto)}" referrerpolicy="no-referrer">`
+        : escHTML((p.userName||'U')[0].toUpperCase());
+      const sharedContent = p.sharedPost
+        ? `<div class="admin-post-caption">Shared post by ${escHTML(p.sharedPost.userName||'User')}: ${escHTML(p.sharedPost.caption||p.sharedPost.herbName||'Herb post')}</div>`
+        : '';
+      return `
+        <div class="admin-post-card" id="review-${p.id}">
+          ${p.imageBase64
+            ? `<img class="admin-post-thumb" src="${p.imageBase64}" loading="lazy" decoding="async" alt="Submitted post photo">`
+            : `<div class="admin-post-thumb-placeholder">🌿</div>`}
+          <div class="admin-post-body">
+            <div class="admin-post-author">
+              <div class="admin-post-author-av">${authorAv}</div>
+              <span class="admin-post-author-name">${escHTML(p.userName||'Unknown')}</span>
+              <span class="admin-post-author-date"><i class="ti ti-clock" style="font-size:10px"></i> ${date}</span>
+            </div>
+            <span class="admin-post-status">Pending review</span>
+            ${p.herbName ? `<span class="admin-post-herb"><i class="ti ti-leaf" style="font-size:10px"></i> ${escHTML(p.herbName)}</span>` : ''}
+            ${p.caption ? `<div class="admin-post-caption">${escHTML(p.caption)}</div>` : ''}
+            ${sharedContent}
+            <div class="admin-post-footer">
+              <div class="post-review-actions">
+                <button class="post-review-btn approve" onclick="reviewCommunityPost('${p.id}','approved')"><i class="ti ti-check"></i> Approve</button>
+                <button class="post-review-btn reject" onclick="reviewCommunityPost('${p.id}','rejected')"><i class="ti ti-x"></i> Reject</button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }).join('')}</div>`;
+  }
+
+  function renderPostReports() {
+    const pending = postReports.filter(report => report.status === 'pending');
+    const badge = document.getElementById('reportPendingBadge');
+    badge.textContent = pending.length;
+    badge.style.display = pending.length ? '' : 'none';
+    document.getElementById('postReportsCount').textContent =
+      `${pending.length} report${pending.length !== 1 ? 's' : ''} waiting for review`;
+
+    const wrap = document.getElementById('postReportsList');
+    if (!pending.length) {
+      wrap.innerHTML = `<div class="empty"><div class="empty-icon">✅</div><h3>No reports waiting for review</h3><p>New community reports will appear here.</p></div>`;
+      return;
+    }
+
+    wrap.innerHTML = `<div class="post-list">${pending.map(report => {
+      const date = report.createdAt?.toDate?.()?.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}) || '';
+      return `
+        <div class="admin-post-card" id="report-${report.id}">
+          <div class="admin-post-thumb-placeholder"><i class="ti ti-flag"></i></div>
+          <div class="admin-post-body">
+            <div class="admin-post-author">
+              <span class="admin-post-author-name">Reported by ${escHTML(report.reporterName || 'Community member')}</span>
+              <span class="admin-post-author-date">${date}</span>
+            </div>
+            <span class="report-reason">${escHTML(report.reason || 'No reason selected')}</span>
+            ${report.details ? `<div class="report-details">${escHTML(report.details)}</div>` : ''}
+            <div class="admin-post-caption">
+              Post by ${escHTML(report.postAuthorName || 'Unknown')}
+              ${report.postHerbName ? ` · ${escHTML(report.postHerbName)}` : ''}
+              ${report.postCaption ? ` — ${escHTML(report.postCaption)}` : ''}
+            </div>
+            <div class="report-preview" id="report-post-preview-${report.id}" style="display:none"></div>
+            <div class="admin-post-footer">
+              <button class="post-review-btn" onclick="viewReportedPost('${report.id}')"><i class="ti ti-eye"></i> View post</button>
+              <div class="post-review-actions">
+                <button class="post-review-btn approve" onclick="reviewPostReport('${report.id}','approved')"><i class="ti ti-check"></i> Approve report</button>
+                <button class="post-review-btn reject" onclick="reviewPostReport('${report.id}','dismissed')"><i class="ti ti-x"></i> Dismiss</button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }).join('')}</div>`;
+  }
+
+  window.viewReportedPost = async function(reportId) {
+    if (!isAdmin) return;
+    const report = postReports.find(item => item.id === reportId);
+    const preview = document.getElementById(`report-post-preview-${reportId}`);
+    if (!report || !preview) return;
+    preview.style.display = '';
+    preview.textContent = 'Loading reported post…';
+    try {
+      const snap = await getDoc(doc(db,'posts',report.postId));
+      if (!snap.exists()) {
+        preview.textContent = 'The reported post no longer exists.';
+        return;
+      }
+      const post = snap.data();
+      const sharedContent = post.sharedPost
+        ? `<div>Shared post by ${escHTML(post.sharedPost.userName || 'User')}: ${escHTML(post.sharedPost.caption || post.sharedPost.herbName || 'Herb post')}</div>`
+        : '';
+      preview.innerHTML = `
+        ${post.imageBase64 ? `<img src="${escHTML(post.imageBase64)}" alt="Reported post photo">` : ''}
+        ${post.herbName ? `<strong>${escHTML(post.herbName)}</strong>` : ''}
+        <div>${escHTML(post.caption || '(No caption)')}</div>
+        ${sharedContent}`;
+    } catch(e) {
+      preview.textContent = `Could not load reported post: ${e.message}`;
+    }
+  };
+
+  window.reviewPostReport = async function(reportId, status) {
+    if (!isAdmin || !['approved','dismissed'].includes(status)) return;
+    const report = postReports.find(item => item.id === reportId);
+    if (!report || report.status !== 'pending') return;
+    if (status === 'approved' && !confirm('Approve this report and remove the post from the community feed?')) return;
+
+    const card = document.getElementById(`report-${reportId}`);
+    const buttons = card?.querySelectorAll('button') || [];
+    buttons.forEach(button => { button.disabled = true; });
+    try {
+      const postRef = doc(db,'posts',report.postId);
+      const postSnap = status === 'approved' ? await getDoc(postRef) : null;
+      const batch = writeBatch(db);
+      batch.update(doc(db,'postReports',reportId), {
+        status,
+        reviewedBy: currentUser.uid,
+        reviewedByEmail: currentUser.email || '',
+        reviewedAt: serverTimestamp(),
+      });
+      if (status === 'approved' && postSnap?.exists()) {
+        batch.update(postRef, {
+          status: 'rejected',
+          reviewedBy: currentUser.uid,
+          reviewedByEmail: currentUser.email || '',
+          reviewedAt: serverTimestamp(),
+        });
+      }
+      await batch.commit();
+      report.status = status;
+      if (status === 'approved') {
+        const post = allPosts.find(item => item.id === report.postId);
+        if (post) post.status = 'rejected';
+        renderPendingPosts();
+      }
+      renderPostReports();
+      showToast(status === 'approved' ? 'Report approved; the post was removed from the community feed.' : 'Report dismissed.');
+    } catch(e) {
+      buttons.forEach(button => { button.disabled = false; });
+      showToast('Could not review report: ' + e.message, 'error');
+    }
+  };
+
+  window.reviewCommunityPost = async function(postId, status) {
+    if (!isAdmin || !['approved', 'rejected'].includes(status)) return;
+    const post = allPosts.find(p => p.id === postId);
+    if (!post || post.status !== 'pending') return;
+    if (status === 'rejected' && !confirm('Reject this post? It will not appear in the community feed.')) return;
+
+    const card = document.getElementById(`review-${postId}`);
+    const buttons = card?.querySelectorAll('button') || [];
+    buttons.forEach(button => { button.disabled = true; });
+    try {
+      await updateDoc(doc(db,'posts',postId), {
+        status,
+        reviewedBy: currentUser.uid,
+        reviewedByEmail: currentUser.email || '',
+        reviewedAt: serverTimestamp(),
+      });
+      post.status = status;
+      renderPendingPosts();
+      showToast(status === 'approved' ? 'Post approved and published to the community.' : 'Post rejected.');
+    } catch(e) {
+      buttons.forEach(button => { button.disabled = false; });
+      showToast('Could not update post review: '+e.message,'error');
+    }
+  };
 
   window.filterAllPosts = function() {
     const q      = (document.getElementById('postSearchInput')?.value || '').toLowerCase();

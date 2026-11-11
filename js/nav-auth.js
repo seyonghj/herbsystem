@@ -159,8 +159,16 @@ export function initNavAuth() {
       @media (max-width: 640px) {
         .nav-account-label { display: none; }
         .nav-account-btn { padding: 4px 8px 4px 4px; }
-        .nav-btn-login { display: none; }
-        .nav-btn-signup { padding: 7px 12px; font-size: 12px; }
+        .nav-auth-slot { gap: 4px; }
+        .nav-btn-login, .nav-btn-signup { padding: 6px 8px; font-size: 11px; }
+        .nav-btn-login i, .nav-btn-signup i { display: none; }
+      }
+
+      @media (max-width: 380px) {
+        .nav { padding-left: 8px; padding-right: 8px; gap: 4px; }
+        .nav-brand { gap: 6px; }
+        .nav-brand-text span { display: none; }
+        .nav-hamburger { min-width: 32px; min-height: 32px; padding: 4px; }
       }
     `;
     document.head.appendChild(style);
@@ -254,7 +262,7 @@ function renderLoggedIn(slot, user) {
         </a>
         <a class="dd-item" href="feed.html">
           <i class="ti ti-users"></i>
-          <div class="dd-item-label">Feed</div>
+          <div class="dd-item-label">Community</div>
         </a>
         <a class="dd-item" href="history.html">
           <i class="ti ti-history"></i>
