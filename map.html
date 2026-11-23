@@ -536,7 +536,7 @@
 
 <script type="module">
   import { initNavAuth }   from './js/nav-auth.js';
-  import { onAuthChange }  from './js/auth.js';
+  import { onAuthChange, checkAdmin } from './js/auth.js';
   import { db, collection, getDocs }
     from './js/firebase-config.js';
   import {
@@ -554,17 +554,6 @@
     document.getElementById('seasonalNotice')?.remove();
     sessionStorage.setItem('seasonalNoticeDismissed', '1');
   };
-
-  // ── ADMIN EMAILS ──
-  // Add more admin emails here to allow additional accounts to manage pins.
-  const ADMIN_EMAILS = [
-    "marklouiepanares7@gmail.com",
-    "agolitorenerose5@gmail.com",
-    "bilbaobenjamin11@gmail.com",
-    "jermilynazuela073@gmail.com",
-    "kurtmatthewjunealborote@gmail.com",
-    "maeloufaithluminate@gmail.com"
-  ];
 
   let currentUser = null;
 
@@ -603,9 +592,17 @@
   const ROUTE_RECALC_MIN_METERS = 30; // don't refetch the route for tiny movements
 
   // ── Watch auth — check if admin ──
-  onAuthChange(user => {
+  onAuthChange(async user => {
     currentUser = user;
-    isAdmin = !!(user && user.email && ADMIN_EMAILS.includes(user.email));
+    isAdmin = false;
+    if (user) {
+      try {
+        isAdmin = await checkAdmin(user);
+      } catch (e) {
+        console.error('Could not verify admin status:', e);
+        showToast('Could not verify admin access. Admin tools are unavailable.', 'error');
+      }
+    }
     updateModeUI();
     // Re-render list to show/hide pin buttons
     if (allHerbs.length) renderList(allHerbs);

@@ -141,6 +141,11 @@ function injectHTML() {
   // FAB
   const fab = document.createElement('button');
   fab.id = 'tl-fab';
+  fab.type = 'button';
+  fab.setAttribute('aria-label', 'Open language selector');
+  fab.setAttribute('aria-haspopup', 'dialog');
+  fab.setAttribute('aria-controls', 'tl-panel');
+  fab.setAttribute('aria-expanded', 'false');
   fab.innerHTML = `<span class="tl-globe">🌐</span> Translate`;
   fab.onclick = togglePanel;
   document.body.appendChild(fab);
@@ -148,6 +153,9 @@ function injectHTML() {
   // Panel
   const panel = document.createElement('div');
   panel.id = 'tl-panel';
+  panel.setAttribute('role', 'dialog');
+  panel.setAttribute('aria-label', 'Choose language');
+  panel.setAttribute('aria-modal', 'false');
   panel.innerHTML = `
     <div class="tl-panel-label">Choose language</div>
     <button class="tl-lang-opt active" id="tl-opt-en" onclick="window._tlSetLang('en','English')">
@@ -182,13 +190,24 @@ function injectHTML() {
         !panel.contains(e.target) &&
         !fab?.contains(e.target)) {
       panel.classList.remove('open');
+      fab?.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      panel.classList.remove('open');
+      fab.setAttribute('aria-expanded', 'false');
+      fab.focus();
     }
   });
 }
 
 // ── Toggle panel ──────────────────────────────────────────
 function togglePanel() {
-  document.getElementById('tl-panel')?.classList.toggle('open');
+  const panel = document.getElementById('tl-panel');
+  const isOpen = panel?.classList.toggle('open');
+  document.getElementById('tl-fab')?.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
 }
 
 // ── State ─────────────────────────────────────────────────
@@ -217,6 +236,7 @@ window._tlSetLang = function(langCode, langName) {
   }
 
   document.getElementById('tl-panel')?.classList.remove('open');
+  document.getElementById('tl-fab')?.setAttribute('aria-expanded', 'false');
   applyTranslation(langCode);
 };
 

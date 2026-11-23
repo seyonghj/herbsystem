@@ -598,19 +598,10 @@ Use Enter for new lines — formatting will be preserved exactly as you type."><
   } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
 
   import { getAuth } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  import { checkAdmin } from './js/auth.js';
   import { initNavAuth } from './js/nav-auth.js';
 
   initNavAuth();
-
-  // ── Admin emails — same list as firestore.rules ──────────
-  const ADMIN_EMAILS = [
-    'marklouiepanares7@gmail.com',
-    'bilbaobenjamin11@gmail.com',
-    'jermilynazuela073@gmail.com',
-    'kurtmatthewjunealborote@gmail.com',
-    'maeloufaithluminate@gmail.com',
-    'agolitorenerose07@gmail.com',
-  ];
 
   const params = new URLSearchParams(location.search);
   const herbId = params.get('id');
@@ -628,20 +619,23 @@ Use Enter for new lines — formatting will be preserved exactly as you type."><
   };
 
   // ── Check if current user is admin ───────────────────────
-  getAuth().onAuthStateChanged(user => {
-    isAdmin = !!(user && ADMIN_EMAILS.includes(user.email));
-    if (isAdmin) {
-      // Show admin upload panel
-      document.getElementById('videoAdminPanel').classList.add('visible');
-      // Show delete buttons on all existing video cards
-      document.querySelectorAll('.video-delete-btn').forEach(btn => {
-        btn.style.display = 'flex';
-      });
-      // Show all admin edit buttons
-      document.querySelectorAll('.admin-edit-btn, .prep-edit-btn').forEach(btn => {
-        btn.classList.add('visible');
-      });
+  getAuth().onAuthStateChanged(async user => {
+    isAdmin = false;
+    if (user) {
+      try {
+        isAdmin = await checkAdmin(user);
+      } catch (e) {
+        console.error('Could not verify admin status:', e);
+        showToast('Could not verify admin access. Admin tools are unavailable.', 'error');
+      }
     }
+    document.getElementById('videoAdminPanel').classList.toggle('visible', isAdmin);
+    document.querySelectorAll('.video-delete-btn').forEach(btn => {
+      btn.style.display = isAdmin ? 'flex' : 'none';
+    });
+    document.querySelectorAll('.admin-edit-btn, .prep-edit-btn').forEach(btn => {
+      btn.classList.toggle('visible', isAdmin);
+    });
   });
 
   // ══════════════════════════════════════════════════════════

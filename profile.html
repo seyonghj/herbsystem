@@ -729,7 +729,7 @@
 
 <script type="module">
   import { db }           from './js/firebase-config.js';
-  import { onAuthChange } from './js/auth.js';
+  import { onAuthChange, checkAdmin } from './js/auth.js';
   import { initNavAuth }  from './js/nav-auth.js';
   import {
     collection, getDocs, deleteDoc, doc, addDoc, getDoc,
@@ -741,18 +741,6 @@
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
   initNavAuth();
-
-  // ══════════════════════════════════════
-  //  ★ ADMIN EMAILS ★
-  // ══════════════════════════════════════
-  const ADMIN_EMAILS = [
-    "marklouiepanares7@gmail.com",
-    "agolitorenerose5@gmail.com",
-    "bilbaobenjamin11@gmail.com",
-    "jermilynazuela073@gmail.com",
-    "kurtmatthewjunealborote@gmail.com",
-    "maeloufaithluminate@gmail.com"
-  ];
 
   // Same threshold as identify.html — a scan is "High" confidence at 75%+.
   const HIGH_CONFIDENCE_THRESHOLD = 75;
@@ -781,6 +769,7 @@
   onAuthChange(async user => {
     currentUser = user;
     if (!user) {
+      isAdmin = false;
       document.getElementById('authGate').style.display      = '';
       document.getElementById('profileContent').style.display = 'none';
       return;
@@ -788,7 +777,13 @@
     document.getElementById('authGate').style.display      = 'none';
     document.getElementById('profileContent').style.display = '';
     isGoogle = user.providerData.some(p => p.providerId === 'google.com');
-    isAdmin  = ADMIN_EMAILS.includes((user.email || '').toLowerCase());
+    isAdmin = false;
+    try {
+      isAdmin = await checkAdmin(user);
+    } catch (e) {
+      console.error('Could not verify admin status:', e);
+      showToast('Could not verify admin access. Admin tools are unavailable.', 'error');
+    }
     renderHeader(user);
     setupAdminUI();
     await Promise.all([loadScans(user.uid), loadPosts(user.uid)]);
@@ -1012,7 +1007,7 @@
       const users = [];
       snap.forEach(d => {
         const u = { id:d.id, ...d.data() };
-        const isAdminAccount = ADMIN_EMAILS.includes((u.email||'').toLowerCase());
+        const isAdminAccount = checkAdmin(u);
         if (isAdminAccount) return; // admins never show in the user-management list
         u._provider = (u.provider === 'google' || u.googleOnly === true) ? 'google' : 'email';
         users.push(u);

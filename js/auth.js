@@ -30,6 +30,16 @@ const app = getApps().length ? getApp() : initializeApp({
 const auth     = getAuth(app);
 const db       = getFirestore(app);
 const provider = new GoogleAuthProvider();
+const ADMIN_EMAILS = new Set([
+  "marklouiepanares7@gmail.com",
+  "bilbaobenjamin11@gmail.com",
+  "jermilynazuela073@gmail.com",
+  "kurtmatthewjunealborote@gmail.com",
+  "maeloufaithluminate@gmail.com",
+  "agolitorenerose5@gmail.com",
+  "agolitorenerose07@gmail.com",
+  "admin@gmail.com",
+]);
 
 // ── Save/update user profile in Firestore ──
 // FIX 1: Always write to Firestore on every login using merge:true
@@ -118,6 +128,10 @@ export function onAuthChange(callback) {
 // ── Get current user ──
 export function getCurrentUser() {
   return auth.currentUser;
+}
+
+export function checkAdmin(user) {
+  return ADMIN_EMAILS.has((user.email || "").toLowerCase());
 }
 
 export { auth, db };
