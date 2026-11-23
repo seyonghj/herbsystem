@@ -954,7 +954,7 @@
         return `<div class="scan-card">
           ${imgSrc?`<img class="scan-img" src="${imgSrc}" loading="lazy" decoding="async" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`:''}
           <div class="scan-placeholder" style="${imgSrc?'display:none':''}">🌿</div>
-          <div class="scan-body"><div class="scan-herb">${herb}</div>${lbl?`<span class="scan-conf ${cls}">${confNum!==null?confNum.toFixed(0)+'% ':''}${lbl}</span>`:''}${galleryBadge}<div class="scan-date"><i class="ti ti-calendar"></i> ${date}</div></div>
+          <div class="scan-body"><div class="scan-herb">${herb}</div>${lbl?`<span class="scan-conf ${cls}">${lbl}</span>`:''}${galleryBadge}<div class="scan-date"><i class="ti ti-calendar"></i> ${date}</div></div>
         </div>`;
       }).join('')}</div>`;
     } catch(e) { wrap.innerHTML=`<div class="empty"><p style="color:#e53e3e">Could not load scans: ${e.message}</p></div>`; }
@@ -1503,6 +1503,7 @@
       const date   = s.scannedAt?.toDate?.()?.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}) || '';
       const herb   = s.identifiedHerb || 'Unknown herb';
       const pct    = s.confidencePercent != null ? Math.round(s.confidencePercent) : null;
+      const confLabel = s.confidenceLabel || (pct != null ? (pct >= 75 ? 'High' : pct >= 50 ? 'Medium' : 'Low') : null);
       const status = isApproved(s) ? 'approved' : isRejected(s) ? 'rejected' : 'pending';
       const imgSrc = s.imageBase64 || null;
 
@@ -1522,7 +1523,7 @@
               ? `<img class="gr-img" src="${imgSrc}" loading="lazy" decoding="async" onclick="openGrLightbox('${s.id}')">`
               : `<div class="gr-placeholder">🌿</div>`}
             <span class="gr-status-pill ${status}">${status}</span>
-            ${pct !== null ? `<span class="gr-conf-pill">${pct}%</span>` : ''}
+            ${confLabel ? `<span class="gr-conf-pill">${confLabel}</span>` : ''}
           </div>
           <div class="gr-body">
             <div class="gr-herb">${escHTML(herb)}</div>

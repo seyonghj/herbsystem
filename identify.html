@@ -757,7 +757,7 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
             <p>${herb?.scientificName || result.scientificName || ''}</p>
           </div>
           <div class="match-confidence" style="background:${confColor}">
-            ${result.confidencePercent?.toFixed(0) || '—'}% ${result.confidenceLabel || ''}
+            ${result.confidenceLabel || 'Low'}
           </div>
         </div>
         <div class="match-body">
@@ -861,7 +861,6 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
           <div class="top3-row">
             <span style="min-width:130px;font-weight:${i===0?'600':'400'}">${h.localName}</span>
             <div class="top3-bar-wrap"><div class="top3-bar" style="width:${h.percent}%"></div></div>
-            <span class="top3-pct">${h.percent}%</span>
           </div>`).join('')}
       </div>`;
   }
@@ -984,10 +983,9 @@ Examine the plant image and respond ONLY in this JSON (no markdown):
   window.shareMatchToCommunity = async function() {
     if (!lastResultForShare) return;
     const r       = lastResultForShare;
-    const pct     = r.confidencePercent || 0;
     const label   = r.confidenceLabel   || '';
-    const caption = `🌿 Identified as ${r.localName} — ${pct.toFixed(0)}% ${label} confidence (verified via CNN + Gemini AI on HerbID Iloilo).`;
-    await handOffToFeed({ herbName: r.localName, confidencePercent: pct, confidenceLabel: label, caption });
+    const caption = `🌿 Identified as ${r.localName} — ${label} confidence (verified via CNN + Gemini AI on HerbID Iloilo).`;
+    await handOffToFeed({ herbName: r.localName, confidencePercent: r.confidencePercent || null, confidenceLabel: label, caption });
   };
 
   window.shareNoMatchToCommunity = async function() {

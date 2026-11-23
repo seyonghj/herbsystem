@@ -1113,7 +1113,7 @@
     const herbBadge = (!p.sharedPost && p.herbName)
       ? `<span class="feed-herb-badge"><i class="ti ti-leaf" style="font-size:11px"></i> ${p.herbName}</span>` : '';
     const confBadge = (!p.sharedPost && p.confidence)
-      ? `<span class="conf-badge ${p.confidenceLabel==='High'?'conf-high':p.confidenceLabel==='Medium'?'conf-med':'conf-low'}">${p.confidence.toFixed(0)}% ${p.confidenceLabel||''}</span>` : '';
+      ? `<span class="conf-badge ${p.confidenceLabel==='High'?'conf-high':p.confidenceLabel==='Medium'?'conf-med':'conf-low'}">${p.confidenceLabel || 'Low'}</span>` : '';
     const repostInline = p.sharedPost
       ? `<span class="repost-inline"><i class="ti ti-repeat"></i> shared a post</span>` : '';
     const sharedEmbedHTML = p.sharedPost
@@ -1216,7 +1216,7 @@
     if (!p.sharedPost && p.herbName) badges += `<span class="feed-herb-badge"><i class="ti ti-leaf" style="font-size:11px"></i> ${p.herbName}</span>`;
     if (!p.sharedPost && p.confidence) {
       const cls = p.confidenceLabel==='High'?'conf-high':p.confidenceLabel==='Medium'?'conf-med':'conf-low';
-      badges += `<span class="conf-badge ${cls}">${p.confidence.toFixed(0)}% ${p.confidenceLabel||''}</span>`;
+      badges += `<span class="conf-badge ${cls}">${p.confidenceLabel || 'Low'}</span>`;
     }
     document.getElementById('detailBadges').innerHTML = badges;
     document.getElementById('detailCaption').innerHTML = p.caption ? escapeHTML(p.caption) : '';

@@ -1309,7 +1309,7 @@ Use Enter for new lines — formatting will be preserved exactly as you type."><
         if (p.confidencePercent) {
           const badge = document.createElement('span');
           badge.className = 'gallery-thumb-badge';
-          badge.textContent = `${Math.round(p.confidencePercent)}%`;
+          badge.textContent = p.confidenceLabel || 'High';
           btn.appendChild(badge);
         }
         btn.addEventListener('click', () => openLightbox(p.imageBase64));

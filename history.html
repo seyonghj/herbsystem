@@ -267,7 +267,8 @@
         }) || "—";
 
         const confPct   = s.confidencePercent || 0;
-        const confClass = confPct >= 85 ? "conf-high" : confPct >= 70 ? "conf-med" : "conf-low";
+        const confLabel = s.confidenceLabel || (confPct >= 75 ? "High" : confPct >= 50 ? "Medium" : "Low");
+        const confClass = confLabel === "High" ? "conf-high" : confLabel === "Medium" ? "conf-med" : "conf-low";
         const methodBadge = s.method === "gemini"
           ? `<span class="scan-method-badge badge-gemini">✨ Gemini</span>`
           : `<span class="scan-method-badge badge-cnn">🔵 CNN</span>`;
@@ -302,7 +303,7 @@
             <div class="scan-card-body">
               <div class="scan-herb-name">${s.identifiedHerb}</div>
               <div class="scan-meta">
-                <span class="scan-conf ${confClass}">${confPct.toFixed(0)}% ${s.confidenceLabel || ''}</span>
+                <span class="scan-conf ${confClass}">${confLabel}</span>
                 <span class="scan-date">${date}</span>
               </div>
               <div class="scan-actions">
