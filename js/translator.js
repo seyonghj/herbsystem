@@ -19,7 +19,7 @@ function loadGoogleTranslate() {
     new google.translate.TranslateElement(
       {
         pageLanguage: 'en',
-        includedLanguages: 'en,tl,ceb',
+        includedLanguages: 'en,tl,hil',
         autoDisplay: false,
       },
       'gt-container'
@@ -173,11 +173,11 @@ function injectHTML() {
         <span class="tl-lang-sub">Filipino</span>
       </span>
     </button>
-    <button class="tl-lang-opt" id="tl-opt-ceb" onclick="window._tlSetLang('ceb','Hiligaynon')">
+    <button class="tl-lang-opt" id="tl-opt-hil" onclick="window._tlSetLang('hil','Hiligaynon')">
       <span class="tl-lang-flag">🇵🇭</span>
       <span>
         <span class="tl-lang-name">Hiligaynon</span>
-        <span class="tl-lang-sub">via Cebuano (closest available)</span>
+        <span class="tl-lang-sub">Ilonggo</span>
       </span>
     </button>`;
   document.body.appendChild(panel);
@@ -214,13 +214,36 @@ function togglePanel() {
 let currentLang   = 'en';
 let domObserver   = null;
 let retranslateTimer = null;
+const TRANSLATE_STORAGE_KEY = 'herbsystem_translate_lang';
+
+function getSavedLanguage() {
+  try {
+    const langCode = localStorage.getItem(TRANSLATE_STORAGE_KEY);
+    return ['tl', 'hil'].includes(langCode) ? langCode : 'en';
+  } catch {
+    return 'en';
+  }
+}
+
+function saveLanguage(langCode) {
+  try {
+    if (langCode === 'en') {
+      localStorage.removeItem(TRANSLATE_STORAGE_KEY);
+    } else {
+      localStorage.setItem(TRANSLATE_STORAGE_KEY, langCode);
+    }
+  } catch {
+    // Translation still works for the current page if storage is unavailable.
+  }
+}
 
 // ── Set language ──────────────────────────────────────────
 window._tlSetLang = function(langCode, langName) {
   currentLang = langCode;
+  saveLanguage(langCode);
 
   // Update active button
-  ['en','tl','ceb'].forEach(code => {
+  ['en','tl','hil'].forEach(code => {
     document.getElementById(`tl-opt-${code}`)?.classList.remove('active');
   });
   document.getElementById(`tl-opt-${langCode}`)?.classList.add('active');
@@ -360,3 +383,9 @@ injectStyles();
 injectHTML();
 loadGoogleTranslate();
 startDomObserver();
+
+const savedLang = getSavedLanguage();
+if (savedLang !== 'en') {
+  const savedLangName = savedLang === 'hil' ? 'Hiligaynon' : 'Tagalog';
+  window._tlSetLang(savedLang, savedLangName);
+}
