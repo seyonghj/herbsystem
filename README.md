@@ -70,7 +70,7 @@ HerbID Iloilo lets users photograph a plant, identify it with a deep-learning mo
         ▼
 ┌───────────────────────────────────────┐
 │ Flask API  (Railway)                  │
-│  • /identify       → ResNet50V2 CNN   │
+│  • /identify       → MobileNetV2 CNN   │
 │  • /gemini-verify  → Gemini AI proxy  │
 │  • /health                            │
 └───────────────────────────────────────┘
@@ -87,7 +87,7 @@ The frontend never calls Gemini directly. Requests go through the Flask proxy so
 | Frontend | HTML5, CSS3, vanilla JavaScript (ES modules), Tabler Icons |
 | Auth / Database / Files | Firebase Authentication, Cloud Firestore, Cloud Storage |
 | API | Python 3.11, Flask, Flask-CORS |
-| Deep learning | TensorFlow / Keras, ResNet50V2 |
+| Deep learning | TensorFlow / Keras, MobileNetV2 |
 | AI verification | Google Gemini (`gemini-3.6-flash`) via `google-generativeai` |
 | Hosting | Railway (frontend and API), Git LFS for the model file |
 | Model testing | Streamlit |
@@ -128,7 +128,7 @@ herbsystem/
 ```
 HerbID-API/
 ├── app.py                # Flask API
-├── class_names.json      # 21 herb classes (index order matches model output)
+├── class_names.json      # 24 herb classes (index order matches model output)
 ├── requirements.txt
 ├── .gitattributes        # Git LFS tracking for model files
 └── model/
@@ -171,7 +171,7 @@ Every scan is saved to the signed-in user's history. High-confidence matches are
 
 ## Model Details
 
-- **Architecture:** ResNet50V2 (transfer learning)
+- **Architecture:** MobileNetV2 (transfer learning)
 - **Input size:** 224 × 224 × 3
 - **Classes:** 21 medicinal herbs of Iloilo (see `class_names.json`)
 - **Match threshold:** 0.55 softmax confidence, combined with the entropy check
@@ -185,7 +185,7 @@ Every scan is saved to the signed-in user's history. High-confidence matches are
 | **ResNet50** | 92.62% | **93.41%** | 92.62% | **92.28%** |
 | EfficientNetB0 | 61.68% | 69.98% | 61.68% | 59.30% |
 
-ResNet50 was selected for the highest precision and F1-score, which matter most when a wrong identification could lead someone to use the wrong plant.
+MoblieNdtV2 was selected for the highest precision and F1-score, which matter most when a wrong identification could lead someone to use the wrong plant.
 
 > ⚠️ **Disclaimer:** HerbID Iloilo is for educational use only. Always consult a qualified herbalist or health professional before using any herb for medicinal purposes.
 
@@ -355,7 +355,7 @@ Sign in with an admin account, then:
 
 - **Hiligaynon translation** uses Cebuano through Google Translate, since Hiligaynon is not offered as its own language.
 - **Gemini free tier** is limited (roughly 1,500 requests per day per key). Multiple keys extend this, and the CNN-only fallback keeps identification working when all keys are exhausted.
-- **The model only knows 21 herbs.** Unrelated plants may be matched to the closest class; the entropy check and Gemini verification reduce but do not remove this.
+- **The model only knows 24 herbs.** Unrelated plants may be matched to the closest class; the entropy check and Gemini verification reduce but do not remove this.
 - **Post moderation is incomplete.** New posts are saved as `pending` and hidden from the feed, but the admin approval panel for posts is not built yet.
 - **Large uploads** to Firebase Storage can stream slowly; YouTube embeds are recommended for videos.
 
@@ -375,11 +375,15 @@ Sign in with an admin account, then:
 
 **BSIT Capstone Project** — Northern Iloilo State University, Lemery Campus, 2024–2025
 
-- Developers: _add your names here_
-- Adviser: _add adviser name here_
+- Project Leader: Rene Rose Agolito - Documentation, Field Researcher, Data Annotator
+- Project Members: Kurt Mathew June Alborote - Front End Developer, Field Researcher, Data Annotator, and Driver
+                   Jermilyn Azuela - Documentation, Field Researcher, Data Annotator
+                   Benjamin Bilbao - Front End Developer, Field Researcher, Data Annotator
+                   Mae Lou Faith Luminate - Documentation, Field Researcher, Data Annotator
+                   Mark Louie Pañares - Lead Developer/Full Stack Developer, and Field Researcher
+
+- Adviser: Ralf Jangit
 
 Built with TensorFlow, Flask, Firebase, Railway, and Google Gemini.
 
-## License
-
-_Add your license here (for example MIT), or state that the project is for academic use only._
+## ACADEMIC USE ONLY
