@@ -387,7 +387,7 @@ Sign in with an admin account, then:
 | Mark Louie Pañares | Lead Developer, Full-Stack Developer, Field Researcher | Overall system development, backend and frontend integration, technical implementation, and field research |
 
 **Adviser:**
--Ralf Jangit
+*Ralf Jangit*
 
 Built with TensorFlow, Flask, Firebase, Railway, and Google Gemini.
 
