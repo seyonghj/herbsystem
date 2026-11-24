@@ -376,14 +376,16 @@ Sign in with an admin account, then:
 **BSIT Capstone Project** — Northern Iloilo State University, Lemery Campus, 2024–2025
 
 **Project Leader:**
-- Rene Rose Agolito - Documentation, Field Researcher, Data Annotator
+Rene Rose Agolito - Documentation, Field Researcher, Data Annotator
   
 **Project Members:**
-*Kurt Mathew June Alborote* - Front End Developer, Field Researcher, Data Annotator, and Driver
-*Jermilyn Azuela* - Documentation, Field Researcher, Data Annotator
-*Benjamin Bilbao* - Front End Developer, Field Researcher, Data Annotator
-*Mae Lou Faith Luminate* - Documentation, Field Researcher, Data Annotator
-*Mark Louie Pañares* - Lead Developer/Full Stack Developer, and Field Researcher
+| Name | Role | Contributions |
+|---|---|---|
+| Juan A. Dela Cruz | Project Manager, Full-Stack Developer | Project planning, system integration, deployment |
+| Maria B. Santos | Machine Learning Engineer | Model training, evaluation, and optimization |
+| Pedro C. Reyes | Front-End Developer, UI/UX Designer | Interface design and page development |
+| Ana D. Garcia | Data Collector and Annotator | Herb image collection, labeling, and dataset organization |
+| Jose E. Ramos | QA Tester, Technical Writer | Testing, documentation, and manuscript |
 
 **Adviser:**
 -Ralf Jangit
