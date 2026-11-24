@@ -203,7 +203,7 @@ function injectHTML() {
   });
 }
 
-// ── Toggle panel ──────────────────────────────────────────
+// ── Toggle panel ────────────────────────────
 function togglePanel() {
   const panel = document.getElementById('tl-panel');
   const isOpen = panel?.classList.toggle('open');
