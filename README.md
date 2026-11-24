@@ -379,6 +379,7 @@ Sign in with an admin account, then:
 
 | Name | Role | Contributions |
 |---|---|---|
+|**Rene Rose Agolito** | Project Leader, Documentation, Field Researcher, Data Annotator | Project leadership and coordination, manuscript preparation, field research, herb image collection, data labeling, and dataset organization |
 | Kurt Mathew June Alborote | Front-End Developer, Field Researcher, Data Annotator, Driver | Front-end development, field research, herb image collection, data annotation, and transportation |
 | Jermilyn Azuela | Documentation, Field Researcher, Data Annotator | Project documentation, field research, herb image collection, and data annotation |
 | Benjamin Bilbao | Front-End Developer, Field Researcher, Data Annotator | Front-end development, field research, herb image collection, and data annotation |
